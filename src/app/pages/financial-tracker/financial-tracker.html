@@ -1,0 +1,71 @@
+<div class="theme-financial animate-fade-in content-container">
+  <div class="header-section text-center">
+    <h1>Cálculos Financieros</h1>
+    <p>Analiza el punto de equilibrio, cálculo de impuestos y beneficio neto de tu empresa en tiempo real.</p>
+  </div>
+
+  <div class="calculator-grid">
+    <!-- Input Section -->
+    <div class="glass-panel form-panel">
+      <h3>Datos de Entrada</h3>
+      
+      <div class="input-group">
+        <label class="input-label">Precio de Venta por Unidad ($)</label>
+        <input type="number" class="input-field" [(ngModel)]="pricePerUnit">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Costo Variable por Unidad ($)</label>
+        <input type="number" class="input-field" [(ngModel)]="variableCostPerUnit">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Costos Fijos Totales ($)</label>
+        <input type="number" class="input-field" [(ngModel)]="fixedCosts">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Unidades Vendidas (Estimación)</label>
+        <input type="number" class="input-field" [(ngModel)]="estimatedUnits">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Tasa de Impuestos (%)</label>
+        <input type="number" class="input-field" [(ngModel)]="taxRate">
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-panel">
+      <div class="glass-panel result-card primary-result">
+        <h3>Beneficio Neto</h3>
+        <div class="value positive" [class.negative]="netProfit() < 0">
+          {{ netProfit() | currency }}
+        </div>
+        <p class="subtitle">Después de impuestos</p>
+      </div>
+
+      <div class="glass-panel result-card">
+        <h3>Punto de Equilibrio</h3>
+        <div class="value">{{ breakEvenPoint() | number:'1.0-0' }}</div>
+        <p class="subtitle">Unidades requeridas</p>
+      </div>
+
+      <div class="glass-panel result-card split-bottom">
+        <div class="metric">
+          <span class="label">Impuestos a Pagar:</span>
+          <span class="val text-accent">{{ taxes() | currency }}</span>
+        </div>
+        <hr class="divider">
+        <div class="metric">
+          <span class="label">Ingresos Totales:</span>
+          <span class="val">{{ revenue() | currency }}</span>
+        </div>
+        <div class="metric">
+          <span class="label">Gastos Totales:</span>
+          <span class="val">{{ totalCosts() | currency }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
