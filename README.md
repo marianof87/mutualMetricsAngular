@@ -75,17 +75,19 @@ npm run docker:up        # docker compose up --build
 npm run podman:up        # podman compose up --build
 ```
 
-## Integrantes
+## Integrantes y slices
 
-| Integrante | GitHub | Sección |
+Trabajamos en **5 slices verticales** (frontend + backend + shared + DB + tests). Las 5 páginas del profesor viven dentro del Slice 5.
+
+| Slice | Integrante | GitHub |
 |---|---|---|
-| Angelica Morales | [@Ange1809](https://github.com/Ange1809) | *por elegir* |
-| Mauro Sebastian Monzon | [@Monzon1983](https://github.com/Monzon1983) | *por elegir* |
-| Mariano Capella | [@marianof87](https://github.com/marianof87) | *por elegir* |
-| Gabriel Osemberg | [@Nubiru](https://github.com/Nubiru) | **Contacto** (referencia) + infraestructura |
-| Franco Marquez | [@Franco1212](https://github.com/Franco1212) | *por elegir* |
+| 1 — Auth & Usuarios 🔐 | Gabriel Osemberg | [@Nubiru](https://github.com/Nubiru) |
+| 2 — Calculadora Cuadrática 📐 | Mariano Capella | [@marianof87](https://github.com/marianof87) |
+| 3 — Optimizador de Precios 💰 | Mauro Sebastian Monzon | [@Monzon1983](https://github.com/Monzon1983) |
+| 4 — Historial & Escenarios 📊 | Franco Marquez | [@Franco1212](https://github.com/Franco1212) |
+| 5 — Contenido Público & Contacto 🌐 | Angelica Morales | [@Ange1809](https://github.com/Ange1809) |
 
-> Cómo elegir sección: ver [`GUIA.md` §1](./GUIA.md).
+> Detalle completo de cada slice: [`GUIA.md` §1](./GUIA.md).
 
 ## ¿Trabajás en este proyecto?
 

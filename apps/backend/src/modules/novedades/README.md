@@ -1,23 +1,24 @@
-# Módulo backend: Novedades
+# Módulo backend: Novedades (Slice 5)
 
-**Dueño:** TBD
-**Feature frontend relacionada:** `apps/frontend/src/app/features/novedades/`
+**Dueño:** @Ange1809
+**Feature frontend:** `apps/frontend/src/app/features/novedades/`
 
 ## Alcance
 
-Endpoints para la sección Novedades + Galería (blog/noticias + media adjunta).
+Blog/novedades del proyecto. Listado paginado + detalle. Media (imágenes) por URL externa.
 
-## Endpoints actuales
+## Endpoints propuestos
 
-- `GET /api/v1/novedades` — placeholder (devuelve lista vacía).
+| Método | Ruta | Request | Response |
+|---|---|---|---|
+| GET | `/api/v1/novedades?page=1&tamano=20` | — | `Paginado<Novedad>` |
+| GET | `/api/v1/novedades/:id` | — | `Novedad` |
+| POST | `/api/v1/novedades` | `NovedadCreate` | `201 Novedad` (opcional: podés dejar el seed en DB y no exponer POST) |
 
-## Propuestas (definir con el dueño)
+## Shared
 
-- `GET /api/v1/novedades` — listado con paginación.
-- `GET /api/v1/novedades/:id` — detalle.
-- `POST /api/v1/novedades` — crear (si hay admin).
-- Media (imágenes/videos) referenciada por URL; evitar subir archivos al backend en MVP.
+Crear `packages/shared/src/dtos/novedades.ts` con `NovedadSchema` y `NovedadCreateSchema`.
 
-## Para agregar un endpoint
+## DB
 
-Ver el módulo `contacto/` como referencia.
+Modelo `Novedad(id, titulo, cuerpo, imagenUrl, publicadoEn)` en Prisma.

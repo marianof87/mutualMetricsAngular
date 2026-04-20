@@ -1,21 +1,17 @@
-# Feature: Inicio
+# Feature: Inicio (Slice 5)
 
-**Dueño:** TBD
-**Ruta frontend:** `/` (raíz)
-**Módulo backend relacionado:** `apps/backend/src/modules/inicio/`
+**Dueño:** @Ange1809
+**Ruta:** `/`
+**Backend:** sin endpoint propio (contenido estático o leído desde `sobre-nosotros`/`novedades`).
 
 ## Alcance (consigna del profesor)
 
-Presentación general del sitio, con un resumen de qué trata, imagen destacada y navegación clara.
+Presentación general del sitio, resumen de qué es MutualMetrics, imagen destacada, navegación clara. CTAs a las calculadoras (`/cuadratica`, `/pricing`) y a registro (`/registrar`).
 
 ## Estado
 
-- [ ] Vista implementada
-- [ ] Consume endpoints del backend si corresponde
-- [ ] Tests mínimos
-- [ ] Responsive / accesible
-- [ ] DoD (ver GUIA.md)
-
-## Notas del dueño
-
-*Completar.*
+- [ ] Hero con propuesta de valor de MutualMetrics
+- [ ] Cards que explican las 2 calculadoras y linkean a cada una
+- [ ] Mención de funcionalidades (guardar escenarios, historial)
+- [ ] Responsive
+- [ ] Test mínimo de render

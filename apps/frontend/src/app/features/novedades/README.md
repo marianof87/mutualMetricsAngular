@@ -1,24 +1,19 @@
-# Feature: Novedades y Galería
+# Feature: Novedades y Galería (Slice 5)
 
-**Dueño:** TBD
-**Ruta frontend:** `/novedades`
-**Módulo backend relacionado:** `apps/backend/src/modules/novedades/`
+**Dueño:** @Ange1809
+**Ruta:** `/novedades`
+**Backend:** `apps/backend/src/modules/novedades/`
 
 ## Alcance (consigna del profesor)
 
-Publicaciones, noticias o actualizaciones del proyecto, junto con imágenes, videos y materiales relacionados (galería fusionada dentro de esta sección).
+Publicaciones, noticias, actualizaciones del proyecto. Galería de imágenes embebida (URLs externas).
 
 ## Estado
 
-- [ ] Listado de novedades
+- [ ] Listado paginado de novedades (usa `Paginado<Novedad>`)
 - [ ] Vista de detalle de una novedad
-- [ ] Galería de imágenes/videos adjuntos
-- [ ] Endpoints backend definidos
-- [ ] Tipos/schemas en `packages/shared/src/dtos/novedades.ts`
-- [ ] Tests mínimos
-- [ ] Responsive / accesible
-- [ ] DoD (ver GUIA.md)
-
-## Notas del dueño
-
-*Completar.*
+- [ ] Schema `Novedad` en `packages/shared/src/dtos/novedades.ts`
+- [ ] Modelo `Novedad` en Prisma + migración
+- [ ] Endpoints backend (CRUD o sólo GET si es read-only) + tests
+- [ ] Responsive
+- [ ] Test mínimo de render

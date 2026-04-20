@@ -1,7 +1,9 @@
 import { Routes } from '@angular/router';
 
-// Zona compartida — ver GUIA.md §3. Cada feature se carga con lazy-loading.
+// Zona compartida — cada dueño de slice registra aquí sus rutas. Ver GUIA.md §3.
+// Todas las rutas cargan con lazy-loading para aislar bundles por slice.
 export const routes: Routes = [
+  // Páginas públicas — Slice 5 (@Ange1809)
   {
     path: '',
     loadComponent: () =>
@@ -29,5 +31,37 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/contacto/contacto.component').then((m) => m.ContactoComponent),
   },
+
+  // Auth — Slice 1 (@Nubiru)
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'registrar',
+    loadComponent: () =>
+      import('./features/auth/registrar/registrar.component').then((m) => m.RegistrarComponent),
+  },
+
+  // Calculadoras — Slice 2 (@marianof87) y Slice 3 (@Monzon1983)
+  {
+    path: 'cuadratica',
+    loadComponent: () =>
+      import('./features/cuadratica/cuadratica.component').then((m) => m.CuadraticaComponent),
+  },
+  {
+    path: 'pricing',
+    loadComponent: () =>
+      import('./features/pricing/pricing.component').then((m) => m.PricingComponent),
+  },
+
+  // Historial — Slice 4 (@Franco1212)
+  {
+    path: 'historial',
+    loadComponent: () =>
+      import('./features/historial/historial.component').then((m) => m.HistorialComponent),
+  },
+
   { path: '**', redirectTo: '' },
 ];

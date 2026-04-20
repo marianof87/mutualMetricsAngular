@@ -5,7 +5,7 @@
  * documentalo en docs/CODIGOS_ERROR.md en el mismo PR.
  */
 export const CodigoError = {
-  // Generales (todas las secciones pueden usarlos)
+  // Generales (todos los slices pueden usarlos)
   ENTRADA_INVALIDA: 'ENTRADA_INVALIDA',
   RECURSO_NO_ENCONTRADO: 'RECURSO_NO_ENCONTRADO',
   NO_AUTORIZADO: 'NO_AUTORIZADO',
@@ -15,15 +15,25 @@ export const CodigoError = {
   ERROR_INTERNO: 'ERROR_INTERNO',
   SERVICIO_NO_DISPONIBLE: 'SERVICIO_NO_DISPONIBLE',
 
-  // Específicos de Contacto
+  // Slice 1 — Auth & Usuarios (@Nubiru)
+  AUTH_CREDENCIALES_INVALIDAS: 'AUTH_CREDENCIALES_INVALIDAS',
+  AUTH_EMAIL_YA_REGISTRADO: 'AUTH_EMAIL_YA_REGISTRADO',
+  AUTH_TOKEN_EXPIRADO: 'AUTH_TOKEN_EXPIRADO',
+  AUTH_TOKEN_INVALIDO: 'AUTH_TOKEN_INVALIDO',
+
+  // Slice 2 — Cuadrática (@marianof87)
+  CUADRATICA_A_CERO: 'CUADRATICA_A_CERO',
+
+  // Slice 3 — Pricing (@Monzon1983)
+  PRICING_SENSIBILIDAD_CERO: 'PRICING_SENSIBILIDAD_CERO',
+  PRICING_OPTIMO_FUERA_DE_RANGO: 'PRICING_OPTIMO_FUERA_DE_RANGO',
+
+  // Slice 4 — Escenarios (@Franco1212)
+  // (agregar acá según se necesiten)
+
+  // Slice 5 — Contacto & Novedades (@Ange1809)
   CONTACTO_EMAIL_INVALIDO: 'CONTACTO_EMAIL_INVALIDO',
   CONTACTO_MENSAJE_VACIO: 'CONTACTO_MENSAJE_VACIO',
-
-  // Placeholders para las demás secciones (cada dueño los completa)
-  // INICIO_*
-  // SOBRE_NOSOTROS_*
-  // SERVICIOS_*
-  // NOVEDADES_*
 } as const;
 
 export type CodigoError = (typeof CodigoError)[keyof typeof CodigoError];

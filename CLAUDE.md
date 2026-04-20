@@ -22,19 +22,25 @@ Este archivo es la guía canónica para **cualquier agente de IA** (Claude Code 
 
 ---
 
-## 2. Propiedad de carpetas (crítico para evitar conflictos de git)
+## 2. Propiedad de carpetas — 5 slices verticales
 
-### Zonas de dueño único
+El proyecto está dividido en 5 slices. Cada slice tiene un dueño end-to-end (FE + BE + shared + DB + tests). Detalle completo en [`GUIA.md §1`](./GUIA.md).
 
-Cada integrante es dueño de **su sección** en:
-- `apps/frontend/src/app/features/<seccion>/`
-- `apps/backend/src/modules/<seccion>/`
+### Dueños de slice
 
-**Regla:** **NUNCA** editar la carpeta de sección de otro integrante sin que el usuario lo pida explícitamente. Si el cambio lo requiere, proponerlo y esperar confirmación.
+| Slice | Handle | Carpetas propias |
+|---|---|---|
+| 1 — Auth & Usuarios | @Nubiru | `features/auth/**`, `modules/auth/**`, `modules/usuarios/**` |
+| 2 — Cuadrática | @marianof87 | `features/cuadratica/**`, `modules/cuadratica/**`, `dominio/cuadratica/**` |
+| 3 — Pricing | @Monzon1983 | `features/pricing/**`, `modules/pricing/**`, `dominio/pricing/**` |
+| 4 — Historial | @Franco1212 | `features/historial/**`, `modules/escenarios/**` |
+| 5 — Público & Contacto | @Ange1809 | `features/{inicio,sobre-nosotros,servicios,novedades,contacto}/**`, `modules/novedades/**`, `modules/contacto/**` |
 
-### Zonas compartidas (review extra requerido)
+**Regla:** NO editar la carpeta de otro slice sin que el usuario lo pida explícitamente. Si el cambio lo requiere, proponelo al usuario y esperá confirmación.
 
-Al editar cualquiera de estas rutas, **avisá al usuario** que es zona compartida y que el PR va a requerir 2 aprobaciones:
+### Zonas compartidas
+
+Estas rutas las tocamos todos. **No requieren aprobación extra** — basta con 1 review estándar. Pero avisá al usuario cuando las tocás:
 
 - `packages/shared/**`
 - `contracts/**`
@@ -42,8 +48,10 @@ Al editar cualquiera de estas rutas, **avisá al usuario** que es zona compartid
 - `apps/frontend/src/app/shared/**`
 - `apps/frontend/src/app/app.routes.ts`
 - `apps/frontend/src/app/app.config.ts`
+- `apps/frontend/src/styles/**`
 - `apps/backend/src/app.module.ts`
 - `apps/backend/src/comunes/**`
+- `apps/backend/prisma/**`
 - `docker-compose.yml`, `docker/**`
 - `.github/**`
 - `package.json` (raíz)
@@ -87,11 +95,10 @@ Al editar cualquiera de estas rutas, **avisá al usuario** que es zona compartid
 - Tras agregar/modificar un modelo → `npm run prisma:migrate -- --name <desc>` → commitear `schema.prisma` + `migrations/`.
 - **Nunca** editar SQL de una migración ya aplicada a main.
 
-### 3.7 Media (Vercel Blob)
+### 3.7 Media (imágenes/videos)
 
-- Inyectar `BlobService` (ya global): `this.blob.subir(ruta, archivo)`.
-- Nunca hardcodear `BLOB_READ_WRITE_TOKEN` — siempre env var.
-- En tests → mockear `BlobService`, nunca pegarle a Vercel real.
+- MVP: usar URLs externas (links a imágenes hosteadas en otro lado).
+- Si una sección necesita upload real al servidor, discutirlo primero — abre decisión cross-cutting.
 
 ### 3.8 Paginación
 
@@ -111,22 +118,20 @@ Al editar cualquiera de estas rutas, **avisá al usuario** que es zona compartid
 
 - **No comentarios redundantes.** Los identificadores bien nombrados explican el *qué*. Comentá sólo el *por qué* cuando no sea obvio (una restricción, una decisión, un workaround).
 - **No** dejes `console.log`/`console.error` en código committeado. Usá `Logger` de Nest en el backend.
-- **No** hardcodees URLs. Frontend usa `entorno.apiBaseUrl` (`apps/frontend/src/app/core/configuracion/entorno.ts`). Backend usa env vars (`PORT`, `CORS_ORIGIN`, `DATABASE_URL`, `BLOB_READ_WRITE_TOKEN`).
+- **No** hardcodees URLs. Frontend usa `entorno.apiBaseUrl` (`apps/frontend/src/app/core/configuracion/entorno.ts`). Backend usa env vars (`PORT`, `CORS_ORIGIN`, `DATABASE_URL`).
 - **No** introduzcas dependencias nuevas sin razón fuerte. Proponé la dep al usuario antes de instalarla.
 
 ---
 
-## 4.5 Testing — TDD con cobertura 95% (invariante)
+## 4.5 Testing — TDD con cobertura 80% (invariante)
 
 - **Test-first.** Escribir el test que falla, después implementar. Aplica a lógica de dominio, pipes, services y componentes con lógica.
-- **Threshold global:** 95% en branches, functions, lines, statements. Configurado en `vitest.config.ts` (shared) y `jest.coverageThreshold` (backend). CI falla si cae.
+- **Threshold global:** 80% en branches, functions, lines, statements. Configurado en `vitest.config.ts` (shared) y `jest.coverageThreshold` (backend). El enforce arranca comentado hasta que haya código real por slice.
 - **Capas:**
   - Unit: junto al archivo (`*.spec.ts` o `*.test.ts`).
   - Integration backend: `*.spec.ts` con `@nestjs/testing` + `supertest`.
-  - E2E: Playwright en `e2e/tests/*.spec.ts`.
-- E2E **no** cuentan para el threshold — validan flows reales FE↔BE.
 - **Nunca** borrar un test ajeno "porque falla" sin acordarlo en el PR.
-- El dueño de la sección escribe el unit mínimo; Gabriel (@Nubiru) suma behavior tests cross-cutting para asegurar el 95%.
+- El dueño del slice escribe el unit mínimo; Gabriel (@Nubiru) suma behavior tests cross-cutting para asegurar el 80%.
 
 ---
 
@@ -135,9 +140,9 @@ Al editar cualquiera de estas rutas, **avisá al usuario** que es zona compartid
 - Formato de commit: **Conventional Commits en español**. Ver `.claude/COMMIT.md` (local) para plantilla y ejemplos.
 - Al hacer commits con asistencia de Claude: agregar footer `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`.
 - **NUNCA** usar `--no-verify`, `--force` a `main`, o commitear directo a `main`.
-- Rama por tarea: `feature/<seccion>/<descripcion>`, `fix/<seccion>/<descripcion>`, `docs/<descripcion>`, `chore/<descripcion>`.
+- Rama por tarea: `feature/<slice>/<descripcion>`, `fix/<slice>/<descripcion>`, `docs/<descripcion>`, `chore/<descripcion>`.
 - PR chico (<500 líneas). Squash-merge a `main`.
-- CI verde + al menos 1 aprobación antes de merge (2 si es zona compartida).
+- CI verde + **1 aprobación** antes de merge. **No hay regla de 2 aprobaciones** — todos tocamos el sistema horizontalmente (ver GUIA.md §2).
 
 ---
 

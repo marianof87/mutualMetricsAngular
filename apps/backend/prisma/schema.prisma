@@ -1,14 +1,18 @@
 // Schema de Prisma — MutualMetrics
 //
-// Cada dueño de sección agrega aquí los modelos que necesita.
+// Cada dueño de slice agrega aquí los modelos que necesita.
 // Regla: nombres en español (PascalCase para modelos, camelCase para campos).
 // Regla: después de agregar/modificar un modelo, correr:
-//   npm --workspace @mutual-metrics/backend run prisma:migrate -- --name <descripcion-corta>
+//   npm run prisma:migrate -- --name <descripcion-corta>
 // Eso genera la migración SQL en prisma/migrations/ (se commitea al repo).
+//
+// Modelos pendientes por slice:
+//   Slice 1 (Auth/Usuarios):  Usuario
+//   Slice 4 (Historial):      Escenario (FK a Usuario)
+//   Slice 5 (Novedades):      Novedad
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {

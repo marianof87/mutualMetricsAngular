@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PersistenciaModule } from './comunes/persistencia/persistencia.module';
-import { InicioModule } from './modules/inicio/inicio.module';
-import { SobreNosotrosModule } from './modules/sobre-nosotros/sobre-nosotros.module';
-import { ServiciosModule } from './modules/servicios/servicios.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { CuadraticaModule } from './modules/cuadratica/cuadratica.module';
+import { PricingModule } from './modules/pricing/pricing.module';
+import { EscenariosModule } from './modules/escenarios/escenarios.module';
 import { NovedadesModule } from './modules/novedades/novedades.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
 
@@ -11,9 +13,11 @@ import { ContactoModule } from './modules/contacto/contacto.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PersistenciaModule,
-    InicioModule,
-    SobreNosotrosModule,
-    ServiciosModule,
+    AuthModule,
+    UsuariosModule,
+    CuadraticaModule,
+    PricingModule,
+    EscenariosModule,
     NovedadesModule,
     ContactoModule,
   ],

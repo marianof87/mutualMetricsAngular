@@ -1,46 +1,64 @@
 # Catálogo de códigos de error
 
-Lista autoritativa. La fuente canónica en código está en `packages/shared/src/errores/codigos.ts` — este archivo es la **referencia humana**. Si agregás un código nuevo, actualizá **los dos** en el mismo PR.
+Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/codigos.ts`. Si agregás un código, actualizá **los dos** en el mismo PR.
 
 ## Convenciones
 
 - Todos en **UPPER_SNAKE_CASE**.
-- **Códigos generales** no llevan prefijo de sección (`ENTRADA_INVALIDA`, `ERROR_INTERNO`, etc.).
-- **Códigos específicos de una sección** llevan el nombre de la sección como prefijo: `CONTACTO_EMAIL_INVALIDO`, `NOVEDADES_NO_PUBLICADA`, etc.
-- Los mensajes (`message`) van **en español**, cortos y humanos.
+- **Códigos generales** sin prefijo (`ENTRADA_INVALIDA`, `ERROR_INTERNO`, etc.).
+- **Códigos específicos de slice** con prefijo: `AUTH_*`, `CUADRATICA_*`, `PRICING_*`, `ESCENARIOS_*`, `NOVEDADES_*`, `CONTACTO_*`.
+- Mensajes (`message`) en español, cortos y humanos.
 
 ## Códigos generales
 
 | Código | HTTP | Uso |
 |---|---|---|
-| `ENTRADA_INVALIDA` | 400 / 422 | Payload mal formado o fallan validaciones. |
-| `RECURSO_NO_ENCONTRADO` | 404 | Id inexistente, ruta inválida de recurso. |
-| `NO_AUTORIZADO` | 401 | Falta autenticación (futuro). |
+| `ENTRADA_INVALIDA` | 400 / 422 | Payload mal formado o validaciones fallidas. |
+| `RECURSO_NO_ENCONTRADO` | 404 | Id inexistente, ruta inválida. |
+| `NO_AUTORIZADO` | 401 | Falta autenticación. |
 | `PROHIBIDO` | 403 | Autenticado pero sin permiso. |
-| `CONFLICTO` | 409 | Intento de crear algo que ya existe (ej: email duplicado). |
+| `CONFLICTO` | 409 | Intento de crear algo que ya existe. |
 | `LIMITE_EXCEDIDO` | 429 | Rate limit. |
-| `ERROR_INTERNO` | 500 | Error no esperado en el servidor. |
-| `SERVICIO_NO_DISPONIBLE` | 503 | Dependencia caída, mantenimiento, etc. |
+| `ERROR_INTERNO` | 500 | Error inesperado en el servidor. |
+| `SERVICIO_NO_DISPONIBLE` | 503 | Dependencia caída, mantenimiento. |
 
-## Códigos por sección
+## Códigos por slice
 
-### Contacto
+### Slice 1 — Auth & Usuarios (@Nubiru)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| `AUTH_CREDENCIALES_INVALIDAS` | 401 | Email o password incorrectos en login. |
+| `AUTH_EMAIL_YA_REGISTRADO` | 409 | Intento de registrar email ya existente. |
+| `AUTH_TOKEN_EXPIRADO` | 401 | JWT expirado; pedir refresh. |
+| `AUTH_TOKEN_INVALIDO` | 401 | JWT malformado o firma inválida. |
+
+### Slice 2 — Cuadrática (@marianof87)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| `CUADRATICA_A_CERO` | 422 | `a === 0` — no es cuadrática, es lineal. |
+
+### Slice 3 — Pricing (@Monzon1983)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| `PRICING_SENSIBILIDAD_CERO` | 422 | `k === 0`; no hay dependencia precio/demanda. |
+| `PRICING_OPTIMO_FUERA_DE_RANGO` | 422 | El óptimo calculado cae fuera de los constraints de precio. |
+
+### Slice 4 — Escenarios (@Franco1212)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| (pendiente — el dueño agrega cuando hagan falta) | — | — |
+
+### Slice 5 — Público & Contacto (@Ange1809)
+
 | Código | HTTP | Uso |
 |---|---|---|
 | `CONTACTO_EMAIL_INVALIDO` | 422 | Email con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
 | `CONTACTO_MENSAJE_VACIO` | 422 | Mensaje vacío o muy corto. |
-
-### Inicio
-*(pendiente — agregar según necesidad)*
-
-### Sobre nosotros
-*(pendiente — agregar según necesidad)*
-
-### Servicios
-*(pendiente — agregar según necesidad)*
-
-### Novedades
-*(pendiente — agregar según necesidad)*
+| (Novedades — pendiente) | — | — |
 
 ## Cómo agregar un código nuevo
 

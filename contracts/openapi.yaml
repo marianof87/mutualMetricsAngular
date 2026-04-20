@@ -3,62 +3,200 @@ info:
   title: MutualMetrics API
   description: |
     API REST del proyecto MutualMetrics (NestJS).
+    Organizada en 5 slices verticales. Cada slice lo posee un integrante
+    distinto (ver GUIA.md §1).
     Todas las respuestas de error siguen el esquema `ErrorEnvelope`.
-  version: 0.1.0
+  version: 0.2.0
 servers:
   - url: /api/v1
 
 tags:
-  - name: inicio
-    description: Sección Inicio (Home)
-  - name: sobre-nosotros
-    description: Sección Sobre nosotros / Institución
-  - name: servicios
-    description: Sección Servicios / Funcionalidades
+  - name: auth
+    description: Slice 1 — Auth & Usuarios (@Nubiru)
+  - name: usuarios
+    description: Slice 1 — Auth & Usuarios (@Nubiru)
+  - name: cuadratica
+    description: Slice 2 — Calculadora Cuadrática (@marianof87)
+  - name: pricing
+    description: Slice 3 — Optimizador de Precios (@Monzon1983)
+  - name: escenarios
+    description: Slice 4 — Historial & Escenarios (@Franco1212)
   - name: novedades
-    description: Sección Novedades + Galería
+    description: Slice 5 — Contenido Público (@Ange1809)
   - name: contacto
-    description: Sección Contacto
+    description: Slice 5 — Contacto (@Ange1809)
 
 paths:
-  /inicio/saludo:
+  # ================ Slice 1 — Auth & Usuarios ================
+  /auth/registrar:
+    post:
+      tags: [auth]
+      summary: Registra un usuario nuevo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegistrarRequest" }
+      responses:
+        "201":
+          description: Usuario creado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SesionResponse" }
+        "409":
+          description: Email ya registrado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Autentica un usuario existente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Sesión iniciada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SesionResponse" }
+        "401":
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /usuarios/yo:
     get:
-      tags: [inicio]
-      summary: Saludo de bienvenida (placeholder)
+      tags: [usuarios]
+      summary: Datos del usuario autenticado
+      security: [{ bearerAuth: [] }]
       responses:
         "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/SaludoResponse" }
+              schema: { $ref: "#/components/schemas/Usuario" }
 
-  /sobre-nosotros:
+  # ================ Slice 2 — Cuadrática ================
+  /cuadratica/resolver:
+    post:
+      tags: [cuadratica]
+      summary: Resuelve ax² + bx + c = 0
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CuadraticaRequest" }
+      responses:
+        "200":
+          description: Resultados
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CuadraticaResponse" }
+        "422":
+          description: a = 0 u otra validación fallida
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  # ================ Slice 3 — Pricing ================
+  /pricing/optimizar:
+    post:
+      tags: [pricing]
+      summary: Calcula precio óptimo de revenue y profit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PricingRequest" }
+      responses:
+        "200":
+          description: Resultado con curvas y óptimos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PricingResponse" }
+
+  # ================ Slice 4 — Escenarios ================
+  /escenarios:
     get:
-      tags: [sobre-nosotros]
-      summary: Información institucional (placeholder)
+      tags: [escenarios]
+      summary: Lista los escenarios del usuario autenticado (paginado)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/Pagina"
+        - $ref: "#/components/parameters/TamanoPagina"
       responses:
         "200":
           description: OK
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/SobreNosotrosResponse" }
+              schema: { $ref: "#/components/schemas/Paginado" }
+    post:
+      tags: [escenarios]
+      summary: Guarda un escenario (cuadrática o pricing)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EscenarioCreate" }
+      responses:
+        "201":
+          description: Creado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Escenario" }
 
-  /servicios:
+  /escenarios/{id}:
     get:
-      tags: [servicios]
-      summary: Lista de servicios (placeholder)
+      tags: [escenarios]
+      summary: Detalle de un escenario
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Escenario" }
+    delete:
+      tags: [escenarios]
+      summary: Borra un escenario
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204":
+          description: Borrado
 
+  # ================ Slice 5 — Novedades ================
   /novedades:
     get:
       tags: [novedades]
-      summary: Lista de novedades (placeholder)
+      summary: Lista las novedades (paginado)
+      parameters:
+        - $ref: "#/components/parameters/Pagina"
+        - $ref: "#/components/parameters/TamanoPagina"
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Paginado" }
 
+  # ================ Slice 5 — Contacto ================
   /contactos:
     post:
       tags: [contacto]
@@ -80,16 +218,6 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ContactoResponse" }
-              examples:
-                ok:
-                  value:
-                    id: "9b2b3b6e-7a1b-4f3e-9a0e-000000000001"
-                    recibidoEn: "2026-04-20T15:30:00.000Z"
-        "400":
-          description: Datos inválidos
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
         "422":
           description: Error de validación
           content:
@@ -97,19 +225,116 @@ paths:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
 components:
-  schemas:
-    SaludoResponse:
-      type: object
-      required: [mensaje]
-      properties:
-        mensaje: { type: string }
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
-    SobreNosotrosResponse:
+  schemas:
+    RegistrarRequest:
       type: object
-      required: [titulo, descripcion]
+      required: [email, password, nombre]
       properties:
-        titulo: { type: string }
-        descripcion: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        nombre: { type: string, minLength: 1, maxLength: 100 }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    SesionResponse:
+      type: object
+      required: [accessToken, usuario]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        usuario: { $ref: "#/components/schemas/Usuario" }
+
+    Usuario:
+      type: object
+      required: [id, email, nombre]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        nombre: { type: string }
+
+    CuadraticaRequest:
+      type: object
+      required: [a, b, c]
+      properties:
+        a: { type: number }
+        b: { type: number }
+        c: { type: number }
+
+    CuadraticaResponse:
+      type: object
+      required: [discriminante, vertice]
+      properties:
+        discriminante: { type: number }
+        raices:
+          oneOf:
+            - type: 'null'
+            - type: array
+              items: { type: number }
+              minItems: 2
+              maxItems: 2
+        vertice:
+          type: object
+          required: [x, y]
+          properties:
+            x: { type: number }
+            y: { type: number }
+
+    PricingRequest:
+      type: object
+      required: [precioActual, unidadesVendidas, sensibilidadDemanda, costoVariable]
+      properties:
+        precioActual: { type: number }
+        unidadesVendidas: { type: number }
+        sensibilidadDemanda: { type: number }
+        costoVariable: { type: number }
+        costosFijos: { type: number, default: 0 }
+
+    PricingResponse:
+      type: object
+      required: [optimoRevenue, optimoProfit]
+      properties:
+        optimoRevenue:
+          type: object
+          properties:
+            precio: { type: number }
+            valor: { type: number }
+        optimoProfit:
+          type: object
+          properties:
+            precio: { type: number }
+            valor: { type: number }
+        breakEven:
+          type: array
+          items: { type: number }
+
+    Escenario:
+      type: object
+      required: [id, tipo, inputs, outputs, creadoEn]
+      properties:
+        id: { type: string, format: uuid }
+        tipo: { type: string, enum: [cuadratica, pricing] }
+        inputs: {}
+        outputs: {}
+        creadoEn: { type: string, format: date-time }
+
+    EscenarioCreate:
+      type: object
+      required: [tipo, inputs, outputs]
+      properties:
+        tipo: { type: string, enum: [cuadratica, pricing] }
+        inputs: {}
+        outputs: {}
 
     ContactoRequest:
       type: object
@@ -146,9 +371,6 @@ components:
     Paginado:
       type: object
       required: [datos, total, pagina, tamano]
-      description: |
-        Forma estándar de respuesta paginada. `datos` es un array del tipo
-        específico del endpoint (ver cada operación).
       properties:
         datos:
           type: array

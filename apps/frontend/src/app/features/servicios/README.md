@@ -1,22 +1,20 @@
-# Feature: Servicios
+# Feature: Servicios (Slice 5)
 
-**Dueño:** TBD
-**Ruta frontend:** `/servicios`
-**Módulo backend relacionado:** `apps/backend/src/modules/servicios/`
+**Dueño:** @Ange1809
+**Ruta:** `/servicios`
+**Backend:** sin endpoint propio.
 
 ## Alcance (consigna del profesor)
 
-Explicación de lo que ofrece la página o sistema (por ejemplo, registro, consultas, reservas, etc.).
+Landing page que **explica y linkea** las funcionalidades del sistema:
+- Calculadora Cuadrática (`/cuadratica`) — dueño @marianof87
+- Optimizador de Precios (`/pricing`) — dueño @Monzon1983
+
+NO implementa los calculadores acá — esta página es la vitrina.
 
 ## Estado
 
-- [ ] Vista implementada
-- [ ] Endpoints backend definidos
-- [ ] Tipos/schemas en `packages/shared/src/dtos/servicios.ts`
-- [ ] Tests mínimos
-- [ ] Responsive / accesible
-- [ ] DoD (ver GUIA.md)
-
-## Notas del dueño
-
-*Completar.*
+- [ ] Card para Cuadrática con descripción + CTA a `/cuadratica`
+- [ ] Card para Pricing con descripción + CTA a `/pricing`
+- [ ] Responsive
+- [ ] Test mínimo de render

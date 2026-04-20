@@ -1,21 +1,17 @@
-# Feature: Sobre nosotros
+# Feature: Sobre nosotros (Slice 5)
 
-**Dueño:** TBD
-**Ruta frontend:** `/sobre-nosotros`
-**Módulo backend relacionado:** `apps/backend/src/modules/sobre-nosotros/`
+**Dueño:** @Ange1809
+**Ruta:** `/sobre-nosotros`
+**Backend:** opcional — si hace falta contenido dinámico, endpoint simple.
 
 ## Alcance (consigna del profesor)
 
-Información sobre el proyecto, la escuela o el equipo: quiénes son, objetivos, contexto.
+Información sobre el proyecto, el equipo (5 integrantes), la escuela, objetivos, contexto académico.
 
 ## Estado
 
-- [ ] Vista implementada
-- [ ] Consume endpoints del backend si corresponde
-- [ ] Tests mínimos
-- [ ] Responsive / accesible
-- [ ] DoD (ver GUIA.md)
-
-## Notas del dueño
-
-*Completar.*
+- [ ] Sección con descripción del proyecto
+- [ ] Lista de integrantes (los 5)
+- [ ] Contexto académico (institución, materia)
+- [ ] Responsive
+- [ ] Test mínimo de render
