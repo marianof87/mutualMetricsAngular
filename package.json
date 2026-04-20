@@ -1,40 +1,41 @@
 {
   "name": "mutual-metrics",
-  "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr:mutualMetrics": "node dist/mutualMetrics/server/server.mjs"
-  },
+  "version": "0.1.0",
   "private": true,
+  "description": "MutualMetrics — proyecto académico Angular + NestJS (monorepo).",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "packageManager": "npm@11.12.1",
-  "dependencies": {
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/forms": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@angular/platform-server": "^21.2.0",
-    "@angular/router": "^21.2.0",
-    "@angular/ssr": "^21.2.7",
-    "chart.js": "^4.5.1",
-    "express": "^5.1.0",
-    "ng2-charts": "^10.0.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+  "scripts": {
+    "dev": "npm-run-all --sequential build:shared dev:all",
+    "dev:all": "npm-run-all --parallel dev:frontend dev:backend",
+    "dev:frontend": "npm --workspace @mutual-metrics/frontend run start",
+    "dev:backend": "npm --workspace @mutual-metrics/backend run start:dev",
+    "build": "npm-run-all --sequential build:shared build:backend build:frontend",
+    "build:shared": "npm --workspace @mutual-metrics/shared run build",
+    "build:backend": "npm --workspace @mutual-metrics/backend run build",
+    "build:frontend": "npm --workspace @mutual-metrics/frontend run build",
+    "test": "npm-run-all --parallel test:frontend test:backend test:shared",
+    "test:frontend": "npm --workspace @mutual-metrics/frontend run test -- --watch=false",
+    "test:backend": "npm --workspace @mutual-metrics/backend run test",
+    "test:shared": "npm --workspace @mutual-metrics/shared run test",
+    "test:cov": "npm-run-all --parallel test:cov:shared test:cov:backend",
+    "test:cov:shared": "npm --workspace @mutual-metrics/shared run test:cov",
+    "test:cov:backend": "npm --workspace @mutual-metrics/backend run test:cov",
+    "lint": "npm-run-all --parallel lint:frontend lint:backend",
+    "lint:frontend": "npm --workspace @mutual-metrics/frontend run lint --if-present",
+    "lint:backend": "npm --workspace @mutual-metrics/backend run lint --if-present",
+    "prisma:generate": "npm --workspace @mutual-metrics/backend run prisma:generate",
+    "prisma:migrate": "npm --workspace @mutual-metrics/backend run prisma:migrate",
+    "prisma:studio": "npm --workspace @mutual-metrics/backend run prisma:studio",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "podman:up": "podman compose up --build",
+    "podman:down": "podman compose down"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.7",
-    "@angular/cli": "^21.2.7",
-    "@angular/compiler-cli": "^21.2.0",
-    "@types/express": "^5.0.1",
-    "@types/node": "^20.17.19",
-    "jsdom": "^28.0.0",
-    "prettier": "^3.8.1",
-    "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "npm-run-all": "^4.1.5"
   }
 }

@@ -1,0 +1,41 @@
+<section class="contacto-wrap">
+  <h1>Contacto</h1>
+  <p>Completá el formulario y nos pondremos en contacto.</p>
+
+  <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate class="form">
+    <label>
+      <span>Nombre</span>
+      <input type="text" formControlName="nombre" autocomplete="name" />
+    </label>
+    @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+      <small class="error">El nombre es obligatorio.</small>
+    }
+
+    <label>
+      <span>Email</span>
+      <input type="email" formControlName="email" autocomplete="email" />
+    </label>
+    @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
+      <small class="error">Ingresá un email válido.</small>
+    }
+
+    <label>
+      <span>Mensaje</span>
+      <textarea formControlName="mensaje" rows="5"></textarea>
+    </label>
+    @if (formulario.controls.mensaje.touched && formulario.controls.mensaje.invalid) {
+      <small class="error">El mensaje debe tener entre 10 y 2000 caracteres.</small>
+    }
+
+    <button type="submit" [disabled]="enviando() || formulario.invalid" class="btn">
+      {{ enviando() ? 'Enviando...' : 'Enviar' }}
+    </button>
+  </form>
+
+  @if (mensajeExito()) {
+    <p class="ok" role="status">{{ mensajeExito() }}</p>
+  }
+  @if (mensajeError()) {
+    <p class="error" role="alert">{{ mensajeError() }}</p>
+  }
+</section>

@@ -42,3 +42,33 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Artefactos locales del agente (Claude Code u otros)
+.claude/
+
+# Variables de entorno locales
+.env
+.env.local
+.env.*.local
+
+# Logs de contenedores y builds
+*.log
+
+# Carpetas extra del monorepo
+/apps/*/dist
+/apps/*/.angular/cache
+/apps/*/node_modules
+/packages/*/node_modules
+/packages/*/dist
+
+# Coverage
+**/coverage/
+
+# Playwright
+/playwright-report/
+/test-results/
+/playwright/.cache/
+
+# SQLite local (cada dev genera el suyo)
+/apps/backend/prisma/*.db
+/apps/backend/prisma/*.db-journal

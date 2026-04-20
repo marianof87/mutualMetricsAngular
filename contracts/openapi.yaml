@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: MutualMetrics API
+  description: |
+    API REST del proyecto MutualMetrics (NestJS).
+    Todas las respuestas de error siguen el esquema `ErrorEnvelope`.
+  version: 0.1.0
+servers:
+  - url: /api/v1
+
+tags:
+  - name: inicio
+    description: Sección Inicio (Home)
+  - name: sobre-nosotros
+    description: Sección Sobre nosotros / Institución
+  - name: servicios
+    description: Sección Servicios / Funcionalidades
+  - name: novedades
+    description: Sección Novedades + Galería
+  - name: contacto
+    description: Sección Contacto
+
+paths:
+  /inicio/saludo:
+    get:
+      tags: [inicio]
+      summary: Saludo de bienvenida (placeholder)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SaludoResponse" }
+
+  /sobre-nosotros:
+    get:
+      tags: [sobre-nosotros]
+      summary: Información institucional (placeholder)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SobreNosotrosResponse" }
+
+  /servicios:
+    get:
+      tags: [servicios]
+      summary: Lista de servicios (placeholder)
+      responses:
+        "200":
+          description: OK
+
+  /novedades:
+    get:
+      tags: [novedades]
+      summary: Lista de novedades (placeholder)
+      responses:
+        "200":
+          description: OK
+
+  /contactos:
+    post:
+      tags: [contacto]
+      summary: Registra un mensaje de contacto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContactoRequest" }
+            examples:
+              valido:
+                value:
+                  nombre: "Juan Pérez"
+                  email: "juan@example.com"
+                  mensaje: "Quisiera más información sobre el sistema."
+      responses:
+        "201":
+          description: Mensaje recibido
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ContactoResponse" }
+              examples:
+                ok:
+                  value:
+                    id: "9b2b3b6e-7a1b-4f3e-9a0e-000000000001"
+                    recibidoEn: "2026-04-20T15:30:00.000Z"
+        "400":
+          description: Datos inválidos
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+components:
+  schemas:
+    SaludoResponse:
+      type: object
+      required: [mensaje]
+      properties:
+        mensaje: { type: string }
+
+    SobreNosotrosResponse:
+      type: object
+      required: [titulo, descripcion]
+      properties:
+        titulo: { type: string }
+        descripcion: { type: string }
+
+    ContactoRequest:
+      type: object
+      required: [nombre, email, mensaje]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 100 }
+        email: { type: string, format: email }
+        mensaje: { type: string, minLength: 10, maxLength: 2000 }
+
+    ContactoResponse:
+      type: object
+      required: [id, recibidoEn]
+      properties:
+        id: { type: string, format: uuid }
+        recibidoEn: { type: string, format: date-time }
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: |
+                Código de error estable en UPPER_SNAKE_CASE.
+                Ver docs/CODIGOS_ERROR.md para el catálogo completo.
+            message: { type: string }
+            details: {}
+            traceId: { type: string }
+
+    Paginado:
+      type: object
+      required: [datos, total, pagina, tamano]
+      description: |
+        Forma estándar de respuesta paginada. `datos` es un array del tipo
+        específico del endpoint (ver cada operación).
+      properties:
+        datos:
+          type: array
+          items: {}
+        total: { type: integer, minimum: 0 }
+        pagina: { type: integer, minimum: 1 }
+        tamano: { type: integer, minimum: 1, maximum: 100 }
+
+  parameters:
+    Pagina:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    TamanoPagina:
+      name: tamano
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }

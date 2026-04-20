@@ -1,0 +1,50 @@
+# CODEOWNERS — MutualMetrics
+#
+# Los handles listados reciben review-request automático cuando un PR toca los
+# archivos bajo el patrón.
+#
+# Mapeo de handles ↔ integrantes:
+#   @Nubiru      → Gabriel Osemberg
+#   @Monzon1983  → Mauro Sebastian Monzon
+#   @Franco1212  → Franco Marquez
+#   @marianof87  → Mariano Capella
+#   @Ange1809    → Angelica Morales
+
+# -------------------------------------------------------------------
+# Zonas compartidas — cualquiera del equipo puede revisar.
+# Regla (ver GUIA.md §3): PRs que tocan estas rutas piden 2 aprobaciones.
+# -------------------------------------------------------------------
+/packages/shared/**                                @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/contracts/**                                      @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/frontend/src/app/core/**                     @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/frontend/src/app/shared/**                   @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/frontend/src/styles/**                       @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/frontend/src/app/app.routes.ts               @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/frontend/src/app/app.config.ts               @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/backend/src/app.module.ts                    @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/backend/src/comunes/**                       @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/apps/backend/prisma/**                            @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/docker-compose.yml                                @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/docker/**                                         @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/.github/**                                        @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/package.json                                      @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/README.md                                         @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/GUIA.md                                           @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+/CLAUDE.md                                         @Nubiru @Monzon1983 @Franco1212 @marianof87 @Ange1809
+
+# -------------------------------------------------------------------
+# Secciones dueñas: 1 integrante = 1 sección.
+# Descomentar y completar cuando cada uno elija su sección (PR chico a GUIA.md).
+# -------------------------------------------------------------------
+# /apps/frontend/src/app/features/inicio/**          @<handle>
+# /apps/backend/src/modules/inicio/**                @<handle>
+# /apps/frontend/src/app/features/sobre-nosotros/**  @<handle>
+# /apps/backend/src/modules/sobre-nosotros/**        @<handle>
+# /apps/frontend/src/app/features/servicios/**       @<handle>
+# /apps/backend/src/modules/servicios/**             @<handle>
+# /apps/frontend/src/app/features/novedades/**       @<handle>
+# /apps/backend/src/modules/novedades/**             @<handle>
+
+# Contacto es implementación de referencia — la lleva Gabriel.
+/apps/frontend/src/app/features/contacto/**        @Nubiru
+/apps/backend/src/modules/contacto/**              @Nubiru

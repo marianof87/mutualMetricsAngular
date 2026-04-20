@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  instalar:
+    name: Instalar y cachear dependencias
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm --workspace @mutual-metrics/shared run build
+      - run: npm --workspace @mutual-metrics/backend run prisma:generate
+
+  lint:
+    name: Lint
+    needs: instalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm --workspace @mutual-metrics/shared run build
+      - run: npm --workspace @mutual-metrics/backend run prisma:generate
+      - run: npm run lint --if-present
+
+  tests:
+    name: Tests unit + coverage
+    needs: instalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm --workspace @mutual-metrics/shared run build
+      - run: npm --workspace @mutual-metrics/backend run prisma:generate
+      - run: npm test
+      - run: npm run test:cov
+
+  build-frontend:
+    name: Build frontend
+    needs: instalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm --workspace @mutual-metrics/shared run build
+      - run: npm --workspace @mutual-metrics/frontend run build
+
+  build-backend:
+    name: Build backend
+    needs: instalar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci --workspaces --include-workspace-root
+      - run: npm --workspace @mutual-metrics/shared run build
+      - run: npm --workspace @mutual-metrics/backend run prisma:generate
+      - run: npm --workspace @mutual-metrics/backend run build

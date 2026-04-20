@@ -1,0 +1,55 @@
+.contacto-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding-block: var(--mm-space-6);
+}
+
+.form {
+  display: grid;
+  gap: var(--mm-space-4);
+  margin-top: var(--mm-space-4);
+}
+
+label {
+  display: grid;
+  gap: var(--mm-space-1);
+}
+
+label span {
+  font-weight: var(--mm-font-weight-medium);
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: var(--mm-space-3);
+  border-radius: var(--mm-radius-md);
+  border: 1px solid var(--mm-color-borde);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--mm-color-acento);
+}
+
+.btn {
+  justify-self: start;
+  padding: var(--mm-space-3) var(--mm-space-5);
+  border-radius: var(--mm-radius-pill);
+  border: 1px solid var(--mm-color-borde);
+  background: var(--mm-color-texto);
+  color: var(--mm-color-texto-inverso);
+  font-weight: var(--mm-font-weight-semibold);
+}
+
+.error {
+  color: var(--mm-color-error);
+}
+
+.ok {
+  color: var(--mm-color-exito);
+}

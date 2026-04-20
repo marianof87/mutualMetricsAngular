@@ -1,0 +1,95 @@
+/*
+ * Design tokens — MutualMetrics
+ *
+ * Toda variable reutilizable del diseño vive acá.
+ * Regla: los componentes NO definen colores, espaciados o tipografías
+ * propios. Referencian `var(--mm-*)`. Si necesitás un token nuevo,
+ * agregalo acá primero y mencionalo en el PR.
+ *
+ * Naming: --mm-<categoria>-<variante>[-<escala>]
+ *   categorias: color, space, radius, shadow, font, size, z
+ */
+
+:root {
+  /* ===== Color: superficie ===== */
+  --mm-color-fondo: #0f111a;
+  --mm-color-superficie: #1a1d2d;
+  --mm-color-superficie-elevada: #242942;
+  --mm-color-vidrio: rgba(26, 29, 45, 0.6);
+
+  /* ===== Color: borde ===== */
+  --mm-color-borde: rgba(255, 255, 255, 0.1);
+  --mm-color-borde-vidrio: rgba(255, 255, 255, 0.08);
+
+  /* ===== Color: texto ===== */
+  --mm-color-texto: #f8f9fa;
+  --mm-color-texto-tenue: #a0a5b8;
+  --mm-color-texto-inverso: #111;
+
+  /* ===== Color: marca (usar con mesura) ===== */
+  --mm-color-primario: #3a7bd5;
+  --mm-color-primario-hover: #4a8be5;
+  --mm-color-acento: #00d2ff;
+
+  /* ===== Color: estado ===== */
+  --mm-color-exito: #7ee787;
+  --mm-color-advertencia: #f0932b;
+  --mm-color-error: #ff6b6b;
+  --mm-color-info: #00d2ff;
+
+  /* ===== Espaciado (escala 4-px) ===== */
+  --mm-space-0: 0;
+  --mm-space-1: 0.25rem;  /* 4 */
+  --mm-space-2: 0.5rem;   /* 8 */
+  --mm-space-3: 0.75rem;  /* 12 */
+  --mm-space-4: 1rem;     /* 16 */
+  --mm-space-5: 1.5rem;   /* 24 */
+  --mm-space-6: 2rem;     /* 32 */
+  --mm-space-7: 3rem;     /* 48 */
+  --mm-space-8: 4rem;     /* 64 */
+
+  /* ===== Radius ===== */
+  --mm-radius-sm: 4px;
+  --mm-radius-md: 8px;
+  --mm-radius-lg: 16px;
+  --mm-radius-pill: 999px;
+
+  /* ===== Sombra ===== */
+  --mm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --mm-shadow-md: 0 4px 15px rgba(0, 0, 0, 0.25);
+  --mm-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* ===== Tipografía ===== */
+  --mm-font-sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --mm-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --mm-font-size-xs: 0.75rem;
+  --mm-font-size-sm: 0.875rem;
+  --mm-font-size-base: 1rem;
+  --mm-font-size-lg: 1.125rem;
+  --mm-font-size-xl: 1.5rem;
+  --mm-font-size-2xl: 2rem;
+  --mm-font-size-3xl: 3rem;
+
+  --mm-font-weight-regular: 400;
+  --mm-font-weight-medium: 500;
+  --mm-font-weight-semibold: 600;
+  --mm-font-weight-bold: 700;
+
+  --mm-line-height-tight: 1.2;
+  --mm-line-height-normal: 1.5;
+  --mm-line-height-relaxed: 1.7;
+
+  /* ===== Tamaños de layout ===== */
+  --mm-size-contenedor-max: 1200px;
+
+  /* ===== Z-index ===== */
+  --mm-z-base: 0;
+  --mm-z-sticky: 100;
+  --mm-z-modal: 1000;
+  --mm-z-toast: 2000;
+
+  /* ===== Transiciones ===== */
+  --mm-transition-rapida: 150ms ease;
+  --mm-transition-media: 300ms ease;
+}

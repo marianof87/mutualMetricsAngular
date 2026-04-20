@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "ENTRADA_INVALIDA",
+    "message": "Los datos enviados no son válidos",
+    "details": [
+      { "path": ["email"], "message": "Formato de email inválido" }
+    ],
+    "traceId": "abc-123"
+  }
+}

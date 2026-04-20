@@ -1,0 +1,37 @@
+{
+  "name": "@mutual-metrics/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tipos, schemas (Zod) y códigos de error compartidos entre frontend y backend.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./errores": {
+      "types": "./dist/errores/index.d.ts",
+      "default": "./dist/errores/index.js"
+    },
+    "./dtos": {
+      "types": "./dist/dtos/index.d.ts",
+      "default": "./dist/dtos/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "dev": "tsc -p tsconfig.json --watch"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@vitest/coverage-istanbul": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.4",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}

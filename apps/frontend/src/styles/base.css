@@ -1,0 +1,71 @@
+/*
+ * Base styles — reset + estilos globales por elemento.
+ * No definir estilos de componente acá. Sólo lo que aplica a elementos HTML puros.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--mm-font-sans);
+  font-size: var(--mm-font-size-base);
+  line-height: var(--mm-line-height-normal);
+  color: var(--mm-color-texto);
+  background-color: var(--mm-color-fondo);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--mm-font-weight-bold);
+  line-height: var(--mm-line-height-tight);
+}
+
+h1 { font-size: var(--mm-font-size-3xl); }
+h2 { font-size: var(--mm-font-size-2xl); }
+h3 { font-size: var(--mm-font-size-xl); }
+h4 { font-size: var(--mm-font-size-lg); }
+
+p {
+  color: var(--mm-color-texto);
+}
+
+a {
+  color: var(--mm-color-acento);
+  text-decoration: none;
+  transition: color var(--mm-transition-rapida);
+}
+
+a:hover {
+  color: var(--mm-color-primario-hover);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+img, picture, video {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mm-color-acento);
+  outline-offset: 2px;
+}

@@ -1,0 +1,30 @@
+// Schema de Prisma — MutualMetrics
+//
+// Cada dueño de sección agrega aquí los modelos que necesita.
+// Regla: nombres en español (PascalCase para modelos, camelCase para campos).
+// Regla: después de agregar/modificar un modelo, correr:
+//   npm --workspace @mutual-metrics/backend run prisma:migrate -- --name <descripcion-corta>
+// Eso genera la migración SQL en prisma/migrations/ (se commitea al repo).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------------
+// Modelo de ejemplo (sección Contacto).
+// Los otros dueños pueden eliminar esto y empezar con sus propios modelos.
+// ------------------------------------------------------------------
+
+model Contacto {
+  id         String   @id @default(uuid())
+  nombre     String
+  email      String
+  mensaje    String
+  recibidoEn DateTime @default(now())
+}

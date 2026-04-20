@@ -1,59 +1,99 @@
 # MutualMetrics
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
+Proyecto académico desarrollado en grupo. Sitio web con 5 secciones (Inicio, Sobre nosotros, Servicios, Novedades y Contacto) construido como **monorepo** con frontend en **Angular** y backend en **NestJS**.
 
-## Development server
+---
 
-To start a local development server, run:
+## Estructura del repo
 
-```bash
-ng serve
+```
+mutualMetricsAngular/
+├── apps/
+│   ├── frontend/      # Angular 21 (SPA)
+│   └── backend/       # NestJS 11
+├── packages/
+│   └── shared/        # Tipos, schemas (Zod) y códigos de error compartidos
+├── contracts/         # openapi.yaml + ejemplos de request/response
+├── docker/            # Dockerfiles + nginx.conf
+├── docs/              # Documentación técnica (arquitectura, estilos, códigos de error, ADR)
+├── docker-compose.yml
+└── GUIA.md            # Guía interna para los 5 integrantes del equipo
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Stack
 
-## Code scaffolding
+| Capa | Tecnología |
+|---|---|
+| Frontend | Angular 21 (SPA) + design tokens CSS |
+| Backend | NestJS 11 (TypeScript) |
+| Persistencia | Prisma + SQLite |
+| Tipos/schemas compartidos | `@mutual-metrics/shared` (Zod) |
+| Contrato API | OpenAPI 3.0 (`contracts/openapi.yaml`) |
+| Contenedores | Docker / Podman (mismo compose) |
+| CI | GitHub Actions |
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Prerrequisitos
 
-```bash
-ng generate component component-name
-```
+- **Node.js 20+** y **npm 11+**
+- Opcional: **Docker** *o* **Podman** (si se quiere correr en contenedores)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Arranque rápido (sin contenedores)
 
 ```bash
-ng test
+# 1) Instalar dependencias de todo el monorepo
+npm install
+
+# 2) Compilar el paquete compartido (sólo la primera vez o tras cambios en packages/shared)
+npm run build:shared
+
+# 3) Levantar frontend + backend en paralelo
+npm run dev
 ```
 
-## Running end-to-end tests
+- Frontend: http://localhost:4200
+- Backend: http://localhost:3000/api/v1
 
-For end-to-end (e2e) testing, run:
+## Arranque con contenedores
 
 ```bash
-ng e2e
+docker compose up --build
+# o equivalente:
+podman compose up --build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+- Frontend (nginx): http://localhost:8080
+- Backend: http://localhost:3000/api/v1
 
-## Additional Resources
+## Scripts útiles (en la raíz)
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+npm run dev              # FE + BE en paralelo (desarrollo)
+npm run build            # Build de shared, backend y frontend
+npm test                 # Tests de todos los workspaces
+npm run lint             # Lint de todos los workspaces
+npm run docker:up        # docker compose up --build
+npm run podman:up        # podman compose up --build
+```
+
+## Integrantes
+
+| Integrante | GitHub | Sección |
+|---|---|---|
+| Angelica Morales | [@Ange1809](https://github.com/Ange1809) | *por elegir* |
+| Mauro Sebastian Monzon | [@Monzon1983](https://github.com/Monzon1983) | *por elegir* |
+| Mariano Capella | [@marianof87](https://github.com/marianof87) | *por elegir* |
+| Gabriel Osemberg | [@Nubiru](https://github.com/Nubiru) | **Contacto** (referencia) + infraestructura |
+| Franco Marquez | [@Franco1212](https://github.com/Franco1212) | *por elegir* |
+
+> Cómo elegir sección: ver [`GUIA.md` §1](./GUIA.md).
+
+## ¿Trabajás en este proyecto?
+
+Leé [`GUIA.md`](./GUIA.md) — contiene la asignación por secciones, flujo de ramas/PRs, convenciones y referencias a los esquemas compartidos. **Todo lo que necesitás saber antes de pushear tu primer commit.**
+
+Documentación técnica adicional:
+
+- [`docs/ARQUITECTURA.md`](./docs/ARQUITECTURA.md) — decisiones de diseño
+- [`docs/CODIGOS_ERROR.md`](./docs/CODIGOS_ERROR.md) — catálogo de códigos
+- [`docs/GUIA_CONTRIBUCION.md`](./docs/GUIA_CONTRIBUCION.md) — flujo de PRs
+- [`contracts/openapi.yaml`](./contracts/openapi.yaml) — contrato API
