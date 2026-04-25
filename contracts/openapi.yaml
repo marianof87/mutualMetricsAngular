@@ -184,17 +184,38 @@ paths:
   # ================ Slice 5 — Novedades ================
   /novedades:
     get:
+      summary: Lista todas las novedades
       tags: [novedades]
-      summary: Lista las novedades (paginado)
       parameters:
         - $ref: "#/components/parameters/Pagina"
         - $ref: "#/components/parameters/TamanoPagina"
       responses:
-        "200":
-          description: OK
+        '200':
+          description: Lista paginada de novedades
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Paginado" }
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Paginado"
+                  - properties:
+                      datos:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/NovedadResponse"
+    post:
+      summary: Crea una nueva novedad
+      tags: [novedades]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrearNovedadRequest" }
+      responses:
+        '201':
+          description: Novedad creada exitosamente
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NovedadResponse" }
 
   # ================ Slice 5 — Contacto ================
   /contactos:
