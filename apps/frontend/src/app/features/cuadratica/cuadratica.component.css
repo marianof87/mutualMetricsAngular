@@ -1,1 +1,124 @@
-section { padding-block: var(--mm-space-6); }
+.solver-container {
+  padding: 3rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.solver-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f8f9fa;
+  margin-bottom: 0.5rem;
+}
+
+.solver-subtitle {
+  color: #a0a5b8;
+  font-size: 1.1rem;
+}
+
+.solver-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .solver-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-panel {
+  background: rgba(30, 39, 46, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+}
+
+.card-panel h2 {
+  font-size: 1.5rem;
+  color: #ffbe76;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #c8d6e5;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ffbe76;
+}
+
+.results-section {
+  margin-top: 2rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.results-section h3 {
+  margin-top: 0;
+  color: #f8f9fa;
+  font-size: 1.2rem;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.4rem;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.warning-text {
+  color: #ff6b6b;
+  font-style: italic;
+}
+
+.error-message {
+  margin-top: 1.5rem;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}

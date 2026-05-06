@@ -1,5 +1,65 @@
-<section>
-  <h1>Calculadora cuadrática</h1>
-  <p>Slice 2 — implementación pendiente por <strong>&#64;marianof87</strong>.</p>
-  <p>Resuelve <code>ax² + bx + c = 0</code>: discriminante, raíces y vértice, con gráfico de la parábola.</p>
+<section class="solver-container">
+  <div class="header-section">
+    <h1 class="solver-title">Calculadora Cuadrática</h1>
+    <p class="solver-subtitle">Resuelve <code>ax² + bx + c = 0</code>: discriminante, raíces, vértice y gráfico de la parábola.</p>
+  </div>
+
+  <div class="solver-content">
+    <div class="input-panel card-panel">
+      <h2>Coeficientes</h2>
+      <div class="form-group">
+        <label for="coeff-a">Coeficiente a:</label>
+        <input id="coeff-a" type="number" [ngModel]="a()" (ngModelChange)="a.set($event)" placeholder="Ej. 1" />
+      </div>
+      <div class="form-group">
+        <label for="coeff-b">Coeficiente b:</label>
+        <input id="coeff-b" type="number" [ngModel]="b()" (ngModelChange)="b.set($event)" placeholder="Ej. -4" />
+      </div>
+      <div class="form-group">
+        <label for="coeff-c">Coeficiente c:</label>
+        <input id="coeff-c" type="number" [ngModel]="c()" (ngModelChange)="c.set($event)" placeholder="Ej. 4" />
+      </div>
+
+      <div class="results-section" *ngIf="a() !== 0">
+        <h3>Resultados</h3>
+        <div class="result-item">
+          <span>Discriminante (Δ):</span>
+          <strong>{{ discriminant() | number:'1.2-2' }}</strong>
+        </div>
+        
+        <div class="result-item" *ngIf="hasRealRoots() && roots()">
+          <span>Raíz x₁:</span>
+          <strong>{{ roots()!.x1 | number:'1.2-2' }}</strong>
+        </div>
+        <div class="result-item" *ngIf="hasRealRoots() && roots()?.x2 !== null">
+          <span>Raíz x₂:</span>
+          <strong>{{ roots()!.x2 | number:'1.2-2' }}</strong>
+        </div>
+        
+        <div class="result-item" *ngIf="!hasRealRoots()">
+          <span class="warning-text">No tiene raíces reales.</span>
+        </div>
+
+        <div class="result-item" *ngIf="vertex()">
+          <span>Vértice:</span>
+          <strong>({{ vertex()!.x | number:'1.2-2' }}, {{ vertex()!.y | number:'1.2-2' }})</strong>
+        </div>
+      </div>
+      
+      <div class="error-message" *ngIf="a() === 0">
+        El coeficiente 'a' no puede ser cero para una función cuadrática.
+      </div>
+    </div>
+
+    <div class="chart-panel card-panel">
+      <h2>Gráfico Cartesiano</h2>
+      <div class="chart-wrapper">
+        <canvas baseChart
+          [data]="lineChartData()"
+          [options]="lineChartOptions"
+          type="line">
+        </canvas>
+      </div>
+    </div>
+  </div>
 </section>
