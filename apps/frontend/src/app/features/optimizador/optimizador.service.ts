@@ -7,12 +7,11 @@ import { OptimizarPrecioRequest, OptimizarPrecioResponse } from '@mutual-metrics
   providedIn: 'root'
 })
 export class OptimizadorFrontendService {
-  // Apunta directo a tu NestJS local
-  private readonly apiUrl = 'http://localhost:3000/optimizador/calcular';
+  // URL perfectamente alineada con el main.ts del backend
+  private readonly apiUrl = 'http://localhost:3000/api/v1/optimizador/calcular';
 
   constructor(private readonly http: HttpClient) {}
 
-  // Corregido: OptimizarPrecioRequest con 'a'
   enviarCalculo(datos: OptimizarPrecioRequest): Observable<OptimizarPrecioResponse> {
     return this.http.post<OptimizarPrecioResponse>(this.apiUrl, datos);
   }
