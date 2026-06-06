@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { OptimizadorFrontendService } from './optimizador.service'; // Usamos tu servicio del frontend
 import { OptimizarPrecioRequest, OptimizarPrecioResponse } from '@mutual-metrics/shared';
 
 @Component({
   selector: 'app-optimizador',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule], // Volamos HttpClientModule de acá porque se declara en el config global
   template: `
     <div class="contenedor-optimizador">
       <div class="tarjeta-formulario">
@@ -85,6 +85,7 @@ import { OptimizarPrecioRequest, OptimizarPrecioResponse } from '@mutual-metrics
   `]
 })
 export class OptimizadorComponent {
+  // Valores por defecto iniciales limpios
   request: OptimizarPrecioRequest = {
     coeficienteA: -2,
     coeficienteB: 120,
@@ -96,15 +97,21 @@ export class OptimizadorComponent {
   resultado: OptimizarPrecioResponse | null = null;
   errorMensaje: string | null = null;
 
-  constructor(private http: HttpClient) {}
+  // Inyectamos el servicio HTTP del frontend que creamos antes
+  constructor(private readonly optimizadorService: OptimizadorFrontendService) {}
 
   enviarCalculo() {
     this.errorMensaje = null;
-    // Petición HTTP directa al backend que armamos recién
-    this.http.post<OptimizarPrecioResponse>('http://localhost:3000/api/optimizador/calcular', this.request)
-      .subscribe({
-        next: (res) => this.resultado = res,
-        error: (err) => this.errorMensaje = err.error?.message || 'Error al conectar con el servidor matemático.'
-      });
+
+    // Consumimos el servicio asíncronamente con un subscribe estructurado
+    this.optimizadorService.enviarCalculo(this.request).subscribe({
+      next: (res) => {
+        this.resultado = res;
+      },
+      error: (err) => {
+        // Capturamos el BadRequestException del backend o fallos de red
+        this.errorMensaje = err.error?.message || 'Error al conectar con el servidor matemático.';
+      }
+    });
   }
 }
