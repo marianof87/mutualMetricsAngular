@@ -1,10 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../comunes/persistencia/prisma.service'; // Ajustamos la ruta subiendo dos niveles (de modulares/optimizador a src)
 import { OptimizarPrecioRequest, OptimizarPrecioResponse } from '@mutual-metrics/shared';
 
 @Injectable()
 export class OptimizadorService {
   
-  optimizar(datos: OptimizarPrecioRequest): OptimizarPrecioResponse {
+  // Inyectamos el servicio de Prisma de tus compañeros
+  constructor(private readonly prisma: PrismaService) {}
+
+  // Agregamos async y Promise ya que el guardado en base de datos es asíncrono
+  async optimizar(datos: OptimizarPrecioRequest): Promise<OptimizarPrecioResponse> {
     const { coeficienteA, coeficienteB, coeficienteC, precioMinimo, precioMaximo } = datos;
 
     // Control de seguridad matemática: si 'a' es mayor o igual a 0, la parábola no tiene un máximo
@@ -37,10 +42,26 @@ export class OptimizadorService {
       estrategiaSugerida = 'Demanda débil. Se sugiere mantener el precio en el mínimo para asegurar volumen.';
     }
 
-    return {
+    const respuesta: OptimizarPrecioResponse = {
       precioOptimo: precioFinal,
       gananciaMaxima: gananciaFinal,
       estrategiaSugerida,
     };
+
+    // OPERACIÓN DE PERSISTENCIA: Guardamos los datos en la tabla local SQLite
+    await this.prisma.optimizacion.create({
+      data: {
+        coeficienteA,
+        coeficienteB,
+        coeficienteC,
+        precioMinimo,
+        precioMaximo,
+        precioOptimo: respuesta.precioOptimo,
+        gananciaMaxima: respuesta.gananciaMaxima,
+        estrategiaSugerida: respuesta.estrategiaSugerida,
+      },
+    });
+
+    return respuesta;
   }
 }
