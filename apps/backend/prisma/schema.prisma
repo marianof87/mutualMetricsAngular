@@ -32,3 +32,15 @@ model Contacto {
   mensaje    String
   recibidoEn DateTime @default(now())
 }
+model Optimizacion {
+  id                 String   @id @default(uuid())
+  coeficienteA       Float
+  coeficienteB       Float
+  coeficienteC       Float
+  precioMinimo       Float
+  precioMaximo       Float
+  precioOptimo       Float
+  gananciaMaxima     Float
+  estrategiaSugerida String
+  calculadoEn        DateTime @default(now())
+}
