@@ -48,3 +48,32 @@
   background: var(--mm-color-texto);
   border-radius: 2px;
 }
+
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: var(--mm-space-4);
+}
+
+.nav-saludo {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+}
+
+.nav-auth-link {
+  color: var(--mm-color-texto-tenue);
+  text-decoration: none;
+  font-weight: var(--mm-font-weight-medium);
+  font-size: var(--mm-font-size-sm);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--mm-transition-media);
+}
+
+.nav-auth-link:hover,
+.nav-auth-link.active {
+  color: var(--mm-color-texto);
+}
