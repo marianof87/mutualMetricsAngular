@@ -72,6 +72,8 @@ Thumbs.db
 /test-results/
 /playwright/.cache/
 
-# SQLite local (cada dev genera el suyo)
-/apps/backend/prisma/*.db
-/apps/backend/prisma/*.db-journal
+# SQLite local (cada dev genera el suyo).
+# Prisma resuelve el DATABASE_URL relativo desde la carpeta del schema,
+# por eso el .db real queda en prisma/prisma/. Glob recursivo cubre ambos casos.
+/apps/backend/prisma/**/*.db
+/apps/backend/prisma/**/*.db-journal
