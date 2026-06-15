@@ -16,7 +16,7 @@
 ## Estado
 
 - [x] Schemas `Auth*Request/Response` en `packages/shared/src/dtos/auth.ts`
-- [ ] Endpoints backend (registrar, login)
+- [x] Endpoints backend (registrar, login) — `AuthService` con bcrypt + JWT, tests unit
 - [x] Modelo `Usuario` en Prisma + migración
 - [ ] Guard + interceptor + signal de sesión
 - [ ] Forms login y registrar con validación y manejo de errores del envelope
