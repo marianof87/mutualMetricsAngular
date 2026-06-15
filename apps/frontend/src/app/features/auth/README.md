@@ -15,9 +15,11 @@
 
 ## Estado
 
-- [ ] Schemas `Auth*Request/Response` en `packages/shared/src/dtos/auth.ts`
-- [ ] Endpoints backend (registrar, login, refresh)
-- [ ] Modelo `Usuario` en Prisma + migración
+- [x] Schemas `Auth*Request/Response` en `packages/shared/src/dtos/auth.ts`
+- [ ] Endpoints backend (registrar, login)
+- [x] Modelo `Usuario` en Prisma + migración
 - [ ] Guard + interceptor + signal de sesión
 - [ ] Forms login y registrar con validación y manejo de errores del envelope
 - [ ] Tests
+
+> Decisión (2026-06-15): el endpoint `refresh` queda para una fase posterior; el contrato OpenAPI no lo incluye, así que no se implementa en el MVP para mantener código y contrato alineados.

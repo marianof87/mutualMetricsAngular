@@ -44,3 +44,12 @@ model Optimizacion {
   estrategiaSugerida String
   calculadoEn        DateTime @default(now())
 }
+
+// Slice 1 (Auth/Usuarios). Base para Slice 4 (Escenario tendrá FK a Usuario).
+model Usuario {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String
+  creadoEn     DateTime @default(now())
+}
