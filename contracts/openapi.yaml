@@ -81,6 +81,21 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Usuario" }
+    patch:
+      tags: [usuarios]
+      summary: Actualiza el perfil del usuario autenticado
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UsuarioActualizar" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Usuario" }
 
   # ================ Slice 2 — Cuadrática ================
   /cuadratica/resolver:
@@ -283,6 +298,12 @@ components:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         nombre: { type: string }
+
+    UsuarioActualizar:
+      type: object
+      required: [nombre]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 100 }
 
     CuadraticaRequest:
       type: object

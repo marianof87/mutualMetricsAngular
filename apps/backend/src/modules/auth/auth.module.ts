@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 // Vida del access token. Fijo para el MVP (mantener simple).
 const EXPIRACION_TOKEN = '1d';
@@ -19,7 +20,8 @@ const EXPIRACION_TOKEN = '1d';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, JwtAuthGuard],
+  // Exporta JwtModule + el guard para que otros slices protejan sus endpoints.
+  exports: [AuthService, JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

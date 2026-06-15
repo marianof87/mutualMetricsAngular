@@ -18,8 +18,9 @@
 - [x] Schemas `Auth*Request/Response` en `packages/shared/src/dtos/auth.ts`
 - [x] Endpoints backend (registrar, login) — `AuthService` con bcrypt + JWT, tests unit
 - [x] Modelo `Usuario` en Prisma + migración
-- [ ] Guard + interceptor + signal de sesión
+- [x] Backend: `JwtAuthGuard` + `modules/usuarios` (`GET/PATCH /usuarios/yo`), tests unit + integración (supertest)
+- [ ] Frontend: interceptor JWT + `auth.guard` + signal `usuarioActual()`
 - [ ] Forms login y registrar con validación y manejo de errores del envelope
-- [ ] Tests
+- [ ] Tests frontend
 
 > Decisión (2026-06-15): el endpoint `refresh` queda para una fase posterior; el contrato OpenAPI no lo incluye, así que no se implementa en el MVP para mantener código y contrato alineados.
