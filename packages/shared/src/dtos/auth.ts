@@ -32,3 +32,10 @@ export const SesionResponseSchema = z.object({
 });
 
 export type SesionResponse = z.infer<typeof SesionResponseSchema>;
+
+// Body de PATCH /usuarios/yo. Por ahora sólo el nombre es editable.
+export const UsuarioActualizarSchema = z.object({
+  nombre: z.string().trim().min(1, 'El nombre es requerido').max(100),
+});
+
+export type UsuarioActualizar = z.infer<typeof UsuarioActualizarSchema>;

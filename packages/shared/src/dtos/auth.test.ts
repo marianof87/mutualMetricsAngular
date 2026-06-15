@@ -4,6 +4,7 @@ import {
   LoginRequestSchema,
   UsuarioSchema,
   SesionResponseSchema,
+  UsuarioActualizarSchema,
 } from './auth';
 
 describe('RegistrarRequestSchema', () => {
@@ -107,6 +108,18 @@ describe('SesionResponseSchema', () => {
     const r = SesionResponseSchema.safeParse({
       accessToken: 'jwt.token.aqui',
     });
+    expect(r.success).toBe(false);
+  });
+});
+
+describe('UsuarioActualizarSchema', () => {
+  it('acepta un nombre válido', () => {
+    const ok = UsuarioActualizarSchema.safeParse({ nombre: 'Ana María' });
+    expect(ok.success).toBe(true);
+  });
+
+  it('rechaza nombre vacío', () => {
+    const r = UsuarioActualizarSchema.safeParse({ nombre: '' });
     expect(r.success).toBe(false);
   });
 });
