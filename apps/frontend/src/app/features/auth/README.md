@@ -19,8 +19,10 @@
 - [x] Endpoints backend (registrar, login) — `AuthService` con bcrypt + JWT, tests unit
 - [x] Modelo `Usuario` en Prisma + migración
 - [x] Backend: `JwtAuthGuard` + `modules/usuarios` (`GET/PATCH /usuarios/yo`), tests unit + integración (supertest)
-- [ ] Frontend: interceptor JWT + `auth.guard` + signal `usuarioActual()`
-- [ ] Forms login y registrar con validación y manejo de errores del envelope
-- [ ] Tests frontend
+- [x] Frontend: `jwt.interceptor` + `auth.guard` + `SesionService` con signal `usuarioActual()` (token en localStorage, SSR-safe)
+- [x] Forms login y registrar con validación y manejo de errores del envelope
+- [x] Tests frontend (service, interceptor, guard, ambos componentes)
+
+> Pendiente menor: el navbar (zona compartida de Slice 5) podría mostrar login/logout según `usuarioActual()`. Lo dejamos para coordinar con @Ange1809.
 
 > Decisión (2026-06-15): el endpoint `refresh` queda para una fase posterior; el contrato OpenAPI no lo incluye, así que no se implementa en el MVP para mantener código y contrato alineados.
