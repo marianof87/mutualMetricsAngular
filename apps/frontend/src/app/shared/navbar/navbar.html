@@ -9,4 +9,13 @@
     <a routerLink="/novedades" routerLinkActive="active" class="nav-link">Novedades</a>
     <a routerLink="/contacto" routerLinkActive="active" class="nav-link">Contacto</a>
   </div>
+  <div class="nav-auth">
+    @if (autenticado()) {
+      <span class="nav-saludo">Hola, {{ usuarioActual()?.nombre }}</span>
+      <button type="button" (click)="cerrarSesion()" class="nav-auth-link">Salir</button>
+    } @else {
+      <a routerLink="/login" routerLinkActive="active" class="nav-auth-link">Ingresar</a>
+      <a routerLink="/registrar" routerLinkActive="active" class="nav-auth-link">Crear cuenta</a>
+    }
+  </div>
 </nav>
