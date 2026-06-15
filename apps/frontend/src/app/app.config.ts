@@ -3,12 +3,14 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
+import { jwtInterceptor } from './core/interceptores/jwt.interceptor';
 import { erroresInterceptor } from './core/interceptores/errores.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideHttpClient(withFetch(), withInterceptors([erroresInterceptor])),
+    // jwt agrega el token saliente; errores normaliza la respuesta entrante.
+    provideHttpClient(withFetch(), withInterceptors([jwtInterceptor, erroresInterceptor])),
   ],
 };
