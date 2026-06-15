@@ -78,6 +78,28 @@ Cada slice tiene su `README.md` en las carpetas propias con endpoints, schemas, 
 
 ---
 
+### Estado actual de los slices (al 2026-06-15)
+
+Foto del avance real, leída del código en `main` y de las ramas WIP. **Ningún slice está terminado** (ver DoD en §7). Mantener esta tabla al día cuando se mergea trabajo.
+
+| Slice | Dueño | Estado | Avance | Dónde vive |
+|---|---|---|---|---|
+| 3 — Pricing | @Monzon1983 | En curso | ~40% | Mergeado en `main` |
+| 5 — Público & Contacto | @Ange1809 | En curso | ~26% | Mergeado en `main` |
+| 2 — Cuadrática | @marianof87 | En curso (solo FE) | ~35% | Rama `quad-solver` (sin mergear) |
+| 4 — Historial | @Franco1212 | Sin arrancar (solo diseño) | ~10% | Rama `feature/historial/diseno-slice4` |
+| 1 — Auth & Usuarios | @Nubiru | Sin arrancar (solo scaffolding) | ~15% | — |
+
+**Detalle por slice:**
+
+- **Slice 3 (Pricing):** optimizador cuadrático funcional end-to-end (FE → controller/service NestJS → modelo Prisma `Optimizacion` + migración). Pendiente: se implementó bajo el nombre `optimizador` mientras las carpetas `pricing` quedaron como stub vacío; el contrato OpenAPI declara `/pricing/optimizar` pero el código sirve `/optimizador/calcular` (desalineado); faltan tests.
+- **Slice 5 (Contacto/Novedades):** `contacto` es la referencia end-to-end (form reactivo → controller validado → modelo Prisma `Contacto`), **pero el service no persiste todavía** (TODO en su README). `novedades` tiene schema Zod + OpenAPI pero sin modelo Prisma ni wiring de FE. Páginas públicas (inicio/sobre-nosotros/servicios) son placeholders.
+- **Slice 2 (Cuadrática):** componente frontend real en `quad-solver`, sin backend ni schema compartido ni integración HTTP aún. ⚠️ La rama incluye un archivo vacío `mutualMetricsAngular` en la raíz (commit accidental) — limpiar antes de mergear.
+- **Slice 4 (Historial):** solo documento de diseño. **Depende de Slice 1:** su modelo `Escenario` tiene FK a `Usuario`. Bloqueado hasta que exista el modelo `Usuario`.
+- **Slice 1 (Auth & Usuarios):** contrato OpenAPI y códigos `AUTH_*` definidos; resto es scaffolding (controllers/services `ping()`-only, componentes placeholder, sin DTOs `auth.ts`, sin modelo `Usuario`, sin tests). **Es la base de Slice 4** — prioritario.
+
+---
+
 ## 2. Ramas y PRs
 
 **Trunk-based simplificado** — una sola rama larga: `main`. Sin `develop`.
