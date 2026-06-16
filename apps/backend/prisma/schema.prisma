@@ -32,3 +32,11 @@ model Contacto {
   mensaje    String
   recibidoEn DateTime @default(now())
 }
+
+model Escenario {
+  id          String   @id @default(uuid())
+  titulo      String
+  descripcion String
+  datos       String   // Guardamos acá los datos del escenario o métricas en formato JSON (texto)
+  creadoEn    DateTime @default(now())
+}

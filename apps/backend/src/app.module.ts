@@ -9,6 +9,7 @@ import { EscenariosModule } from './modules/escenarios/escenarios.module';
 import { NovedadesModule } from './modules/novedades/novedades.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

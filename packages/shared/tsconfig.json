@@ -5,6 +5,10 @@
     "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "@mutual-metrics/shared": ["libs/shared/src/index.ts"]
+    },
     "declaration": true,
     "declarationMap": true,
     "strict": true,
