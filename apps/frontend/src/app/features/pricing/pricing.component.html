@@ -1,5 +1,41 @@
 <section>
-  <h1>Optimizador de precios</h1>
-  <p>Slice 3 — implementación pendiente por <strong>&#64;Monzon1983</strong>.</p>
-  <p>Encontrá el precio que maximiza revenue y profit a partir de tus datos de negocio.</p>
+  <h1>Optimizador de Precios</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    
+    <div class="campo">
+      <label for="coefA">Coeficiente A (Parábola):</label>
+      <input type="number" id="coefA" formControlName="coeficienteA" placeholder="Ej: -2">
+    </div>
+
+    <div class="campo">
+      <label for="coefB">Coeficiente B (Demanda):</label>
+      <input type="number" id="coefB" formControlName="coeficienteB" placeholder="Ej: 120">
+    </div>
+
+    <div class="campo">
+      <label for="coefC">Coeficiente C (Costos fijos):</label>
+      <input type="number" id="coefC" formControlName="coeficienteC" placeholder="Ej: -1000">
+    </div>
+
+    <div class="campo">
+      <label for="pMin">Precio Mínimo:</label>
+      <input type="number" id="pMin" formControlName="precioMinimo" placeholder="Ej: 10">
+    </div>
+
+    <div class="campo">
+      <label for="pMax">Precio Máximo:</label>
+      <input type="number" id="pMax" formControlName="precioMaximo" placeholder="Ej: 100">
+    </div>
+
+    <button type="submit" [disabled]="form.invalid">Calcular Precio Óptimo</button>
+
+  </form>
+
+  <div *ngIf="resultado" class="resultado">
+    <h3>Resultados de la Optimización:</h3>
+    <p>Precio Óptimo de Venta: <strong>${{ resultado.precioOptimo }}</strong></p>
+    <p>Ganancia Máxima Estimada: <strong>${{ resultado.gananciaMaxima }}</strong></p>
+    <p>Estrategia Sugerida: <span>{{ resultado.estrategiaSugerida }}</span></p>
+  </div>
 </section>
