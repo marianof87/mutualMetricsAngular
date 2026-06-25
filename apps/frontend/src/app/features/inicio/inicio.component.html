@@ -1,5 +1,68 @@
-<section>
-  <h1>Inicio</h1>
-  <p>Sección <strong>Inicio</strong> pendiente de implementación.</p>
-  <p>Presentación general del sitio, imagen destacada, navegación clara.</p>
+<section class="hero">
+  <div class="hero-content">
+    <h1>MutualMetrics</h1>
+
+    <p class="hero-text">
+      Plataforma web para resolver funciones cuadráticas, optimizar precios y
+      analizar escenarios de negocio de manera simple e intuitiva.
+    </p>
+
+    <div class="hero-actions">
+      <a routerLink="/servicios" class="btn-primary">
+        Explorar servicios
+      </a>
+
+       <a routerLink="/registrar" class="btn-secondary">
+       Crear cuenta
+       </a>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>¿Qué podés hacer con MutualMetrics?</h2>
+
+  <div class="cards">
+    <article class="card">
+      <h3>Calculadora Cuadrática</h3>
+      <p>
+        Resolvé ecuaciones cuadráticas obteniendo discriminante, raíces y
+        vértice.
+      </p>
+
+      <a routerLink="/cuadratica" class="card-link">Ir a la calculadora</a>
+
+    </article>
+
+    <article class="card">
+      <h3>Optimizador de Precios</h3>
+      <p>
+        Analizá estrategias de precios e identificá puntos óptimos de ganancia.
+      </p>
+
+      <a routerLink="/pricing" class="card-link">Ir al optimizador</a>
+
+    </article>
+
+    <article class="card">
+      <h3>Historial</h3>
+      <p>
+        Consultá cálculos realizados previamente y compará distintos escenarios.
+      </p>
+
+      <a routerLink="/historial" class="card-link">Ver historial</a>
+
+    </article>
+  </div>
+</section>
+
+<section class="about">
+  <h2>Tecnologías utilizadas</h2>
+
+  <div class="tech-list">
+    <span>Angular</span>
+    <span>NestJS</span>
+    <span>Prisma</span>
+    <span>SQLite</span>
+  </div>
 </section>

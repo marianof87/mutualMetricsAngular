@@ -1,6 +1,7 @@
 # Feature: Inicio (Slice 5)
 
-**Dueño:** @Ange1809
+**Responsable Frontend:** @TizianaOchoa
+**Responsable del Slice:** @Ange1809
 **Ruta:** `/`
 **Backend:** sin endpoint propio (contenido estático o leído desde `sobre-nosotros`/`novedades`).
 
@@ -10,8 +11,8 @@ Presentación general del sitio, resumen de qué es MutualMetrics, imagen destac
 
 ## Estado
 
-- [ ] Hero con propuesta de valor de MutualMetrics
-- [ ] Cards que explican las 2 calculadoras y linkean a cada una
-- [ ] Mención de funcionalidades (guardar escenarios, historial)
-- [ ] Responsive
+- [x] Hero con propuesta de valor de MutualMetrics
+- [x] Cards que explican las 2 calculadoras y linkean a cada una
+- [x] Mención de funcionalidades (guardar escenarios, historial)
+- [x] Responsive
 - [ ] Test mínimo de render
