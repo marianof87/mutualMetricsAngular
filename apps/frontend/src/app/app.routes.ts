@@ -55,6 +55,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/pricing/pricing.component').then((m) => m.PricingComponent),
   },
+  {
     path: 'optimizador',
     loadComponent: () =>
       import('./features/optimizador/optimizador.component').then((m) => m.OptimizadorComponent),
