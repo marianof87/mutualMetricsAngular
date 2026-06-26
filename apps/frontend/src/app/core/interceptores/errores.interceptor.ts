@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { CodigoError, type EnvelopeError } from '@mutual-metrics/shared';
 import { SesionService } from '../servicios/sesion.service';
+import { OMITIR_REDIRECCION_SESION } from './contexto-http';
 
 // Códigos que significan "tu sesión ya no sirve": limpiamos sesión y mandamos a /login.
 // Ojo: AUTH_CREDENCIALES_INVALIDAS NO entra acá (es un login fallido, no una sesión expirada).
@@ -19,7 +20,8 @@ export const erroresInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: unknown) => {
       const envelope = aEnvelope(err);
-      if (CODIGOS_SESION_INVALIDA.includes(envelope.error.code)) {
+      const omitirRedireccion = req.context.get(OMITIR_REDIRECCION_SESION);
+      if (CODIGOS_SESION_INVALIDA.includes(envelope.error.code) && !omitirRedireccion) {
         sesion.cerrarSesion();
         void router.navigate(['/login']);
       }

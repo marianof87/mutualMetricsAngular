@@ -65,3 +65,49 @@ describe('SesionService', () => {
     expect(localStorage.getItem('mm_sesion')).toBeNull();
   });
 });
+
+describe('SesionService — revalidación al iniciar', () => {
+  function montar() {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+    return { servicio, http };
+  }
+
+  it('verifica el token guardado contra GET /usuarios/yo y refresca el usuario', () => {
+    localStorage.setItem(
+      'mm_sesion',
+      JSON.stringify({ accessToken: 'token.jwt', usuario: sesionFalsa.usuario }),
+    );
+
+    const { servicio, http } = montar();
+    const req = http.expectOne(`${entorno.apiBaseUrl}/usuarios/yo`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ id: 'u1', email: 'ana@example.com', nombre: 'Ana Actualizada' });
+
+    expect(servicio.usuarioActual()?.nombre).toBe('Ana Actualizada');
+    http.verify();
+    localStorage.clear();
+  });
+
+  it('limpia la sesión si el backend rechaza el token guardado', () => {
+    localStorage.setItem(
+      'mm_sesion',
+      JSON.stringify({ accessToken: 'token.vencido', usuario: sesionFalsa.usuario }),
+    );
+
+    const { servicio, http } = montar();
+    http
+      .expectOne(`${entorno.apiBaseUrl}/usuarios/yo`)
+      .flush(
+        { error: { code: 'AUTH_TOKEN_EXPIRADO', message: 'Token expirado' } },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+
+    expect(servicio.autenticado()).toBe(false);
+    expect(localStorage.getItem('mm_sesion')).toBeNull();
+    http.verify();
+  });
+});
