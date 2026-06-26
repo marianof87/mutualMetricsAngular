@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { CodigoError, type EnvelopeError } from '@mutual-metrics/shared';
 import type {
   LoginRequest,
   RegistrarRequest,
@@ -11,6 +12,13 @@ import { entorno } from '../configuracion/entorno';
 import { OMITIR_REDIRECCION_SESION } from '../interceptores/contexto-http';
 
 const CLAVE_ALMACEN = 'mm_sesion';
+
+// Solo estos códigos significan "tu token ya no sirve" → limpiar sesión.
+// Un error transitorio (red caída, 500) NO debe desloguear al usuario.
+const CODIGOS_TOKEN_RECHAZADO: string[] = [
+  CodigoError.AUTH_TOKEN_EXPIRADO,
+  CodigoError.AUTH_TOKEN_INVALIDO,
+];
 
 interface SesionAlmacenada {
   accessToken: string;
@@ -30,7 +38,6 @@ export class SesionService {
 
   constructor() {
     this.hidratar();
-    this.revalidar();
   }
 
   registrar(dto: RegistrarRequest): Observable<SesionResponse> {
@@ -65,12 +72,16 @@ export class SesionService {
     this.almacen?.setItem(CLAVE_ALMACEN, JSON.stringify(datos));
   }
 
-  // Al iniciar la app, si hay un token guardado lo verificamos contra el
-  // backend (GET /usuarios/yo). Si sigue válido refrescamos los datos del
-  // usuario; si el backend lo rechaza, limpiamos la sesión obsoleta.
-  // Se marca con OMITIR_REDIRECCION_SESION para no expulsar al usuario de
-  // la página pública en la que esté parado.
-  private revalidar(): void {
+  // Verifica el token guardado contra el backend (GET /usuarios/yo) y
+  // refresca los datos del usuario. Si el backend rechaza el token, limpia
+  // la sesión obsoleta; ante un error transitorio, conserva la sesión.
+  //
+  // IMPORTANTE: se invoca desde provideAppInitializer (app.config.ts), NO
+  // desde el constructor. Llamarlo en el constructor dispara la request
+  // mientras el servicio aún se construye, y como los interceptores HTTP
+  // inyectan SesionService, se produce una dependencia circular que termina
+  // cerrando la sesión en cada refresh.
+  revalidar(): void {
     if (!this.token) return;
     this.http
       .get<Usuario>(`${entorno.apiBaseUrl}/usuarios/yo`, {
@@ -78,7 +89,11 @@ export class SesionService {
       })
       .subscribe({
         next: (usuario) => this._usuario.set(usuario),
-        error: () => this.cerrarSesion(),
+        error: (envelope: EnvelopeError) => {
+          if (CODIGOS_TOKEN_RECHAZADO.includes(envelope?.error?.code)) {
+            this.cerrarSesion();
+          }
+        },
       });
   }
 
