@@ -6,7 +6,7 @@ info:
     Organizada en 5 slices verticales. Cada slice lo posee un integrante
     distinto (ver GUIA.md §1).
     Todas las respuestas de error siguen el esquema `ErrorEnvelope`.
-  version: 0.2.0
+  version: 0.3.0
 servers:
   - url: /api/v1
 
@@ -25,6 +25,8 @@ tags:
     description: Slice 5 — Contenido Público (@Ange1809)
   - name: contacto
     description: Slice 5 — Contacto (@Ange1809)
+  - name: finanzas
+    description: Extra — Calculadora Financiera (interés simple/compuesto, ROI, VAN, TIR)
 
 paths:
   # ================ Slice 1 — Auth & Usuarios ================
@@ -260,6 +262,112 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
+  # ================ Extra — Calculadora Financiera ================
+  /finanzas/interes-simple:
+    post:
+      tags: [finanzas]
+      summary: Calcula el interés simple y el monto total
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InteresSimpleRequest" }
+      responses:
+        "201":
+          description: Interés simple calculado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InteresSimpleResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /finanzas/interes-compuesto:
+    post:
+      tags: [finanzas]
+      summary: Calcula el interés compuesto y el monto total
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InteresCompuestoRequest" }
+      responses:
+        "201":
+          description: Interés compuesto calculado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InteresCompuestoResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /finanzas/roi:
+    post:
+      tags: [finanzas]
+      summary: Calcula el retorno sobre la inversión (ROI)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ROIRequest" }
+      responses:
+        "201":
+          description: ROI calculado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ROIResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /finanzas/van:
+    post:
+      tags: [finanzas]
+      summary: Calcula el Valor Actual Neto (VAN/NPV)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VANRequest" }
+      responses:
+        "201":
+          description: VAN calculado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VANResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /finanzas/tir:
+    post:
+      tags: [finanzas]
+      summary: Calcula la Tasa Interna de Retorno (TIR/IRR)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TIRRequest" }
+      responses:
+        "201":
+          description: TIR calculada
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TIRResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -392,6 +500,86 @@ components:
       properties:
         id: { type: string, format: uuid }
         recibidoEn: { type: string, format: date-time }
+
+    InteresSimpleRequest:
+      type: object
+      required: [principal, tasa, tiempo]
+      properties:
+        principal: { type: number, minimum: 0, description: Capital inicial }
+        tasa: { type: number, minimum: 0, description: Tasa de interés (por período) }
+        tiempo: { type: number, minimum: 0, description: Cantidad de períodos }
+
+    InteresSimpleResponse:
+      type: object
+      required: [interes, total]
+      properties:
+        interes: { type: number }
+        total: { type: number }
+
+    InteresCompuestoRequest:
+      type: object
+      required: [principal, tasa, tiempo]
+      properties:
+        principal: { type: number, minimum: 0 }
+        tasa: { type: number, minimum: 0 }
+        tiempo: { type: number, minimum: 0 }
+        frecuencia:
+          type: number
+          minimum: 1
+          default: 1
+          description: Capitalizaciones por período (1 = anual)
+
+    InteresCompuestoResponse:
+      type: object
+      required: [interes, total]
+      properties:
+        interes: { type: number }
+        total: { type: number }
+
+    ROIRequest:
+      type: object
+      required: [inversion, beneficio]
+      properties:
+        inversion: { type: number, minimum: 1, description: Monto invertido (mayor a 0) }
+        beneficio: { type: number, description: Beneficio obtenido }
+
+    ROIResponse:
+      type: object
+      required: [roi]
+      properties:
+        roi: { type: number, description: Retorno sobre la inversión (proporción) }
+
+    VANRequest:
+      type: object
+      required: [tasa, inversionInicial, flujos]
+      properties:
+        tasa: { type: number, minimum: 0, description: Tasa de descuento }
+        inversionInicial: { type: number, description: Usualmente negativo }
+        flujos:
+          type: array
+          items: { type: number }
+          description: Flujos de fondos por período
+
+    VANResponse:
+      type: object
+      required: [van]
+      properties:
+        van: { type: number, description: Valor Actual Neto }
+
+    TIRRequest:
+      type: object
+      required: [inversionInicial, flujos]
+      properties:
+        inversionInicial: { type: number }
+        flujos:
+          type: array
+          items: { type: number }
+
+    TIRResponse:
+      type: object
+      required: [tir]
+      properties:
+        tir: { type: number, description: Tasa Interna de Retorno }
 
     ErrorEnvelope:
       type: object

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { RegistrarRequestSchema, type EnvelopeError } from '@mutual-metrics/shared';
@@ -10,6 +10,7 @@ import { SesionService } from '../../../core/servicios/sesion.service';
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './registrar.component.html',
   styleUrl: './registrar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegistrarComponent {
   private readonly fb = inject(FormBuilder);
