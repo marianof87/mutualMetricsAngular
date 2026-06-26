@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import type {
   LoginRequest,
@@ -8,6 +8,7 @@ import type {
   Usuario,
 } from '@mutual-metrics/shared';
 import { entorno } from '../configuracion/entorno';
+import { OMITIR_REDIRECCION_SESION } from '../interceptores/contexto-http';
 
 const CLAVE_ALMACEN = 'mm_sesion';
 
@@ -29,6 +30,7 @@ export class SesionService {
 
   constructor() {
     this.hidratar();
+    this.revalidar();
   }
 
   registrar(dto: RegistrarRequest): Observable<SesionResponse> {
@@ -61,6 +63,23 @@ export class SesionService {
       usuario: sesion.usuario,
     };
     this.almacen?.setItem(CLAVE_ALMACEN, JSON.stringify(datos));
+  }
+
+  // Al iniciar la app, si hay un token guardado lo verificamos contra el
+  // backend (GET /usuarios/yo). Si sigue válido refrescamos los datos del
+  // usuario; si el backend lo rechaza, limpiamos la sesión obsoleta.
+  // Se marca con OMITIR_REDIRECCION_SESION para no expulsar al usuario de
+  // la página pública en la que esté parado.
+  private revalidar(): void {
+    if (!this.token) return;
+    this.http
+      .get<Usuario>(`${entorno.apiBaseUrl}/usuarios/yo`, {
+        context: new HttpContext().set(OMITIR_REDIRECCION_SESION, true),
+      })
+      .subscribe({
+        next: (usuario) => this._usuario.set(usuario),
+        error: () => this.cerrarSesion(),
+      });
   }
 
   private hidratar(): void {
