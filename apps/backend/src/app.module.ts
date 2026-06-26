@@ -8,6 +8,7 @@ import { PricingModule } from './modules/pricing/pricing.module';
 import { EscenariosModule } from './modules/escenarios/escenarios.module';
 import { NovedadesModule } from './modules/novedades/novedades.module';
 import { ContactoModule } from './modules/contacto/contacto.module';
+import { FinanzasModule } from './modules/finanzas/finanzas.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ContactoModule } from './modules/contacto/contacto.module';
     EscenariosModule,
     NovedadesModule,
     ContactoModule,
+    FinanzasModule,
   ],
 })
 export class AppModule {}

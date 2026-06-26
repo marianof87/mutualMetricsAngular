@@ -55,6 +55,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/pricing/pricing.component').then((m) => m.PricingComponent),
   },
+  {
+    path: 'financiera',
+    loadComponent: () =>
+      import('./features/financiera/financiera.component').then((m) => m.FinancieraComponent),
+  },
 
   // Historial — Slice 4 (@Franco1212)
   {
