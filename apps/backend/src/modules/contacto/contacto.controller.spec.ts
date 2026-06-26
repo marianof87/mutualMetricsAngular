@@ -14,13 +14,15 @@ describe('ContactoController', () => {
     controller = moduleRef.get<ContactoController>(ContactoController);
   });
 
-  it('registra un contacto válido y devuelve id + recibidoEn', () => {
+  it('debería enviar el contacto correctamente', async () => {
     const dto = {
       nombre: 'Juan Pérez',
       email: 'juan@example.com',
       mensaje: 'Quisiera más información sobre el sistema, gracias.',
     };
-    const resultado = controller.enviar(dto);
+    
+    const resultado = await controller.enviar(dto); 
+  
     expect(resultado.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(new Date(resultado.recibidoEn).toString()).not.toBe('Invalid Date');
   });
