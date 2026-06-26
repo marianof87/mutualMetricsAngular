@@ -1,0 +1,138 @@
+<section class="financiera-container">
+  <div class="header-section">
+    <h1 class="financiera-title">Calculadora Financiera</h1>
+    <p class="financiera-subtitle">Herramientas esenciales para el análisis de inversiones y rentabilidad.</p>
+  </div>
+
+  <div class="tabs-navigation">
+    <button [class.active]="tipoActivo() === 'interes-simple'" (click)="setTipo('interes-simple')">Interés Simple</button>
+    <button [class.active]="tipoActivo() === 'interes-compuesto'" (click)="setTipo('interes-compuesto')">Interés Compuesto</button>
+    <button [class.active]="tipoActivo() === 'roi'" (click)="setTipo('roi')">ROI</button>
+    <button [class.active]="tipoActivo() === 'van-tir'" (click)="setTipo('van-tir')">VAN & TIR</button>
+  </div>
+
+  <div class="calculator-content">
+    
+    <!-- Interés Simple -->
+    <div class="input-panel card-panel" *ngIf="tipoActivo() === 'interes-simple'">
+      <h2>Configuración</h2>
+      <div class="form-group">
+        <label>Capital Inicial ($):</label>
+        <input type="number" [ngModel]="isPrincipal()" (ngModelChange)="isPrincipal.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Tasa Anual (%):</label>
+        <input type="number" [ngModel]="isTasa()" (ngModelChange)="isTasa.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Tiempo (Años):</label>
+        <input type="number" [ngModel]="isTiempo()" (ngModelChange)="isTiempo.set($event)" />
+      </div>
+
+      <div class="results-section">
+        <h3>Resultados</h3>
+        <div class="result-item">
+          <span>Interés Ganado:</span>
+          <strong>{{ isResultado().interes | currency:'USD' }}</strong>
+        </div>
+        <div class="result-item">
+          <span>Monto Total:</span>
+          <strong>{{ isResultado().total | currency:'USD' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interés Compuesto -->
+    <div class="input-panel card-panel" *ngIf="tipoActivo() === 'interes-compuesto'">
+      <h2>Configuración</h2>
+      <div class="form-group">
+        <label>Capital Inicial ($):</label>
+        <input type="number" [ngModel]="icPrincipal()" (ngModelChange)="icPrincipal.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Tasa Anual (%):</label>
+        <input type="number" [ngModel]="icTasa()" (ngModelChange)="icTasa.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Tiempo (Años):</label>
+        <input type="number" [ngModel]="icTiempo()" (ngModelChange)="icTiempo.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Frecuencia (Meses al año):</label>
+        <select [ngModel]="icFrecuencia()" (ngModelChange)="icFrecuencia.set($event)">
+          <option [value]="1">Anual</option>
+          <option [value]="2">Semestral</option>
+          <option [value]="4">Trimestral</option>
+          <option [value]="12">Mensual</option>
+          <option [value]="365">Diaria</option>
+        </select>
+      </div>
+
+      <div class="results-section">
+        <h3>Resultados</h3>
+        <div class="result-item">
+          <span>Interés Acumulado:</span>
+          <strong>{{ icResultado().interes | currency:'USD' }}</strong>
+        </div>
+        <div class="result-item">
+          <span>Monto Final:</span>
+          <strong>{{ icResultado().total | currency:'USD' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROI -->
+    <div class="input-panel card-panel" *ngIf="tipoActivo() === 'roi'">
+      <h2>Análisis de Retorno</h2>
+      <div class="form-group">
+        <label>Monto Invertido ($):</label>
+        <input type="number" [ngModel]="roiInversion()" (ngModelChange)="roiInversion.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Beneficio Total ($):</label>
+        <input type="number" [ngModel]="roiBeneficio()" (ngModelChange)="roiBeneficio.set($event)" />
+      </div>
+
+      <div class="results-section">
+        <h3>Resultados</h3>
+        <div class="result-item">
+          <span>ROI:</span>
+          <strong [class.success-text]="roiResultado() > 0" [class.error-text]="roiResultado() < 0">
+            {{ roiResultado() | number:'1.2-2' }}%
+          </strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- VAN & TIR -->
+    <div class="input-panel card-panel" *ngIf="tipoActivo() === 'van-tir'">
+      <h2>Flujos de Caja</h2>
+      <div class="form-group">
+        <label>Tasa de Descuento (%):</label>
+        <input type="number" [ngModel]="vtTasa()" (ngModelChange)="vtTasa.set($event)" />
+      </div>
+      <div class="form-group">
+        <label>Inversión Inicial ($):</label>
+        <input type="number" [ngModel]="vtInversion()" (ngModelChange)="vtInversion.set($event)" />
+        <small>Ingresar como valor negativo</small>
+      </div>
+      <div class="form-group">
+        <label>Flujos (separados por coma):</label>
+        <input type="text" [ngModel]="vtFlujosStr()" (ngModelChange)="vtFlujosStr.set($event)" placeholder="Ej: 500, 700, 300" />
+      </div>
+
+      <div class="results-section">
+        <h3>Resultados</h3>
+        <div class="result-item">
+          <span>VAN (NPV):</span>
+          <strong>{{ vtVan() | currency:'USD' }}</strong>
+        </div>
+        <div class="result-item">
+          <span>TIR (IRR):</span>
+          <strong>{{ vtTir() * 100 | number:'1.2-2' }}%</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
