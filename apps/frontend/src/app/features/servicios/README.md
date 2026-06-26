@@ -1,6 +1,7 @@
 # Feature: Servicios (Slice 5)
 
-**Dueño:** @Ange1809
+**Responsable Frontend:** @TizianaOchoa
+**Responsable del Slice:** @Ange1809
 **Ruta:** `/servicios`
 **Backend:** sin endpoint propio.
 
@@ -14,7 +15,7 @@ NO implementa los calculadores acá — esta página es la vitrina.
 
 ## Estado
 
-- [ ] Card para Cuadrática con descripción + CTA a `/cuadratica`
-- [ ] Card para Pricing con descripción + CTA a `/pricing`
-- [ ] Responsive
+- [x] Card para Cuadrática con descripción + CTA a `/cuadratica`
+- [x] Card para Pricing con descripción + CTA a `/pricing`
+- [x] Responsive
 - [ ] Test mínimo de render
