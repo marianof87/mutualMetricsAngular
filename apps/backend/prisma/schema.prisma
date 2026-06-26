@@ -9,7 +9,7 @@
 // Modelos pendientes por slice:
 //   Slice 1 (Auth/Usuarios):  Usuario
 //   Slice 4 (Historial):      Escenario (FK a Usuario)
-//   Slice 5 (Novedades):      Novedad
+//   Slice 5 (Novedades):      Novedad, Contacto
 
 generator client {
   provider = "prisma-client-js"
@@ -21,9 +21,16 @@ datasource db {
 }
 
 // ------------------------------------------------------------------
-// Modelo de ejemplo (sección Contacto).
-// Los otros dueños pueden eliminar esto y empezar con sus propios modelos.
+// Slice 5 (Novedades & Contacto)
 // ------------------------------------------------------------------
+
+model Novedad {
+  id           String   @id @default(uuid())
+  titulo       String
+  contenido    String
+  imagenUrl    String?
+  fechaCreacion DateTime @default(now())
+}
 
 model Contacto {
   id         String   @id @default(uuid())

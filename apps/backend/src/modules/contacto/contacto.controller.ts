@@ -13,9 +13,9 @@ export class ContactoController {
 
   @Post()
   @HttpCode(201)
-  enviar(
+  async enviar(
     @Body(new ZodValidationPipe(ContactoRequestSchema)) dto: ContactoRequest,
-  ): ContactoResponse {
-    return this.servicio.registrar(dto);
+  ): Promise<ContactoResponse> {
+    return await this.servicio.registrar(dto);
   }
 }
