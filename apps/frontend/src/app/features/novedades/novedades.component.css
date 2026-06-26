@@ -1,3 +1,82 @@
-section {
-  padding-block: var(--mm-space-6);
+.novedades-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.hero h1 {
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.hero p {
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.novedades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.novedad-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.novedad-card h2 {
+  margin: 0.75rem 0;
+}
+
+.novedad-card p {
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.fecha {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.novedad-card button {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.galeria h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.galeria-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.galeria-grid img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+  .novedades-page {
+    padding: 1rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+  }
 }

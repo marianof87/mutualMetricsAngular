@@ -1,12 +1,13 @@
 # Feature: Novedades y Galería (Slice 5)
 
-**Dueño:** @Ange1809
+**Responsable Frontend:** @TizianaOchoa
+**Responsable del Slice:** @Ange1809
 **Ruta:** `/novedades`
 **Backend:** `apps/backend/src/modules/novedades/`
 
 ## Alcance (consigna del profesor)
 
-Publicaciones, noticias, actualizaciones del proyecto. Galería de imágenes embebida (URLs externas).
+Publicaciones, noticias, actualizaciones del proyecto. Galería de imágenes embebida (Imagenes del desarrollo del proyecto).
 
 ## Estado
 
@@ -15,5 +16,5 @@ Publicaciones, noticias, actualizaciones del proyecto. Galería de imágenes emb
 - [ ] Schema `Novedad` en `packages/shared/src/dtos/novedades.ts`
 - [ ] Modelo `Novedad` en Prisma + migración
 - [ ] Endpoints backend (CRUD o sólo GET si es read-only) + tests
-- [ ] Responsive
+- [x] Responsive
 - [ ] Test mínimo de render
