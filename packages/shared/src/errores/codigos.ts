@@ -34,6 +34,10 @@ export const CodigoError = {
   // Slice 5 — Contacto & Novedades (@Ange1809)
   CONTACTO_EMAIL_INVALIDO: 'CONTACTO_EMAIL_INVALIDO',
   CONTACTO_MENSAJE_VACIO: 'CONTACTO_MENSAJE_VACIO',
+
+  // Lead Magnet — captación de leads (gated content)
+  LEAD_EMAIL_INVALIDO: 'LEAD_EMAIL_INVALIDO',
+  LEAD_WHATSAPP_INVALIDO: 'LEAD_WHATSAPP_INVALIDO',
 } as const;
 
 export type CodigoError = (typeof CodigoError)[keyof typeof CodigoError];

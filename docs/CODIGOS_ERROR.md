@@ -60,6 +60,13 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 | `CONTACTO_MENSAJE_VACIO` | 422 | Mensaje vacío o muy corto. |
 | (Novedades — pendiente) | — | — |
 
+### Lead Magnet — captación de leads (gated content)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| `LEAD_EMAIL_INVALIDO` | 422 | Email laboral con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
+| `LEAD_WHATSAPP_INVALIDO` | 422 | WhatsApp con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
+
 ## Cómo agregar un código nuevo
 
 1. Agregar la constante a `packages/shared/src/errores/codigos.ts`.

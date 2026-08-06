@@ -4,3 +4,4 @@ export * from './contacto';
 export * from './novedades';
 export * from './precio';
 export * from './finanzas';
+export * from './lead';
