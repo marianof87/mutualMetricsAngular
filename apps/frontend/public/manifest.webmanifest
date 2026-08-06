@@ -1,0 +1,20 @@
+{
+  "name": "Sinaptek — Simulador de precios",
+  "short_name": "Sinaptek",
+  "description": "Descubrí el precio óptimo de tu producto y descargá un informe personalizado en PDF.",
+  "start_url": "/lead-magnet",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f111a",
+  "theme_color": "#3a7bd5",
+  "orientation": "portrait-primary",
+  "lang": "es-AR",
+  "icons": [
+    {
+      "src": "icons/icono-sinaptek.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
