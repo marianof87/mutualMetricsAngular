@@ -25,6 +25,8 @@ tags:
     description: Slice 5 — Contenido Público (@Ange1809)
   - name: contacto
     description: Slice 5 — Contacto (@Ange1809)
+  - name: leads
+    description: Lead Magnet — captación de leads del informe gated en PDF
 
 paths:
   # ================ Slice 1 — Auth & Usuarios ================
@@ -260,6 +262,35 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
+# ================ Lead Magnet — Leads ================
+  /leads:
+    post:
+      tags: [leads]
+      summary: Registra un lead del informe gated (formulario de descarga de PDF)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LeadRequest" }
+            examples:
+              valido:
+                value:
+                  nombre: "Ana Pérez"
+                  empresa: "Textil Sur"
+                  whatsapp: "+54 9 351 555-1234"
+                  email: "ana.perez@empresa.com"
+      responses:
+        "201":
+          description: Lead registrado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LeadResponse" }
+        "422":
+          description: Error de validación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
 components:
   securitySchemes:
     bearerAuth:
@@ -387,6 +418,22 @@ components:
         mensaje: { type: string, minLength: 10, maxLength: 2000 }
 
     ContactoResponse:
+      type: object
+      required: [id, recibidoEn]
+      properties:
+        id: { type: string, format: uuid }
+        recibidoEn: { type: string, format: date-time }
+
+    LeadRequest:
+      type: object
+      required: [nombre, empresa, whatsapp, email]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 120 }
+        empresa: { type: string, minLength: 1, maxLength: 120 }
+        whatsapp: { type: string, minLength: 6, maxLength: 20 }
+        email: { type: string, format: email }
+
+    LeadResponse:
       type: object
       required: [id, recibidoEn]
       properties:

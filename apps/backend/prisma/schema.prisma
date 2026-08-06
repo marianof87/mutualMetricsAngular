@@ -39,6 +39,16 @@ model Contacto {
   mensaje    String
   recibidoEn DateTime @default(now())
 }
+
+// Lead Magnet — leads capturados por el informe gated (descarga de PDF).
+model Lead {
+  id         String   @id @default(uuid())
+  nombre     String
+  empresa    String
+  whatsapp   String
+  email      String
+  recibidoEn DateTime @default(now())
+}
 model Optimizacion {
   id                 String   @id @default(uuid())
   coeficienteA       Float
