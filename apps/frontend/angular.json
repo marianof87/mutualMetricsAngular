@@ -25,6 +25,8 @@
                 "input": "public"
               }
             ],
+            "allowedCommonJsDependencies": ["pako"],
+            "serviceWorker": "ngsw-config.json",
             "styles": ["src/styles.css"]
           },
           "configurations": {

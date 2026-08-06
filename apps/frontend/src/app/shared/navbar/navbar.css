@@ -49,6 +49,31 @@
   border-radius: 2px;
 }
 
+.nav-link.nav-cta {
+  padding: var(--mm-space-1) var(--mm-space-4);
+  border-radius: var(--mm-radius-pill);
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+}
+
+.nav-link.nav-cta:hover {
+  background: var(--mm-color-primario-hover);
+  color: var(--mm-color-texto);
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: var(--mm-space-3);
+    border-radius: var(--mm-radius-lg);
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    gap: var(--mm-space-3);
+  }
+}
+
 .nav-auth {
   display: flex;
   align-items: center;
