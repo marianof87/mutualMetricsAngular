@@ -3,12 +3,6 @@
  * No definir estilos de componente acá. Sólo lo que aplica a elementos HTML puros.
  */
 
-@font-face {
-  font-family: 'MetrixBrand';
-  src: url('/fuentes/metrix-IA.ttf') format('truetype');
-  font-display: swap;
-}
-
 *,
 *::before,
 *::after {

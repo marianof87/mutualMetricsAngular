@@ -11,10 +11,11 @@ section {
   margin: 0 auto;
 }
 
-.hero h1 {
-  font-family: var(--mm-font-marca);
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.hero h1 img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .hero-text {
