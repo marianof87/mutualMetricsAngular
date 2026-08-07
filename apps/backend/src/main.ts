@@ -16,7 +16,7 @@ async function bootstrap() {
 
   const puerto = Number(process.env.PORT ?? 3000);
   await app.listen(puerto);
-  console.log(`Backend MutualMetrics escuchando en http://localhost:${puerto}/api/v1`);
+  console.log(`Backend Metrix IA escuchando en http://localhost:${puerto}/api/v1`);
 }
 
 bootstrap();

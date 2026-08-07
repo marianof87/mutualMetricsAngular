@@ -66,7 +66,7 @@ export class InformePdfService {
       height: 110,
       color: AZUL_PRIMARIO,
     });
-    this.pagina.drawText('Sinaptek', { x: 48, y: this.y - 44, size: 28, font: this.fuenteNegrita, color: BLANCO });
+    this.pagina.drawText('Metrix IA', { x: 48, y: this.y - 44, size: 28, font: this.fuenteNegrita, color: BLANCO });
 
     const subtitulo = 'Informe personalizado de precios';
     const anchoSubtitulo = this.medir(subtitulo, 11);
@@ -89,7 +89,7 @@ export class InformePdfService {
       color: TEXTO_OSCURO,
     });
     this.y -= 24;
-    this.pagina.drawText('Simulación personalizada generada con la herramienta de Sinaptek.', {
+    this.pagina.drawText('Simulación personalizada generada con la herramienta de Metrix IA.', {
       x: 48,
       y: this.y,
       size: 11,
@@ -178,7 +178,7 @@ export class InformePdfService {
     });
     this.y -= 54;
     this.y = this.dibujarTexto(
-      'Agendá un diagnóstico gratuito de 30 minutos con un especialista de Sinaptek.',
+      'Agendá un diagnóstico gratuito de 30 minutos con un especialista de Metrix IA.',
       72,
       this.y,
       11,

@@ -2,7 +2,7 @@
   "name": "mutual-metrics",
   "version": "0.1.0",
   "private": true,
-  "description": "MutualMetrics — proyecto académico Angular + NestJS (monorepo).",
+  "description": "Metrix IA — proyecto académico Angular + NestJS (monorepo).",
   "workspaces": [
     "apps/*",
     "packages/*"

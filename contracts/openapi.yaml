@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: MutualMetrics API
+  title: Metrix IA API
   description: |
-    API REST del proyecto MutualMetrics (NestJS).
+    API REST del proyecto Metrix IA (NestJS).
     Organizada en 5 slices verticales. Cada slice lo posee un integrante
     distinto (ver GUIA.md §1).
     Todas las respuestas de error siguen el esquema `ErrorEnvelope`.

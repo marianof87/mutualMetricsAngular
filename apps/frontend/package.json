@@ -2,7 +2,7 @@
   "name": "@mutual-metrics/frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Frontend Angular (SPA) de MutualMetrics.",
+  "description": "Frontend Angular (SPA) de Metrix IA.",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

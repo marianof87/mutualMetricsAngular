@@ -12,6 +12,7 @@ section {
 }
 
 .hero h1 {
+  font-family: var(--mm-font-marca);
   font-size: 3rem;
   margin-bottom: 1rem;
 }

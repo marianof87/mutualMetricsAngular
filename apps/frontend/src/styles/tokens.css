@@ -1,5 +1,5 @@
 /*
- * Design tokens — Sinaptek
+ * Design tokens — Metrix IA
  *
  * Toda variable reutilizable del diseño vive acá.
  * Regla: los componentes NO definen colores, espaciados o tipografías
@@ -66,6 +66,7 @@
   /* ===== Tipografía ===== */
   --mm-font-sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --mm-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mm-font-marca: 'MetrixBrand', var(--mm-font-sans);
 
   --mm-font-size-xs: 0.75rem;
   --mm-font-size-sm: 0.875rem;

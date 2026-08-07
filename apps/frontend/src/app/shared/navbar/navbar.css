@@ -10,10 +10,19 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: var(--mm-space-2);
   font-size: var(--mm-font-size-lg);
   font-weight: var(--mm-font-weight-bold);
   text-decoration: none;
   color: var(--mm-color-texto);
+}
+
+.logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
 .nav-links {

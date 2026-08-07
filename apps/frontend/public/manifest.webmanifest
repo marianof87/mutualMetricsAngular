@@ -1,6 +1,6 @@
 {
-  "name": "Sinaptek — Simulador de precios",
-  "short_name": "Sinaptek",
+  "name": "Metrix IA — Simulador de precios",
+  "short_name": "Metrix IA",
   "description": "Descubrí el precio óptimo de tu producto y descargá un informe personalizado en PDF.",
   "start_url": "/lead-magnet",
   "scope": "/",
@@ -11,9 +11,9 @@
   "lang": "es-AR",
   "icons": [
     {
-      "src": "icons/icono-sinaptek.svg",
+      "src": "icons/logo-metrix.png",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     }
   ]
