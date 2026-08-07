@@ -21,6 +21,10 @@
   --mm-color-borde: rgba(255, 255, 255, 0.1);
   --mm-color-borde-vidrio: rgba(255, 255, 255, 0.08);
 
+  /* ===== Cuadrícula de fondo (estilo hoja de cálculo) ===== */
+  --mm-color-cuadricula: rgba(255, 255, 255, 0.07);
+  --mm-size-grid-celda: 64px;
+
   /* ===== Color: texto ===== */
   --mm-color-texto: #f8f9fa;
   --mm-color-texto-tenue: #a0a5b8;
