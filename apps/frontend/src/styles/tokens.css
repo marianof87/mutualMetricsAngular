@@ -12,7 +12,7 @@
 
 :root {
   /* ===== Color: superficie ===== */
-  --mm-color-fondo: #0f111a;
+  --mm-color-fondo: #1a1a1a;
   --mm-color-superficie: #1a1d2d;
   --mm-color-superficie-elevada: #242942;
   --mm-color-vidrio: rgba(26, 29, 45, 0.6);
