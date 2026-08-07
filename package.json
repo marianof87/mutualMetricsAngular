@@ -9,6 +9,7 @@
   ],
   "packageManager": "npm@11.12.1",
   "scripts": {
+    "postinstall": "npm run prisma:generate",
     "dev": "npm-run-all --sequential build:shared dev:all",
     "dev:all": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "npm --workspace @mutual-metrics/frontend run start",
