@@ -3,12 +3,6 @@
  * No definir estilos de componente acá. Sólo lo que aplica a elementos HTML puros.
  */
 
-@font-face {
-  font-family: 'Pixelion';
-  src: url('/fuentes/pixelion.otf') format('opentype');
-  font-display: swap;
-}
-
 *,
 *::before,
 *::after {
