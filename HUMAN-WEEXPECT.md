@@ -1,8 +1,8 @@
 # HUMAN-WEEXPECT — Metrix AI
 
-> **BORRADOR PARA COMPLETAR Y FIRMAR — Mariano Capella.**
-> Este archivo todavía **no** es el dossier definitivo. Cuando esté completo y firmado se deposita como
-> `HUMAN-WEEXPECT.md` y recién ahí el sistema permite crear el proyecto.
+> **DOSSIER COMPLETO Y FIRMADO — Mariano Capella.**
+> Este archivo es el dossier definitivo: completo y firmado, depositado como
+> `HUMAN-WEEXPECT.md`. Recién a partir de este depósito el sistema habilita la creación del proyecto.
 
 ---
 
@@ -55,7 +55,7 @@ queremos descubrir ahora y no en seis meses.
 
 | Role                                     | Answered by       | Relationship |
 | ---------------------------------------- | ----------------- | ------------ |
-| Dueño/a de un negocio (el cliente final) | {Mariano Capella} | daily driver |
+| Dueño/a de un negocio (el cliente final) | Mariano Capella (aproximación — sin dueño real disponible) | daily driver |
 | Mariano — lead del producto              | Mariano Capella   | daily driver |
 
 > **Vale la pena el esfuerzo extra**: si podés contestar la sección "Dueño/a de un negocio" con un dueño
@@ -87,8 +87,6 @@ cada historia termina en un resultado que el rol puede confirmar que pasó.
 - As dueño de un negocio, I cargo el costo, la comisión y el precio de lista de un producto, so that veo si ese producto me deja plata o me la saca. [MVP-1]
 - As dueño de un negocio, I pruebo un descuento del 10%, so that sé cuántas unidades más tengo que vender para no perder margen. [MVP-1]
 - As dueño de un negocio, I cargo la suba que me pasó el proveedor, so that sé cuánto tengo que mover el precio y a partir de cuándo. [MVP-1]
-
-### Mariano — lead del producto
 
 ### Mariano — lead del producto
 
@@ -132,7 +130,7 @@ Una fila cuenta como HUMANA solo bajo esta firma. Un borrador entregado sin toca
 Contá cuántas filas escribiste o reescribiste vos y poné ese número.
 
 - signed-by: Mariano Capella
-- signed-at: {2026-08-11}
+- signed-at: 2026-08-11
 - rows-authored-or-rewritten: 13
 - attestation: I read every row; the rows counted above I authored or deliberately rewrote myself.
 
