@@ -1,0 +1,236 @@
+.actuarial-container {
+  padding: 3rem 2rem;
+  max-width: var(--mm-size-contenedor-max);
+  margin: 0 auto;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.actuarial-title {
+  font-size: 2.5rem;
+  font-weight: var(--mm-font-weight-bold);
+  color: var(--mm-color-texto);
+  margin-bottom: 0.5rem;
+  font-family: var(--mm-font-marca);
+}
+
+.actuarial-subtitle {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-lg);
+}
+
+.actuarial-subtitle code {
+  color: var(--mm-color-advertencia);
+}
+
+.actuarial-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .actuarial-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card-panel {
+  background: var(--mm-color-vidrio);
+  border: 1px solid var(--mm-color-borde-vidrio);
+  border-radius: var(--mm-radius-lg);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-panel h2 {
+  font-size: var(--mm-font-size-xl);
+  color: var(--mm-color-advertencia);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--mm-color-borde);
+  padding-bottom: 0.5rem;
+}
+
+.parametro-block {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed var(--mm-color-borde);
+}
+
+.parametro-block:last-of-type {
+  border-bottom: none;
+}
+
+.parametro-block h3 {
+  margin: 0 0 1rem;
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  font-weight: var(--mm-font-weight-semibold);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--mm-color-texto-tenue);
+  font-weight: var(--mm-font-weight-medium);
+  font-size: var(--mm-font-size-sm);
+}
+
+.form-group input,
+.select-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--mm-radius-md);
+  border: 1px solid var(--mm-color-borde);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  transition: border-color var(--mm-transition-rapida);
+}
+
+.form-group input:focus,
+.select-input:focus {
+  outline: none;
+  border-color: var(--mm-color-primario);
+}
+
+.hint {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+.error-message {
+  margin-bottom: 1rem;
+  color: var(--mm-color-error);
+  background: rgba(255, 107, 107, 0.1);
+  padding: 0.9rem;
+  border-radius: var(--mm-radius-md);
+  text-align: center;
+}
+
+.error-text {
+  color: var(--mm-color-error);
+}
+
+.btn-simular {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: var(--mm-radius-md);
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+}
+
+.btn-simular:hover:not(:disabled) {
+  background: var(--mm-color-primario-hover);
+}
+
+.btn-simular:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--mm-color-borde);
+  border-radius: var(--mm-radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.metric-label {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+}
+
+.metric-value {
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-xl);
+  font-weight: var(--mm-font-weight-bold);
+}
+
+.metric-detail {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+}
+
+.metric-danger {
+  color: var(--mm-color-error);
+}
+
+.tabla-percentiles h3,
+.advertencias h3 {
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  margin: 1.25rem 0 0.75rem;
+}
+
+.percentiles-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.percentil-chip {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  background: var(--mm-color-superficie-elevada);
+  border: 1px solid var(--mm-color-borde);
+  border-radius: var(--mm-radius-pill);
+  padding: 0.35rem 0.9rem;
+}
+
+.percentil-key {
+  color: var(--mm-color-advertencia);
+  font-size: var(--mm-font-size-sm);
+  font-weight: var(--mm-font-weight-semibold);
+}
+
+.percentil-value {
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-sm);
+}
+
+.advertencias {
+  background: rgba(240, 147, 43, 0.08);
+  border-left: 3px solid var(--mm-color-advertencia);
+  padding: 0.75rem 1rem;
+  border-radius: var(--mm-radius-sm);
+  margin-bottom: 1.25rem;
+}
+
+.advertencias ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--mm-color-texto-tenue);
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 320px;
+  width: 100%;
+}

@@ -1,0 +1,247 @@
+<section class="actuarial-container">
+  <div class="header-section">
+    <h1 class="actuarial-title">Módulo Actuarial</h1>
+    <p class="actuarial-subtitle">
+      Simulación estocástica (Monte Carlo) de la parábola de ganancia
+      <code>G(P) = A·P² + B·P + C</code>: intervalos con probabilidad antes que
+      números falsos con dos decimales.
+    </p>
+  </div>
+
+  <div class="actuarial-content">
+    <div class="input-panel card-panel">
+      <h2>Parámetros estocásticos</h2>
+
+      <div class="parametro-block">
+        <h3>A — Sensibilidad de la demanda</h3>
+        <div class="form-group">
+          <label for="modo-a">Modo</label>
+          <select
+            id="modo-a"
+            [ngModel]="modoA()"
+            (ngModelChange)="cambiarModoA($event)"
+            class="select-input"
+          >
+            <option value="triangular">Triangular (mín / moda / máx)</option>
+            <option value="normal">Normal (rango con confianza)</option>
+            <option value="fijo">Fijo</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="modoA() === 'fijo'">
+          <label for="a-valor">Valor fijo (debe ser &lt; 0)</label>
+          <input
+            id="a-valor"
+            type="number"
+            [ngModel]="aValor()"
+            (ngModelChange)="aValor.set($event)"
+          />
+        </div>
+        <div class="form-group" *ngIf="modoA() === 'triangular'">
+          <label for="a-minimo">Mínimo</label>
+          <input id="a-minimo" type="number" [ngModel]="aMinimo()" (ngModelChange)="aMinimo.set($event)" />
+          <label for="a-moda">Moda</label>
+          <input id="a-moda" type="number" [ngModel]="aModa()" (ngModelChange)="aModa.set($event)" />
+          <label for="a-maximo">Máximo</label>
+          <input id="a-maximo" type="number" [ngModel]="aMaximo()" (ngModelChange)="aMaximo.set($event)" />
+        </div>
+        <div class="form-group" *ngIf="modoA() === 'normal'">
+          <label for="a-minimo-n">Rango mínimo</label>
+          <input id="a-minimo-n" type="number" [ngModel]="aMinimo()" (ngModelChange)="aMinimo.set($event)" />
+          <label for="a-maximo-n">Rango máximo</label>
+          <input id="a-maximo-n" type="number" [ngModel]="aMaximo()" (ngModelChange)="aMaximo.set($event)" />
+          <p class="hint">
+            Ej: "la sensibilidad varía entre -3 y -1 con un 90% de probabilidad".
+          </p>
+        </div>
+      </div>
+
+      <div class="parametro-block">
+        <h3>B — Término lineal (fijo)</h3>
+        <div class="form-group">
+          <label for="coef-b">Coeficiente B</label>
+          <input id="coef-b" type="number" [ngModel]="coeficienteB()" (ngModelChange)="coeficienteB.set($event)" />
+        </div>
+      </div>
+
+      <div class="parametro-block">
+        <h3>C — Término independiente neto (costos fijos con signo)</h3>
+        <div class="form-group">
+          <label for="modo-c">Modo</label>
+          <select id="modo-c" [ngModel]="modoC()" (ngModelChange)="cambiarModoC($event)" class="select-input">
+            <option value="normal">Normal (rango con confianza)</option>
+            <option value="triangular">Triangular (mín / moda / máx)</option>
+            <option value="fijo">Fijo</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="modoC() === 'fijo'">
+          <label for="c-valor">Valor fijo</label>
+          <input id="c-valor" type="number" [ngModel]="cValor()" (ngModelChange)="cValor.set($event)" />
+        </div>
+        <div class="form-group" *ngIf="modoC() === 'triangular'">
+          <label for="c-minimo">Mínimo</label>
+          <input id="c-minimo" type="number" [ngModel]="cMinimo()" (ngModelChange)="cMinimo.set($event)" />
+          <label for="c-moda">Moda</label>
+          <input id="c-moda" type="number" [ngModel]="cModa()" (ngModelChange)="cModa.set($event)" />
+          <label for="c-maximo">Máximo</label>
+          <input id="c-maximo" type="number" [ngModel]="cMaximo()" (ngModelChange)="cMaximo.set($event)" />
+        </div>
+        <div class="form-group" *ngIf="modoC() === 'normal'">
+          <label for="c-minimo-n">Rango mínimo</label>
+          <input id="c-minimo-n" type="number" [ngModel]="cMinimo()" (ngModelChange)="cMinimo.set($event)" />
+          <label for="c-maximo-n">Rango máximo</label>
+          <input id="c-maximo-n" type="number" [ngModel]="cMaximo()" (ngModelChange)="cMaximo.set($event)" />
+          <label for="c-confianza">Nivel de confianza del rango</label>
+          <input
+            id="c-confianza"
+            type="number"
+            step="0.01"
+            min="0.51"
+            max="0.999"
+            [ngModel]="cConfianza()"
+            (ngModelChange)="cConfianza.set($event)"
+          />
+          <p class="hint">
+            Ej: "los costos varían entre -1100 y -900 con un 90% de probabilidad".
+          </p>
+        </div>
+      </div>
+
+      <div class="parametro-block">
+        <h3>Contexto de precio</h3>
+        <div class="form-group">
+          <label for="precio-min">Precio mínimo</label>
+          <input id="precio-min" type="number" [ngModel]="precioMinimo()" (ngModelChange)="precioMinimo.set($event)" />
+          <label for="precio-max">Precio máximo</label>
+          <input id="precio-max" type="number" [ngModel]="precioMaximo()" (ngModelChange)="precioMaximo.set($event)" />
+          <label for="precio-actual">Precio actual (opcional)</label>
+          <input
+            id="precio-actual"
+            type="number"
+            [ngModel]="precioActual() ?? ''"
+            (ngModelChange)="precioActual.set($event === '' ? null : $event)"
+          />
+        </div>
+      </div>
+
+      <div class="parametro-block">
+        <h3>Simulación</h3>
+        <div class="form-group">
+          <label for="n-sim">Número de simulaciones (100 – 100.000)</label>
+          <input
+            id="n-sim"
+            type="number"
+            [ngModel]="nSimulaciones()"
+            (ngModelChange)="nSimulaciones.set($event)"
+          />
+          <label for="nivel-confianza">Nivel de confianza (0.8 – 0.99)</label>
+          <input
+            id="nivel-confianza"
+            type="number"
+            step="0.01"
+            [ngModel]="nivelConfianza()"
+            (ngModelChange)="nivelConfianza.set($event)"
+          />
+          <label for="semilla">Semilla (opcional, para reproducir)</label>
+          <input
+            id="semilla"
+            type="number"
+            [ngModel]="semilla() ?? ''"
+            (ngModelChange)="semilla.set($event === '' ? null : $event)"
+          />
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="sinIncertidumbre()">
+        Al menos un coeficiente debe ser estocástico para simular riesgo.
+      </div>
+
+      <button class="btn-simular" (click)="simular()" [disabled]="sinIncertidumbre() || cargando()">
+        {{ cargando() ? 'Simulando…' : 'Simular riesgo' }}
+      </button>
+    </div>
+
+    <div class="results-panel">
+      <div class="card-panel" *ngIf="error()">
+        <h2>Error</h2>
+        <p class="error-text">{{ error() }}</p>
+      </div>
+
+      <div class="card-panel" *ngIf="resultado(); let resultado">
+        <h2>Resultado (confianza {{ resultado.nivelConfianza | percent:'1.0-0' }})</h2>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="metric-label">Precio óptimo (media)</span>
+            <strong class="metric-value">$ {{ resultado.precioOptimo.media | number:'1.2-2' }}</strong>
+            <span class="metric-detail">
+              Intervalo: $ {{ resultado.precioOptimo.intervalo.minimo | number:'1.2-2' }} –
+              $ {{ resultado.precioOptimo.intervalo.maximo | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Piso de solvencia</span>
+            <strong class="metric-value" *ngIf="resultado.pisoSolvencia !== null">
+              $ {{ resultado.pisoSolvencia | number:'1.2-2' }}
+            </strong>
+            <strong class="metric-value metric-danger" *ngIf="resultado.pisoSolvencia === null">
+              Sin piso solvente
+            </strong>
+            <span class="metric-detail">Precio mínimo recomendado</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Prob. de pérdida al óptimo</span>
+            <strong class="metric-value" [class.metric-danger]="resultado.probabilidadPerdida.enPrecioOptimo > 0.1">
+              {{ resultado.probabilidadPerdida.enPrecioOptimo | percent:'1.0-0' }}
+            </strong>
+            <span class="metric-detail">
+              <ng-container *ngIf="resultado.probabilidadPerdida.enPrecioActual !== null">
+                En el precio actual: {{ resultado.probabilidadPerdida.enPrecioActual | percent:'1.0-0' }}
+              </ng-container>
+            </span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Punto de equilibrio (media)</span>
+            <strong class="metric-value">$ {{ resultado.puntoEquilibrio.media | number:'1.2-2' }}</strong>
+            <span class="metric-detail">Ganancia máxima esperada: $ {{ resultado.gananciaMaxima.media | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="tabla-percentiles" *ngIf="percentilesDe(resultado).length > 0">
+          <h3>Percentiles del precio óptimo</h3>
+          <div class="percentiles-row">
+            <span class="percentil-chip" *ngFor="let p of percentilesDe(resultado)">
+              <span class="percentil-key">P{{ p.clave }}</span>
+              <span class="percentil-value">$ {{ p.valor | number:'1.2-2' }}</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="advertencias" *ngIf="resultado.advertencias.length > 0">
+          <h3>Advertencias (causa → acción)</h3>
+          <ul>
+            <li *ngFor="let advertencia of resultado.advertencias">{{ advertencia }}</li>
+          </ul>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas baseChart [data]="curvaData()" [options]="opcionesCurva" type="line"></canvas>
+        </div>
+
+        <p class="hint">
+          {{ resultado.nSimulaciones | number }} escenarios · semilla {{ resultado.semilla }} ·
+          {{ resultado.muestrasInvalidas }} descartadas por A ≥ 0
+        </p>
+      </div>
+
+      <div class="card-panel" *ngIf="!resultado() && !error()">
+        <h2>Esperando simulación</h2>
+        <p class="hint">
+          Configurá la incertidumbre de A y C y presioná "Simular riesgo" para obtener el
+          intervalo del precio óptimo, la probabilidad de pérdida y la curva de riesgo.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
