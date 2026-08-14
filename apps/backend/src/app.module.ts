@@ -11,6 +11,7 @@ import { ContactoModule } from './modules/contacto/contacto.module';
 import { OptimizadorModule } from './modules/optimizador/optimizador.module';
 import { FinanzasModule } from './modules/finanzas/finanzas.module';
 import { LeadsModule } from './modules/leads/leads.module';
+import { ActuarialModule } from './modules/actuarial/actuarial.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LeadsModule } from './modules/leads/leads.module';
     OptimizadorModule,
     FinanzasModule,
     LeadsModule,
+    ActuarialModule,
   ],
 })
 export class AppModule {}
