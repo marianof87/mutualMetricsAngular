@@ -19,6 +19,8 @@ tags:
     description: Slice 2 — Calculadora Cuadrática (@marianof87)
   - name: pricing
     description: Slice 3 — Optimizador de Precios (@Monzon1983)
+  - name: actuarial
+    description: Slice 2 — Módulo Actuarial (Monte Carlo sobre la parábola de ganancia) (@marianof87)
   - name: escenarios
     description: Slice 4 — Historial & Escenarios (@Franco1212)
   - name: novedades
@@ -137,6 +139,40 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PricingResponse" }
+
+  # ================ Slice 2 — Módulo Actuarial ================
+  /actuarial/simulaciones:
+    post:
+      tags: [actuarial]
+      summary: |
+        Simulación estocástica (Monte Carlo) de la parábola de ganancia
+        G(P) = A·P² + B·P + C con A y C estocásticos: intervalo de confianza
+        del precio óptimo, probabilidad de pérdida, piso de solvencia y curva
+        de riesgo. Alineado con OBJ-2: intervalos con probabilidad, nunca un
+        número falso con dos decimales.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SimulacionActuarialRequest" }
+      responses:
+        "200":
+          description: Resultado de la simulación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SimulacionActuarialResponse" }
+        "400":
+          description: |
+            Sin incertidumbre para simular (código `SIMULACION_SIN_INCERTIDUMBRE`)
+            u otra validación fallida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "422":
+          description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
   # ================ Slice 4 — Escenarios ================
   /escenarios:
@@ -390,6 +426,119 @@ components:
         breakEven:
           type: array
           items: { type: number }
+
+    ParametroEstocastico:
+      type: object
+      required: [tipo]
+      discriminator:
+        propertyName: tipo
+      properties:
+        tipo:
+          type: string
+          enum: [fijo, triangular, normal]
+        valor: { type: number }
+        minimo: { type: number }
+        moda: { type: number }
+        maximo: { type: number }
+        nivelConfianza:
+          type: number
+          minimum: 0.51
+          maximum: 0.999
+          default: 0.9
+      description: |
+        Parámetro de la parábola declarado con incertidumbre: `fijo` (valor
+        puntual), `triangular` (minimo/moda/maximo) o `normal` (rango con nivel
+        de confianza, ej: "entre 800 y 1200 con un 90% de probabilidad").
+
+    SimulacionActuarialRequest:
+      type: object
+      required: [coeficienteA, coeficienteB, coeficienteC, precioMinimo, precioMaximo]
+      properties:
+        coeficienteA:
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Sensibilidad de la demanda (estocástico; A >= 0 degenera la parábola)
+        coeficienteB:
+          type: number
+          description: Término lineal (fijo en v1)
+        coeficienteC:
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Término independiente neto (costos fijos incluidos; puede ser negativo)
+        precioMinimo: { type: number, minimum: 0 }
+        precioMaximo: { type: number, exclusiveMinimum: 0 }
+        precioActual: { type: number, minimum: 0 }
+        nSimulaciones:
+          type: integer
+          minimum: 100
+          maximum: 100000
+          default: 10000
+        nivelConfianza:
+          type: number
+          minimum: 0.8
+          maximum: 0.99
+          default: 0.95
+        semilla:
+          type: integer
+          minimum: 1
+          description: Semilla opcional para reproducibilidad exacta
+
+    DistribucionResumen:
+      type: object
+      required: [media, mediana, desvio, percentiles, intervalo]
+      properties:
+        media: { type: number }
+        mediana: { type: number }
+        desvio: { type: number }
+        percentiles:
+          type: object
+          additionalProperties: { type: number }
+        intervalo:
+          type: object
+          required: [minimo, maximo]
+          properties:
+            minimo: { type: number }
+            maximo: { type: number }
+
+    SimulacionActuarialResponse:
+      type: object
+      required:
+        [nSimulaciones, semilla, muestrasInvalidas, nivelConfianza, precioOptimo,
+         gananciaMaxima, puntoEquilibrio, pisoSolvencia, probabilidadPerdida,
+         curvaRiesgo, advertencias]
+      properties:
+        nSimulaciones: { type: integer }
+        semilla: { type: integer }
+        muestrasInvalidas: { type: integer }
+        nivelConfianza: { type: number }
+        precioOptimo: { $ref: "#/components/schemas/DistribucionResumen" }
+        gananciaMaxima: { $ref: "#/components/schemas/DistribucionResumen" }
+        puntoEquilibrio: { $ref: "#/components/schemas/DistribucionResumen" }
+        pisoSolvencia:
+          type: number
+          nullable: true
+          description: |
+            Precio mínimo recomendado con el nivel de confianza pedido; null si
+            la estructura no es solvente en más del (1 - nivelConfianza) de los
+            escenarios.
+        probabilidadPerdida:
+          type: object
+          required: [enPrecioOptimo]
+          properties:
+            enPrecioOptimo: { type: number }
+            enPrecioActual:
+              type: number
+              nullable: true
+        curvaRiesgo:
+          type: array
+          items:
+            type: object
+            required: [precio, probabilidadPerdida]
+            properties:
+              precio: { type: number }
+              probabilidadPerdida: { type: number }
+        advertencias:
+          type: array
+          items: { type: string }
+          description: Causas y acciones sugeridas (OBJ-2), nunca números falsos
 
     Escenario:
       type: object
