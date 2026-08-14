@@ -38,6 +38,7 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 | Código | HTTP | Uso |
 |---|---|---|
 | `CUADRATICA_A_CERO` | 422 | `a === 0` — no es cuadrática, es lineal. |
+| `SIMULACION_SIN_INCERTIDUMBRE` | 400 | Módulo actuarial: ambos coeficientes son fijos; no hay riesgo que simular. Se exige al menos un parámetro estocástico. |
 
 ### Slice 3 — Pricing (@Monzon1983)
 
