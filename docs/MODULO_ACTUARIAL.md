@@ -137,14 +137,45 @@ Ejecución: `npm test --workspace=@mutual-metrics/shared`, `npm test --workspace
 - **Stateless en v1**: las corridas no se persisten (no se toca Prisma); el endpoint devuelve todo en la
   respuesta. Si se necesita historial, se puede ampliar `Escenario.tipo` a `actuarial`.
 - El motor **permite fijo+fijo** como caso degenerado determinístico; la protección de negocio la aplica
-  el service con un código de error específico.
+  el service con un código de error específico (`SIMULACION_SIN_INCERTIDUMBRE`).
+- La condición "al menos un coeficiente estocástico" se evalúa con `tieneIncertidumbre` (dominio
+  compartido), que acepta coeficientes numéricos y paramétricos: si `coeficienteB` pasa a ser
+  estocástico en el futuro, la validación sigue funcionando sin cambios.
+- Los errores matemáticos del dominio (hoy inalcanzables porque Zod valida los rangos antes del motor)
+  se traducen en el service a `422 ENTRADA_INVALIDA` dentro del envelope único, por si el motor gana
+  validaciones nuevas.
 - La pérdida no sale del vértice (la parábola en su máximo es ≥ su mínimo), sale de **vender a un precio
   dado**: por eso la curva de riesgo y la probabilidad en el óptimo capturan la falta de solvencia
   (costos que ni el mejor precio cubren).
 
+### 6.1 Procesamiento síncrono: decisión medida
+
+`simularRiesgo` es **síncrono**: bloquea el event loop de Node mientras corre (medido en este repo,
+Windows, engine compilado, en aislamiento):
+
+| nSimulaciones | Tiempo |
+|---|---|
+| 10.000 (default del schema) | ~71 ms |
+| 50.000 | ~413 ms |
+| 100.000 (máximo permitido) | ~874 ms |
+
+Con el perfil actual (default 10.000, uso de bajo volumen) el bloqueo es aceptable y se mantiene el
+cálculo síncrono. Se descartan por ahora:
+
+- **Worker Threads**: paralelismo real (~0.9 s → ~0.25 s), pero agrega script de worker, protocolo de
+  mensajes y config de build/tests — desproporcionado sin evidencia de carga.
+- **Cola de tareas (BullMQ/Redis)**: dependencia nueva + infraestructura para un proyecto sin carga.
+
+Upgrade barato si algún día hay carga: **async por lotes** (chunks de ~10.000 muestras con
+`await setImmediate()` entre lotes) — el event loop nunca queda bloqueado más de ~100 ms y el
+determinismo se conserva (misma semilla, RNG secuencial). Revisitar esta sección cuando haya evidencia
+de tráfico.
+
 ## 7. Pendientes fuera de alcance (v2)
 
-- `CoeficienteB` estocástico.
+- `CoeficienteB` estocástico: el engine y la validación (`tieneIncertidumbre`) ya están preparados; falta
+  cambiar el schema (`coeficienteB` pasa de `z.number()` a `ParametroEstocastico`), el muestreo en el
+  motor y el contrato.
 - Distribuciones adicionales (log-normal, PERT).
 - Persistencia de corridas como `Escenario` (Prisma + enum en contrato).
 - Histograma de la distribución del precio óptimo en el frontend (hoy se muestra la curva de riesgo).
