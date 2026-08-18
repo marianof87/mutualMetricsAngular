@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { simularRiesgo } from './monteCarlo';
+import { simularRiesgo, tieneIncertidumbre } from './monteCarlo';
 import type { SimulacionActuarialRequest } from '../../dtos/actuarial';
 
 describe('simularRiesgo — caso determinístico (todo fijo)', () => {
@@ -177,6 +177,64 @@ describe('simularRiesgo — muestras degeneradas', () => {
     expect(resultado.muestrasInvalidas).toBeGreaterThan(0);
     expect(
       resultado.advertencias.some((advertencia) => advertencia.includes('Se descartó el')),
+    ).toBe(true);
+  });
+});
+
+describe('tieneIncertidumbre', () => {
+  it('es falso cuando todos los coeficientes son fijos (incluido B numérico)', () => {
+    expect(
+      tieneIncertidumbre({
+        coeficienteA: { tipo: 'fijo', valor: -2 },
+        coeficienteB: 120,
+        coeficienteC: { tipo: 'fijo', valor: -1000 },
+        precioMinimo: 10,
+        precioMaximo: 100,
+        nSimulaciones: 500,
+        nivelConfianza: 0.95,
+      }),
+    ).toBe(false);
+  });
+
+  it('es verdadero con A estocástico y C fijo', () => {
+    expect(
+      tieneIncertidumbre({
+        coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+        coeficienteB: 120,
+        coeficienteC: { tipo: 'fijo', valor: -1000 },
+        precioMinimo: 10,
+        precioMaximo: 100,
+        nSimulaciones: 500,
+        nivelConfianza: 0.95,
+      }),
+    ).toBe(true);
+  });
+
+  it('es verdadero con A fijo y C normal', () => {
+    expect(
+      tieneIncertidumbre({
+        coeficienteA: { tipo: 'fijo', valor: -2 },
+        coeficienteB: 120,
+        coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
+        precioMinimo: 10,
+        precioMaximo: 100,
+        nSimulaciones: 500,
+        nivelConfianza: 0.95,
+      }),
+    ).toBe(true);
+  });
+
+  it('es verdadero si B llegara a ser estocástico aunque A y C sean fijos', () => {
+    expect(
+      tieneIncertidumbre({
+        coeficienteA: { tipo: 'fijo', valor: -2 },
+        coeficienteB: { tipo: 'triangular', minimo: 100, moda: 120, maximo: 140 } as never,
+        coeficienteC: { tipo: 'fijo', valor: -1000 },
+        precioMinimo: 10,
+        precioMaximo: 100,
+        nSimulaciones: 500,
+        nivelConfianza: 0.95,
+      }),
     ).toBe(true);
   });
 });
