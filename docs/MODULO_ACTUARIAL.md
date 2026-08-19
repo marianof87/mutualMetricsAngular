@@ -119,16 +119,32 @@ Campos opcionales: `precioActual` (evalúa el riesgo ahí), `semilla` (reproduci
 
 ## 5. Tests
 
-- **Shared (vitest)** — `packages/shared/src/dominio/actuarial/*.test.ts` y `dtos/actuarial.test`:
+Estrategia de pruebas del módulo (TDD, cobertura en 4 capas):
+
+- **Shared (vitest)** — `packages/shared/src/dominio/actuarial/*.test.ts`, `dtos/actuarial.test.ts` y
+  `propiedadesActuarial.test.ts` (fast-check):
   - invariantes matemáticas (media empírica ≈ media teórica, percentiles R-7 con valores a mano, desvío acotado);
   - caso determinístico exacto (vértice, piso, curva de riesgo escalón 0/1);
   - probabilidad de pérdida calculada a mano con tolerancia;
   - reproducibilidad: misma semilla ⇒ misma respuesta; semilla distinta ⇒ respuesta distinta;
-  - muestras degeneradas (`A ≥ 0`) contadas y advertidas.
+  - muestras degeneradas (`A ≥ 0`) contadas y advertidas;
+  - schemas Zod: defaults, rechazos (rangos, moda, precios, N, confianza, semilla, tipo);
+  - invariantes de salida: P5 ≤ P50 ≤ P95, probabilidad ∈ [0,1], `muestrasInvalidas` entero ≥ 0,
+    sin NaN/infinitos, `pisoSolvencia` null o ≥ 0;
+  - property-based: cientos de combinaciones aleatorias de solicitudes y distribuciones (fast-check)
+    sin crash, sin NaN y con muestreos siempre dentro de [min, max].
 - **Backend (jest + supertest)** — `actuarial.service.spec.ts` (código `SIMULACION_SIN_INCERTIDUMBRE`,
-  delegación al dominio) y `actuarial.controller.spec.ts` (orquestación).
+  delegación al dominio, traducción de errores) y `actuarial.controller.spec.ts` (integración HTTP:
+  200 validado por el schema compartido, reproducibilidad por semilla a nivel HTTP, 400
+  `ENTRADA_INVALIDA` y `SIMULACION_SIN_INCERTIDUMBRE`, caso degenerado con advertencia).
+- **Frontend (vitest + jsdom)** — `actuarial.service.spec.ts` (POST a la URL del entorno) y
+  `actuarial.component.spec.ts` (request construido desde las señales, render de métricas/percentiles/
+  advertencias, envelope de error, bloqueo sin incertidumbre, stub de canvas).
+- **Rendimiento** — `apps/backend/bench/` (motor y concurrencia HTTP), script `test:rendimiento`
+  (no entra en CI); resultados en §6.1.
 
-Ejecución: `npm test --workspace=@mutual-metrics/shared`, `npm test --workspace=@mutual-metrics/backend`.
+Ejecución: `npm test --workspace=@mutual-metrics/shared`, `npm test --workspace=@mutual-metrics/backend`,
+`npm test --workspace=@mutual-metrics/frontend` y `npm run test:rendimiento --workspace=@mutual-metrics/backend`.
 
 ## 6. Decisiones técnicas
 
@@ -150,14 +166,21 @@ Ejecución: `npm test --workspace=@mutual-metrics/shared`, `npm test --workspace
 
 ### 6.1 Procesamiento síncrono: decisión medida
 
-`simularRiesgo` es **síncrono**: bloquea el event loop de Node mientras corre (medido en este repo,
+`simularRiesgo` es **síncrono**: bloquea el event loop de Node mientras corre. Medido con
+`npm run test:rendimiento --workspace=@mutual-metrics/backend` (bench scripts en `apps/backend/bench/`,
 Windows, engine compilado, en aislamiento):
 
-| nSimulaciones | Tiempo |
-|---|---|
-| 10.000 (default del schema) | ~71 ms |
-| 50.000 | ~413 ms |
-| 100.000 (máximo permitido) | ~874 ms |
+| nSimulaciones | Tiempo | Ticks de event loop perdidos |
+|---|---|---|
+| 1.000 | ~34 ms | ~34 |
+| 10.000 (default del schema) | ~108 ms | ~108 |
+| 50.000 | ~391 ms | ~391 |
+| 100.000 (máximo permitido) | ~851 ms | ~851 |
+
+Los ticks perdidos ≈ duración: durante la simulación el event loop no atiende nada (el motor es
+síncrono). Bajo carga concurrente se confirma la serialización: **5 requests de N=100.000 en paralelo
+tardaron 5,7 s en total (p95 por request 5,7 s, +267 MB de heap)** — las peticiones se encolan, no se
+superponen.
 
 Con el perfil actual (default 10.000, uso de bajo volumen) el bloqueo es aceptable y se mantiene el
 cálculo síncrono. Se descartan por ahora:
@@ -179,3 +202,6 @@ de tráfico.
 - Distribuciones adicionales (log-normal, PERT).
 - Persistencia de corridas como `Escenario` (Prisma + enum en contrato).
 - Histograma de la distribución del precio óptimo en el frontend (hoy se muestra la curva de riesgo).
+- E2E con Playwright (flujo form → POST → renderizado de resultados y advertencias): postergado
+  deliberadamente; los tests unitarios del componente + la integración HTTP cubren la misma superficie
+  con mucho menos mantenimiento.
