@@ -238,3 +238,99 @@ describe('tieneIncertidumbre', () => {
     ).toBe(true);
   });
 });
+
+describe('simularRiesgo — invariantes de la respuesta', () => {
+  it('cumple P5 <= P50 <= P95 en los resúmenes de distribución', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: 120,
+      coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 20000,
+      nivelConfianza: 0.95,
+      semilla: 21,
+    });
+
+    for (const resumen of [resultado.precioOptimo, resultado.gananciaMaxima]) {
+      const p5 = resumen.percentiles['5'];
+      const p50 = resumen.percentiles['50'];
+      const p95 = resumen.percentiles['95'];
+      expect(p5).toBeLessThanOrEqual(p50);
+      expect(p50).toBeLessThanOrEqual(p95);
+      expect(resumen.intervalo.minimo).toBeLessThanOrEqual(resumen.intervalo.maximo);
+    }
+  });
+
+  it('mantiene la probabilidad de pérdida en [0, 1] y muestrasInvalidas como entero >= 0', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -0.02, moda: -0.01, maximo: 0.02 },
+      coeficienteB: 120,
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      precioActual: 15,
+      nSimulaciones: 30000,
+      nivelConfianza: 0.95,
+      semilla: 22,
+    });
+
+    expect(Number.isInteger(resultado.muestrasInvalidas)).toBe(true);
+    expect(resultado.muestrasInvalidas).toBeGreaterThanOrEqual(0);
+    expect(resultado.probabilidadPerdida.enPrecioOptimo).toBeGreaterThanOrEqual(0);
+    expect(resultado.probabilidadPerdida.enPrecioOptimo).toBeLessThanOrEqual(1);
+    if (resultado.probabilidadPerdida.enPrecioActual !== null) {
+      expect(resultado.probabilidadPerdida.enPrecioActual).toBeGreaterThanOrEqual(0);
+      expect(resultado.probabilidadPerdida.enPrecioActual).toBeLessThanOrEqual(1);
+    }
+    for (const punto of resultado.curvaRiesgo) {
+      expect(punto.probabilidadPerdida).toBeGreaterThanOrEqual(0);
+      expect(punto.probabilidadPerdida).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('no produce NaN ni infinitos en ningún campo numérico', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'normal', minimo: -5, maximo: -0.5, nivelConfianza: 0.9 },
+      coeficienteB: 120,
+      coeficienteC: { tipo: 'triangular', minimo: -2000, moda: -1000, maximo: -500 },
+      precioMinimo: 5,
+      precioMaximo: 200,
+      precioActual: 40,
+      nSimulaciones: 20000,
+      nivelConfianza: 0.9,
+      semilla: 23,
+    });
+
+    const numericos = [
+      resultado.precioOptimo.media,
+      resultado.precioOptimo.mediana,
+      resultado.precioOptimo.desvio,
+      ...Object.values(resultado.precioOptimo.percentiles),
+      resultado.precioOptimo.intervalo.minimo,
+      resultado.precioOptimo.intervalo.maximo,
+      resultado.pisoSolvencia,
+      resultado.probabilidadPerdida.enPrecioOptimo,
+      ...resultado.curvaRiesgo.flatMap((punto) => [punto.precio, punto.probabilidadPerdida]),
+    ];
+    for (const valor of numericos) {
+      if (valor === null) continue;
+      expect(Number.isFinite(valor)).toBe(true);
+    }
+  });
+
+  it('reporta pisoSolvencia como null o un número no negativo', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: 120,
+      coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 20000,
+      nivelConfianza: 0.95,
+      semilla: 24,
+    });
+
+    expect(resultado.pisoSolvencia === null || resultado.pisoSolvencia >= 0).toBe(true);
+  });
+});
