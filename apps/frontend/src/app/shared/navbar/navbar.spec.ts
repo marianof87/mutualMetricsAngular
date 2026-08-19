@@ -28,6 +28,7 @@ describe('Navbar', () => {
       'Sobre nosotros',
       'Servicios',
       'Novedades',
+      'Módulo Actuarial',
       'Simulador de precios',
       'Contacto',
     ]);
