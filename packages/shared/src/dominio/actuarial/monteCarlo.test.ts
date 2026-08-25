@@ -335,6 +335,131 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
   });
 });
 
+describe('simularRiesgo — B estocástico en el motor', () => {
+  it('produce resultados válidos con B triangular', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'triangular', minimo: 80, moda: 120, maximo: 160 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 10000,
+      nivelConfianza: 0.95,
+      semilla: 42,
+    });
+
+    expect(Number.isFinite(resultado.precioOptimo.media)).toBe(true);
+    expect(resultado.precioOptimo.media).toBeGreaterThan(0);
+    expect(resultado.gananciaMaxima.media).toBeGreaterThan(0);
+    expect(resultado.curvaRiesgo.length).toBe(50);
+    expect(Number.isInteger(resultado.muestrasInvalidas)).toBe(true);
+    expect(resultado.muestrasInvalidas).toBeGreaterThanOrEqual(0);
+  });
+
+  it('produce resultados distintos a B fijo', () => {
+    const base: SimulacionActuarialRequest = {
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'fijo', valor: 120 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 10000,
+      nivelConfianza: 0.95,
+      semilla: 42,
+    };
+
+    const conBFijo = simularRiesgo(base);
+    const conBTriangular = simularRiesgo({
+      ...base,
+      coeficienteB: { tipo: 'triangular', minimo: 80, moda: 120, maximo: 160 },
+    });
+
+    expect(conBFijo.precioOptimo.media).not.toBe(conBTriangular.precioOptimo.media);
+  });
+
+  it('mantiene invariantes con B estocástico (sin NaN, percentiles ordenados)', () => {
+    const resultado = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'normal', minimo: 80, maximo: 160, nivelConfianza: 0.9 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 10000,
+      nivelConfianza: 0.95,
+      semilla: 77,
+    });
+
+    expect(Number.isFinite(resultado.precioOptimo.media)).toBe(true);
+    const p5 = resultado.precioOptimo.percentiles['5'];
+    const p50 = resultado.precioOptimo.percentiles['50'];
+    const p95 = resultado.precioOptimo.percentiles['95'];
+    expect(p5).toBeLessThanOrEqual(p50);
+    expect(p50).toBeLessThanOrEqual(p95);
+    expect(resultado.probabilidadPerdida.enPrecioOptimo).toBeGreaterThanOrEqual(0);
+    expect(resultado.probabilidadPerdida.enPrecioOptimo).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('simularRiesgoAsync — boundaries de chunking', () => {
+  it('funciona con nSimulaciones igual al tamaño de lote (5000)', async () => {
+    const resultado = await simularRiesgoAsync({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'fijo', valor: 120 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 5000,
+      nivelConfianza: 0.95,
+      semilla: 10,
+    });
+
+    const sync = simularRiesgo({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'fijo', valor: 120 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 5000,
+      nivelConfianza: 0.95,
+      semilla: 10,
+    });
+
+    expect(resultado).toEqual(sync);
+  });
+
+  it('funciona con nSimulaciones menor al tamaño de lote (100)', async () => {
+    const resultado = await simularRiesgoAsync({
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'fijo', valor: 120 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 100,
+      nivelConfianza: 0.95,
+      semilla: 5,
+    });
+
+    expect(Number.isFinite(resultado.precioOptimo.media)).toBe(true);
+    expect(resultado.curvaRiesgo.length).toBe(50);
+  });
+
+  it('produce exactamente la misma respuesta que simularRiesgo para n=100', async () => {
+    const solicitud: SimulacionActuarialRequest = {
+      coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+      coeficienteB: { tipo: 'fijo', valor: 120 },
+      coeficienteC: { tipo: 'fijo', valor: -1000 },
+      precioMinimo: 10,
+      precioMaximo: 100,
+      nSimulaciones: 100,
+      nivelConfianza: 0.95,
+      semilla: 5,
+    };
+    const sync = simularRiesgo(solicitud);
+    const async_ = await simularRiesgoAsync(solicitud);
+    expect(async_).toEqual(sync);
+  });
+});
+
 describe('simularRiesgoAsync — equivalencia con la versión síncrona', () => {
   const solicitud: SimulacionActuarialRequest = {
     coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },

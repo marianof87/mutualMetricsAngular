@@ -111,4 +111,26 @@ describe('ActuarialPersistenciaService', () => {
     const llamada = prismaMock.simulacionActuarial.create.mock.calls[0][0];
     expect(llamada.data.leadId).toBeNull();
   });
+
+  it('usa intervalo.minimo/maximo como fallback cuando percentiles están vacíos', async () => {
+    const resultadoSinPercentiles: SimulacionActuarialResponse = {
+      ...resultadoMock,
+      precioOptimo: {
+        media: 30,
+        mediana: 30,
+        desvio: 0.5,
+        percentiles: {},
+        intervalo: { minimo: 28, maximo: 32 },
+      },
+    };
+
+    await servicio.guardar({
+      solicitud: solicitudMock,
+      resultado: resultadoSinPercentiles,
+    });
+
+    const llamada = prismaMock.simulacionActuarial.create.mock.calls[0][0];
+    expect(llamada.data.precioOptimoP5).toBe(28);
+    expect(llamada.data.precioOptimoP95).toBe(32);
+  });
 });

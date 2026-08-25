@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BaseChartDirective } from 'ng2-charts';
+import { vi } from 'vitest';
 import type { SimulacionActuarialResponse } from '@mutual-metrics/shared';
 import { ActuarialComponent } from './actuarial.component';
 import { ActuarialService } from './actuarial.service';
@@ -140,5 +141,68 @@ describe('ActuarialComponent', () => {
       { clave: '50', valor: 30 },
       { clave: '95', valor: 30.9 },
     ]);
+  });
+});
+
+describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
+  beforeEach(async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    await TestBed.configureTestingModule({
+      imports: [ActuarialComponent],
+      providers: [ActuarialService],
+    })
+      .overrideComponent(ActuarialComponent, {
+        remove: { imports: [BaseChartDirective] },
+        add: { imports: [CanvasStubDirective] },
+      })
+      .compileComponents();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('resuelve la simulación y popula resultado + cargando vuelve a false', async () => {
+    const fixture = TestBed.createComponent(ActuarialComponent);
+    const comp = fixture.componentInstance;
+    comp.semilla.set(42);
+    comp.nSimulaciones.set(100);
+
+    comp.simular();
+    expect(comp.cargando()).toBe(true);
+
+    // Flush todos los timers (componente + chunking interno de simularRiesgoAsync)
+    for (let i = 0; i < 20; i++) {
+      await vi.advanceTimersByTimeAsync(0);
+    }
+    fixture.detectChanges();
+
+    expect(comp.cargando()).toBe(false);
+    expect(comp.error()).toBeNull();
+    expect(comp.resultado()).not.toBeNull();
+    expect(comp.resultado()!.nSimulaciones).toBe(100);
+  });
+
+  it('maneja escenarios degenerados sin crashear (A >= 0)', async () => {
+    const fixture = TestBed.createComponent(ActuarialComponent);
+    const comp = fixture.componentInstance;
+    comp.semilla.set(42);
+    comp.nSimulaciones.set(100);
+    comp.aValor.set(10);
+    comp.aMinimo.set(10);
+    comp.aMaximo.set(10);
+
+    comp.simular();
+    expect(comp.cargando()).toBe(true);
+
+    for (let i = 0; i < 20; i++) {
+      await vi.advanceTimersByTimeAsync(0);
+    }
+    fixture.detectChanges();
+
+    expect(comp.cargando()).toBe(false);
+    expect(comp.error()).toBeNull();
+    expect(comp.resultado()).not.toBeNull();
+    expect(comp.resultado()!.muestrasInvalidas).toBe(100);
   });
 });

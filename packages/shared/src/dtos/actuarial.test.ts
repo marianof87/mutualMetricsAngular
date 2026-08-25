@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   SimulacionActuarialRequestSchema,
   SimulacionActuarialResponseSchema,
+  GuardarSimulacionActuarialSchema,
 } from './actuarial';
 
 const solicitudValida = {
@@ -103,6 +104,80 @@ describe('SimulacionActuarialRequestSchema', () => {
       coeficienteA: { tipo: 'lognormal', media: 1 },
     });
     expect(resultado.success).toBe(false);
+  });
+});
+
+describe('GuardarSimulacionActuarialSchema', () => {
+  const payloadValido = {
+    leadId: '550e8400-e29b-41d4-a716-446655440000',
+    coeficienteBTipo: 'fijo' as const,
+    nSimulaciones: 10000,
+    nivelConfianza: 0.95,
+    precioOptimoMedia: 30,
+    precioOptimoP5: 29.1,
+    precioOptimoP95: 30.9,
+    pisoSolvencia: 10.2,
+    probPerdidaOptimo: 0.05,
+    probPerdidaActual: 0.15,
+  };
+
+  it('acepta un payload completo y válido', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse(payloadValido);
+    expect(resultado.success).toBe(true);
+  });
+
+  it('acepta leadId omitido (simulación anónima)', () => {
+    const { leadId: _, ...sinLeadId } = payloadValido;
+    const resultado = GuardarSimulacionActuarialSchema.safeParse(sinLeadId);
+    expect(resultado.success).toBe(true);
+  });
+
+  it('rechaza probPerdidaOptimo mayor a 1', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      probPerdidaOptimo: 1.5,
+    });
+    expect(resultado.success).toBe(false);
+  });
+
+  it('rechaza probPerdidaOptimo negativa', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      probPerdidaOptimo: -0.1,
+    });
+    expect(resultado.success).toBe(false);
+  });
+
+  it('rechaza leadId que no sea UUID válido', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      leadId: 'no-es-uuid',
+    });
+    expect(resultado.success).toBe(false);
+  });
+
+  it('rechaza coeficienteBTipo con valor no permitido', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      coeficienteBTipo: 'invalido',
+    });
+    expect(resultado.success).toBe(false);
+  });
+
+  it('acepta pisoSolvencia null', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      pisoSolvencia: null,
+    });
+    expect(resultado.success).toBe(true);
+  });
+
+  it('acepta probPerdidaActual null', () => {
+    const resultado = GuardarSimulacionActuarialSchema.safeParse({
+      ...payloadValido,
+      probPerdidaActual: null,
+    });
+    expect(resultado.success).toBe(true);
   });
 });
 
