@@ -34,7 +34,7 @@ const arbitrarioEstocastico = fc.oneof(
 const arbitrarioSolicitud: fc.Arbitrary<SimulacionActuarialRequest> = fc
   .tuple(
     arbitrarioEstocastico,
-    fc.integer({ min: 10, max: 300 }),
+    arbitrarioEstocastico,
     arbitrarioEstocastico,
     fc.integer({ min: 1, max: 50 }),
     fc.integer({ min: 51, max: 500 }),
@@ -43,7 +43,7 @@ const arbitrarioSolicitud: fc.Arbitrary<SimulacionActuarialRequest> = fc
   .map(
     ([coeficienteA, coeficienteB, coeficienteC, precioMinimo, precioMaximo, nivelConfianza]) => ({
       coeficienteA: coeficienteA as ParametroEstocastico,
-      coeficienteB,
+      coeficienteB: coeficienteB as ParametroEstocastico,
       coeficienteC: coeficienteC as ParametroEstocastico,
       precioMinimo,
       precioMaximo,

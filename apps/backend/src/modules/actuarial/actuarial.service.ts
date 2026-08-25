@@ -3,7 +3,7 @@ import {
   CodigoError,
   SimulacionActuarialRequest,
   SimulacionActuarialResponse,
-  simularRiesgo,
+  simularRiesgoAsync,
   tieneIncertidumbre,
 } from '@mutual-metrics/shared';
 
@@ -11,11 +11,10 @@ import {
 export class ActuarialService {
   /**
    * Orquesta la simulación actuarial sin duplicar la matemática: la delega al
-   * dominio puro de @mutual-metrics/shared. Acá vive solo la protección de
-   * negocio (la incertidumbre es condición de existencia del módulo) y la
-   * traducción de errores matemáticos del dominio al envelope del proyecto.
+   * dominio puro de @mutual-metrics/shared. Usa `simularRiesgoAsync` para no
+   * bloquear el event loop de Node.js durante simulaciones con N alto.
    */
-  simularRiesgo(solicitud: SimulacionActuarialRequest): SimulacionActuarialResponse {
+  async simularRiesgo(solicitud: SimulacionActuarialRequest): Promise<SimulacionActuarialResponse> {
     if (!tieneIncertidumbre(solicitud)) {
       throw new BadRequestException({
         code: CodigoError.SIMULACION_SIN_INCERTIDUMBRE,
@@ -23,7 +22,7 @@ export class ActuarialService {
       });
     }
     try {
-      return simularRiesgo(solicitud);
+      return await simularRiesgoAsync(solicitud);
     } catch (error) {
       return traducirErrorDominio(error);
     }

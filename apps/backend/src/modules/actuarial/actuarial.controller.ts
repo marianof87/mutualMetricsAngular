@@ -16,10 +16,10 @@ export class ActuarialController {
 
   @Post('simulaciones')
   @HttpCode(200)
-  simular(
+  async simular(
     @Body(new ZodValidationPipe(SimulacionActuarialRequestSchema))
     solicitud: SimulacionActuarialRequest,
-  ): SimulacionActuarialResponse {
-    return this.servicio.simularRiesgo(solicitud);
+  ): Promise<SimulacionActuarialResponse> {
+    return await this.servicio.simularRiesgo(solicitud);
   }
 }

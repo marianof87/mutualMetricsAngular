@@ -26,7 +26,7 @@ describe('ActuarialService', () => {
 
   const solicitud: SimulacionActuarialRequest = {
     coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-    coeficienteB: 120,
+    coeficienteB: { tipo: 'fijo', valor: 120 },
     coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
     precioMinimo: 10,
     precioMaximo: 100,

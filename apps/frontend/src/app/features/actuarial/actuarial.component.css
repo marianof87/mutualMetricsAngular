@@ -234,3 +234,29 @@
   height: 320px;
   width: 100%;
 }
+
+@media (max-width: 600px) {
+  .actuarial-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .actuarial-title {
+    font-size: 1.8rem;
+  }
+
+  .chart-wrapper {
+    height: 250px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .percentiles-row {
+    gap: 0.35rem;
+  }
+
+  .percentil-chip {
+    padding: 0.25rem 0.6rem;
+  }
+}

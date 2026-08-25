@@ -14,11 +14,11 @@ describe('ActuarialService', () => {
     servicio = modulo.get<ActuarialService>(ActuarialService);
   });
 
-  it('rechaza una solicitud sin incertidumbre con el código SIMULACION_SIN_INCERTIDUMBRE', () => {
-    expect(() =>
+  it('rechaza una solicitud sin incertidumbre con el código SIMULACION_SIN_INCERTIDUMBRE', async () => {
+    await expect(
       servicio.simularRiesgo({
         coeficienteA: { tipo: 'fijo', valor: -2 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -26,7 +26,7 @@ describe('ActuarialService', () => {
         nivelConfianza: 0.95,
         semilla: 1,
       }),
-    ).toThrow(
+    ).rejects.toThrow(
       new BadRequestException({
         code: CodigoError.SIMULACION_SIN_INCERTIDUMBRE,
         message: 'Al menos un coeficiente debe ser estocástico para simular riesgo.',
@@ -34,10 +34,10 @@ describe('ActuarialService', () => {
     );
   });
 
-  it('delega al dominio y devuelve la simulación cuando hay incertidumbre', () => {
-    const resultado = servicio.simularRiesgo({
+  it('delega al dominio y devuelve la simulación cuando hay incertidumbre', async () => {
+    const resultado = await servicio.simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -53,10 +53,10 @@ describe('ActuarialService', () => {
     expect(resultado.curvaRiesgo.length).toBeGreaterThan(10);
   });
 
-  it('acepta una solicitud con A y C fijos si B es estocástico (preparado para v2)', () => {
-    const resultado = servicio.simularRiesgo({
+  it('acepta una solicitud con A y C fijos si B es estocástico (preparado para v2)', async () => {
+    const resultado = await servicio.simularRiesgo({
       coeficienteA: { tipo: 'fijo', valor: -2 },
-      coeficienteB: { tipo: 'triangular', minimo: 100, moda: 120, maximo: 140 } as never,
+      coeficienteB: { tipo: 'triangular', minimo: 100, moda: 120, maximo: 140 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,

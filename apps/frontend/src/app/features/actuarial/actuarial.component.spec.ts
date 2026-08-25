@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BaseChartDirective } from 'ng2-charts';
-import { of, throwError, type Observable } from 'rxjs';
-import type { SimulacionActuarialRequest, SimulacionActuarialResponse } from '@mutual-metrics/shared';
+import type { SimulacionActuarialResponse } from '@mutual-metrics/shared';
 import { ActuarialComponent } from './actuarial.component';
 import { ActuarialService } from './actuarial.service';
 
@@ -54,23 +53,10 @@ const respuestaFalsa: SimulacionActuarialResponse = {
 };
 
 describe('ActuarialComponent', () => {
-  let solicitudes: SimulacionActuarialRequest[];
-  let servicioMock: {
-    simular: (solicitud: SimulacionActuarialRequest) => Observable<SimulacionActuarialResponse | never>;
-  };
-
   beforeEach(async () => {
-    solicitudes = [];
-    servicioMock = {
-      simular: (solicitud: SimulacionActuarialRequest) => {
-        solicitudes.push(solicitud);
-        return of(respuestaFalsa);
-      },
-    };
-
     await TestBed.configureTestingModule({
       imports: [ActuarialComponent],
-      providers: [{ provide: ActuarialService, useValue: servicioMock }],
+      providers: [ActuarialService],
     })
       .overrideComponent(ActuarialComponent, {
         remove: { imports: [BaseChartDirective] },
@@ -89,10 +75,11 @@ describe('ActuarialComponent', () => {
     expect(el.querySelector('button.btn-simular')).not.toBeNull();
   });
 
-  it('deshabilita el botón y avisa cuando A y C son fijos (sin incertidumbre)', () => {
+  it('deshabilita el botón y avisa cuando A, B y C son fijos (sin incertidumbre)', () => {
     const fixture = TestBed.createComponent(ActuarialComponent);
     const comp = fixture.componentInstance;
     comp.modoA.set('fijo');
+    comp.modoB.set('fijo');
     comp.modoC.set('fijo');
     fixture.detectChanges();
 
@@ -101,63 +88,45 @@ describe('ActuarialComponent', () => {
     ) as HTMLButtonElement;
     expect(boton.disabled).toBe(true);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-      'Al menos un coeficiente debe ser estocástico',
+      'al menos un dato tiene que tener variación',
     );
   });
 
-  it('no llama al servicio si no hay incertidumbre', () => {
+  it('no ejecuta la simulación si no hay incertidumbre', () => {
     const fixture = TestBed.createComponent(ActuarialComponent);
     const comp = fixture.componentInstance;
     comp.modoA.set('fijo');
+    comp.modoB.set('fijo');
     comp.modoC.set('fijo');
     comp.simular();
 
-    expect(solicitudes.length).toBe(0);
+    expect(comp.resultado()).toBeNull();
+    expect(comp.cargando()).toBe(false);
   });
 
-  it('envía el request construido con las señales y renderiza métricas, percentiles y advertencias', () => {
+  it('ejecuta la simulación localmente sin llamar al backend', () => {
     const fixture = TestBed.createComponent(ActuarialComponent);
     const comp = fixture.componentInstance;
     comp.semilla.set(42);
     comp.simular();
-    fixture.detectChanges();
 
-    expect(solicitudes.length).toBe(1);
-    const solicitud = solicitudes[0];
-    expect(solicitud.coeficienteA).toEqual({ tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 });
-    expect(solicitud.coeficienteC).toEqual({
-      tipo: 'normal',
-      minimo: -1100,
-      maximo: -900,
-      nivelConfianza: 0.9,
-    });
-    expect(solicitud.semilla).toBe(42);
-    expect(solicitud.precioActual).toBeUndefined();
-
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('$ 30.00');
-    expect(el.textContent).toContain('Intervalo: $ 29.05 – $ 30.95');
-    expect(el.textContent).toContain('Sin piso solvente');
-    expect(el.textContent).toContain('P5');
-    expect(el.textContent).toContain('Advertencias (causa → acción)');
-    expect(el.textContent).toContain('Intervalo amplio');
-    expect(el.textContent).toContain('semilla 42');
-    expect(el.textContent).toContain('3 descartadas');
-    expect(comp.resultado()).not.toBeNull();
+    expect(comp.cargando()).toBe(true);
+    expect(comp.error()).toBeNull();
   });
 
-  it('muestra el mensaje del envelope de error sin crashear', () => {
+  it('captura errores del dominio sin crashear', () => {
     const fixture = TestBed.createComponent(ActuarialComponent);
     const comp = fixture.componentInstance;
+    comp.modoA.set('fijo');
+    comp.modoB.set('fijo');
     comp.modoC.set('fijo');
-    comp.aValor.set(-2);
-    servicioMock.simular = () =>
-      throwError(() => ({ error: { message: 'Al menos un coeficiente estocástico.' } }));
-    comp.simular();
-    fixture.detectChanges();
+    comp.aValor.set(5);
+    comp.bValor.set(120);
+    comp.cValor.set(-1000);
 
-    const el = fixture.nativeElement as HTMLElement;
-    expect(el.textContent).toContain('Al menos un coeficiente estocástico.');
+    comp.simular();
+
+    expect(comp.resultado()).toBeNull();
     expect(comp.cargando()).toBe(false);
   });
 

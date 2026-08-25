@@ -55,10 +55,10 @@ export const ParametroEstocasticoSchema = z
 export type ParametroEstocastico = z.infer<typeof ParametroEstocasticoSchema>;
 
 // Solicitud de simulación actuarial (Monte Carlo) sobre la parábola de ganancia
-// G(P) = A·P² + B·P + C. Solo A y C pueden ser estocásticos en v1.
+// G(P) = A·P² + B·P + C. Los tres coeficientes pueden ser estocásticos.
 export const SimulacionActuarialRequestSchema = z.object({
   coeficienteA: ParametroEstocasticoSchema,
-  coeficienteB: z.number(),
+  coeficienteB: ParametroEstocasticoSchema,
   coeficienteC: ParametroEstocasticoSchema,
   precioMinimo: z.number().min(0, 'El precio mínimo no puede ser negativo'),
   precioMaximo: z.number().positive('El precio máximo debe ser mayor a 0'),
@@ -67,7 +67,7 @@ export const SimulacionActuarialRequestSchema = z.object({
     .number()
     .int()
     .min(100, 'El mínimo de simulaciones es 100')
-    .max(100000, 'El máximo de simulaciones es 100.000')
+    .max(25000, 'El máximo de simulaciones es 25.000')
     .default(10000),
   nivelConfianza: z
     .number()
@@ -117,3 +117,19 @@ export const SimulacionActuarialResponseSchema = z.object({
 });
 
 export type SimulacionActuarialResponse = z.infer<typeof SimulacionActuarialResponseSchema>;
+
+// Guardado de simulación actuarial (resumen) vinculada a un Lead.
+export const GuardarSimulacionActuarialSchema = z.object({
+  leadId: z.string().uuid().optional(),
+  coeficienteBTipo: z.enum(['fijo', 'estocástico']),
+  nSimulaciones: z.number().int().positive(),
+  nivelConfianza: z.number().min(0.8).max(0.99),
+  precioOptimoMedia: z.number(),
+  precioOptimoP5: z.number(),
+  precioOptimoP95: z.number(),
+  pisoSolvencia: z.number().nullable(),
+  probPerdidaOptimo: z.number().min(0).max(1),
+  probPerdidaActual: z.number().min(0).max(1).nullable(),
+});
+
+export type GuardarSimulacionActuarial = z.infer<typeof GuardarSimulacionActuarialSchema>;

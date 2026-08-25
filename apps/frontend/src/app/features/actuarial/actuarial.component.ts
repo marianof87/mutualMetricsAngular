@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import type {
-  EnvelopeError,
   ParametroEstocastico,
   SimulacionActuarialResponse,
 } from '@mutual-metrics/shared';
+import { simularRiesgoAsync } from '@mutual-metrics/shared';
 import { ActuarialService } from './actuarial.service';
 
 type ModoParametro = 'fijo' | 'triangular' | 'normal';
@@ -29,7 +29,13 @@ export class ActuarialComponent {
   aMaximo = signal(-1);
   aValor = signal(-2);
 
-  coeficienteB = signal(120);
+  // Coeficiente B — demanda base (estocástico)
+  modoB = signal<ModoParametro>('fijo');
+  bMinimo = signal(100);
+  bModa = signal(120);
+  bMaximo = signal(140);
+  bValor = signal(120);
+  bConfianza = signal(0.9);
 
   // Coeficiente C — término independiente neto (costos fijos con signo; estocástico)
   modoC = signal<ModoParametro>('normal');
@@ -51,7 +57,7 @@ export class ActuarialComponent {
   resultado = signal<SimulacionActuarialResponse | null>(null);
 
   sinIncertidumbre = computed(
-    () => this.modoA() === 'fijo' && this.modoC() === 'fijo',
+    () => this.modoA() === 'fijo' && this.modoB() === 'fijo' && this.modoC() === 'fijo',
   );
 
   curvaData = computed<ChartConfiguration<'line'>['data']>(() => {
@@ -75,17 +81,30 @@ export class ActuarialComponent {
   opcionesCurva: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
     plugins: {
-      legend: { labels: { color: '#f8f9fa' } },
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const precio = context.label;
+            const prob = context.parsed.y;
+            return `A $${precio}: ${prob}% de probabilidad de pérdida`;
+          },
+        },
+      },
     },
     scales: {
       x: {
         title: { display: true, text: 'Precio', color: '#f0932b' },
         grid: { color: 'rgba(255, 255, 255, 0.05)' },
-        ticks: { color: '#a0a5b8' },
+        ticks: { color: '#a0a5b8', maxTicksLimit: 10 },
       },
       y: {
-        title: { display: true, text: 'P(pérdida) %', color: '#f0932b' },
+        title: { display: true, text: 'Riesgo de pérdida %', color: '#f0932b' },
         grid: { color: 'rgba(255, 255, 255, 0.05)' },
         ticks: { color: '#a0a5b8' },
         min: 0,
@@ -98,6 +117,10 @@ export class ActuarialComponent {
     this.modoA.set(modo as ModoParametro);
   }
 
+  cambiarModoB(modo: string): void {
+    this.modoB.set(modo as ModoParametro);
+  }
+
   cambiarModoC(modo: string): void {
     this.modoC.set(modo as ModoParametro);
   }
@@ -107,7 +130,22 @@ export class ActuarialComponent {
     this.cargando.set(true);
     this.error.set(null);
 
-    const solicitud = {
+    const solicitud = this.construirSolicitud();
+
+    setTimeout(async () => {
+      try {
+        const resultado = await simularRiesgoAsync(solicitud);
+        this.resultado.set(resultado);
+      } catch (e) {
+        this.error.set(e instanceof Error ? e.message : 'No se pudo completar la simulación.');
+      } finally {
+        this.cargando.set(false);
+      }
+    }, 0);
+  }
+
+  private construirSolicitud() {
+    return {
       coeficienteA: this.construirParametro(
         this.modoA(),
         this.aValor(),
@@ -116,7 +154,14 @@ export class ActuarialComponent {
         this.aMaximo(),
         0.9,
       ),
-      coeficienteB: this.coeficienteB(),
+      coeficienteB: this.construirParametro(
+        this.modoB(),
+        this.bValor(),
+        this.bMinimo(),
+        this.bModa(),
+        this.bMaximo(),
+        this.bConfianza(),
+      ),
       coeficienteC: this.construirParametro(
         this.modoC(),
         this.cValor(),
@@ -132,17 +177,6 @@ export class ActuarialComponent {
       nivelConfianza: this.nivelConfianza(),
       semilla: this.semilla() ?? undefined,
     };
-
-    this.servicio.simular(solicitud).subscribe({
-      next: (respuesta) => {
-        this.resultado.set(respuesta);
-        this.cargando.set(false);
-      },
-      error: (error: EnvelopeError) => {
-        this.error.set(error.error?.message ?? 'No se pudo completar la simulación.');
-        this.cargando.set(false);
-      },
-    });
   }
 
   private construirParametro(

@@ -16,11 +16,11 @@ import type { SimulacionActuarialRequest } from '@mutual-metrics/shared';
 
 const solicitud: SimulacionActuarialRequest = {
   coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-  coeficienteB: 120,
+  coeficienteB: { tipo: 'fijo', valor: 120 },
   coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
   precioMinimo: 10,
   precioMaximo: 100,
-  nSimulaciones: 100000,
+  nSimulaciones: 25000,
   nivelConfianza: 0.95,
   semilla: 42,
 };
@@ -56,9 +56,9 @@ async function principal(): Promise<void> {
   const p95 = latencias[Math.floor(latencias.length * 0.95)] ?? latencias.at(-1);
   const memoriaFinal = process.memoryUsage().heapUsed;
 
-  const todasIguales = resultados.every((r) => r.semilla === 42 && r.nSimulaciones === 100000);
+  const todasIguales = resultados.every((r) => r.semilla === 42 && r.nSimulaciones === 25000);
 
-  console.log('Benchmark concurrencia (5 x N=100.000 en paralelo):');
+  console.log('Benchmark concurrencia (5 x N=25.000 en paralelo):');
   console.log(`  total: ${(fin - inicio).toFixed(0)} ms | p95 por request: ${p95.toFixed(0)} ms`);
   console.log(
     `  heap: +${((memoriaFinal - memoriaInicial) / 1024 / 1024).toFixed(1)} MB ` +

@@ -30,7 +30,7 @@ describe('ActuarialController (integración HTTP)', () => {
 
   const solicitudValida: SimulacionActuarialRequest = {
     coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-    coeficienteB: 120,
+    coeficienteB: { tipo: 'fijo', valor: 120 },
     coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
     precioMinimo: 10,
     precioMaximo: 100,
@@ -102,7 +102,7 @@ describe('ActuarialController (integración HTTP)', () => {
       .post('/actuarial/simulaciones')
       .send({
         coeficienteA: { tipo: 'fijo', valor: -2 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -120,7 +120,7 @@ describe('ActuarialController (integración HTTP)', () => {
       .post('/actuarial/simulaciones')
       .send({
         coeficienteA: { tipo: 'normal', minimo: 0, maximo: 1, nivelConfianza: 0.9 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -171,7 +171,7 @@ describe('ActuarialController (unitario)', () => {
     };
 
     const servicioMock = {
-      simularRiesgo: jest.fn().mockReturnValue(respuestaMock),
+      simularRiesgo: jest.fn().mockResolvedValue(respuestaMock),
     };
 
     const modulo: TestingModule = await Test.createTestingModule({
@@ -182,10 +182,10 @@ describe('ActuarialController (unitario)', () => {
     controlador = modulo.get<ActuarialController>(ActuarialController);
   });
 
-  it('delega en el servicio y devuelve el resultado de la simulación', () => {
+  it('delega en el servicio y devuelve el resultado de la simulación', async () => {
     const solicitud: SimulacionActuarialRequest = {
       coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -194,7 +194,7 @@ describe('ActuarialController (unitario)', () => {
       semilla: 42,
     };
 
-    const resultado = controlador.simular(solicitud);
+    const resultado = await controlador.simular(solicitud);
 
     expect(resultado.nSimulaciones).toBe(10000);
     expect(resultado.precioOptimo.intervalo).toEqual({ minimo: 29.05, maximo: 30.95 });

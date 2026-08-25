@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { simularRiesgo, tieneIncertidumbre } from './monteCarlo';
+import { simularRiesgo, simularRiesgoAsync, tieneIncertidumbre } from './monteCarlo';
 import type { SimulacionActuarialRequest } from '../../dtos/actuarial';
 
 describe('simularRiesgo — caso determinístico (todo fijo)', () => {
   const solicitud: SimulacionActuarialRequest = {
     coeficienteA: { tipo: 'fijo', valor: -2 },
-    coeficienteB: 120,
+    coeficienteB: { tipo: 'fijo', valor: 120 },
     coeficienteC: { tipo: 'fijo', valor: -1000 },
     precioMinimo: 10,
     precioMaximo: 100,
@@ -51,7 +51,7 @@ describe('simularRiesgo — reproducibilidad', () => {
   it('la misma semilla produce exactamente la misma respuesta', () => {
     const base: SimulacionActuarialRequest = {
       coeficienteA: { tipo: 'triangular', minimo: -2.05, moda: -2, maximo: -1.95 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'triangular', minimo: -1050, moda: -1000, maximo: -950 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -67,7 +67,7 @@ describe('simularRiesgo — reproducibilidad', () => {
   it('semillas distintas producen respuestas distintas', () => {
     const base: SimulacionActuarialRequest = {
       coeficienteA: { tipo: 'triangular', minimo: -2.05, moda: -2, maximo: -1.95 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'triangular', minimo: -1050, moda: -1000, maximo: -950 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -85,7 +85,7 @@ describe('simularRiesgo — Monte Carlo con incertidumbre chica', () => {
   it('la media del precio óptimo converge a -B/(2·E[A]) = 30 y la ganancia a 800', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -2.05, moda: -2, maximo: -1.95 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'triangular', minimo: -1050, moda: -1000, maximo: -950 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -110,7 +110,7 @@ describe('simularRiesgo — probabilidad de pérdida calculada a mano', () => {
   it('estima la probabilidad de pérdida con tolerancia sobre el valor teórico', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -4, moda: -3, maximo: -2 },
-      coeficienteB: 100,
+      coeficienteB: { tipo: 'fijo', valor: 100 },
       coeficienteC: { tipo: 'fijo', valor: -900 },
       precioMinimo: 5,
       precioMaximo: 40,
@@ -125,7 +125,7 @@ describe('simularRiesgo — probabilidad de pérdida calculada a mano', () => {
   it('sin piso solvente para el nivel de confianza, reporta null y advierte', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -4, moda: -3, maximo: -2 },
-      coeficienteB: 100,
+      coeficienteB: { tipo: 'fijo', valor: 100 },
       coeficienteC: { tipo: 'fijo', valor: -900 },
       precioMinimo: 5,
       precioMaximo: 40,
@@ -149,7 +149,7 @@ describe('simularRiesgo — muestras degeneradas', () => {
     const resultado = simularRiesgo({
       // Rango 100% inválido: sensibilidad positiva en todo el rango.
       coeficienteA: { tipo: 'triangular', minimo: 1, moda: 2, maximo: 3 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -166,7 +166,7 @@ describe('simularRiesgo — muestras degeneradas', () => {
     const resultado = simularRiesgo({
       // La cola positiva (A > 0) existe con baja probabilidad: 0.1^3-ish dentro de la triangular.
       coeficienteA: { tipo: 'triangular', minimo: -0.02, moda: -0.01, maximo: 0.02 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -186,7 +186,7 @@ describe('tieneIncertidumbre', () => {
     expect(
       tieneIncertidumbre({
         coeficienteA: { tipo: 'fijo', valor: -2 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -200,7 +200,7 @@ describe('tieneIncertidumbre', () => {
     expect(
       tieneIncertidumbre({
         coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -214,7 +214,7 @@ describe('tieneIncertidumbre', () => {
     expect(
       tieneIncertidumbre({
         coeficienteA: { tipo: 'fijo', valor: -2 },
-        coeficienteB: 120,
+        coeficienteB: { tipo: 'fijo', valor: 120 },
         coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -228,7 +228,7 @@ describe('tieneIncertidumbre', () => {
     expect(
       tieneIncertidumbre({
         coeficienteA: { tipo: 'fijo', valor: -2 },
-        coeficienteB: { tipo: 'triangular', minimo: 100, moda: 120, maximo: 140 } as never,
+        coeficienteB: { tipo: 'triangular', minimo: 100, moda: 120, maximo: 140 },
         coeficienteC: { tipo: 'fijo', valor: -1000 },
         precioMinimo: 10,
         precioMaximo: 100,
@@ -243,7 +243,7 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
   it('cumple P5 <= P50 <= P95 en los resúmenes de distribución', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -265,7 +265,7 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
   it('mantiene la probabilidad de pérdida en [0, 1] y muestrasInvalidas como entero >= 0', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -0.02, moda: -0.01, maximo: 0.02 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -292,7 +292,7 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
   it('no produce NaN ni infinitos en ningún campo numérico', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'normal', minimo: -5, maximo: -0.5, nivelConfianza: 0.9 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'triangular', minimo: -2000, moda: -1000, maximo: -500 },
       precioMinimo: 5,
       precioMaximo: 200,
@@ -322,7 +322,7 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
   it('reporta pisoSolvencia como null o un número no negativo', () => {
     const resultado = simularRiesgo({
       coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -332,5 +332,40 @@ describe('simularRiesgo — invariantes de la respuesta', () => {
     });
 
     expect(resultado.pisoSolvencia === null || resultado.pisoSolvencia >= 0).toBe(true);
+  });
+});
+
+describe('simularRiesgoAsync — equivalencia con la versión síncrona', () => {
+  const solicitud: SimulacionActuarialRequest = {
+    coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
+    coeficienteB: { tipo: 'fijo', valor: 120 },
+    coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
+    precioMinimo: 10,
+    precioMaximo: 100,
+    nSimulaciones: 10000,
+    nivelConfianza: 0.95,
+    semilla: 42,
+  };
+
+  it('produce exactamente la misma respuesta que simularRiesgo para la misma semilla', async () => {
+    const sync = simularRiesgo(solicitud);
+    const async_ = await simularRiesgoAsync(solicitud);
+    expect(async_).toEqual(sync);
+  });
+
+  it('mantiene invariantes de la respuesta (sin NaN, percentiles ordenados)', async () => {
+    const resultado = await simularRiesgoAsync({
+      ...solicitud,
+      nSimulaciones: 15000,
+      semilla: 99,
+    });
+
+    expect(Number.isFinite(resultado.precioOptimo.media)).toBe(true);
+    const p5 = resultado.precioOptimo.percentiles['5'];
+    const p50 = resultado.precioOptimo.percentiles['50'];
+    const p95 = resultado.precioOptimo.percentiles['95'];
+    expect(p5).toBeLessThanOrEqual(p50);
+    expect(p50).toBeLessThanOrEqual(p95);
+    expect(resultado.curvaRiesgo.length).toBe(50);
   });
 });

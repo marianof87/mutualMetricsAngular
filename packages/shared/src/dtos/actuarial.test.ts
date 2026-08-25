@@ -6,7 +6,7 @@ import {
 
 const solicitudValida = {
   coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
-  coeficienteB: 120,
+  coeficienteB: { tipo: 'fijo', valor: 120 },
   coeficienteC: { tipo: 'normal', minimo: -1100, maximo: -900, nivelConfianza: 0.9 },
   precioMinimo: 10,
   precioMaximo: 100,
@@ -25,7 +25,7 @@ describe('SimulacionActuarialRequestSchema', () => {
   it('aplica los defaults de nSimulaciones y nivelConfianza', () => {
     const { nSimulaciones, nivelConfianza } = SimulacionActuarialRequestSchema.parse({
       coeficienteA: { tipo: 'fijo', valor: -2 },
-      coeficienteB: 120,
+      coeficienteB: { tipo: 'fijo', valor: 120 },
       coeficienteC: { tipo: 'fijo', valor: -1000 },
       precioMinimo: 10,
       precioMaximo: 100,
@@ -70,13 +70,13 @@ describe('SimulacionActuarialRequestSchema', () => {
     expect(conMaximoNegativo.success).toBe(false);
   });
 
-  it('rechaza nSimulaciones fuera del rango [100, 100000]', () => {
+  it('rechaza nSimulaciones fuera del rango [100, 25000]', () => {
     const nChico = SimulacionActuarialRequestSchema.safeParse({ ...solicitudValida, nSimulaciones: 99 });
     expect(nChico.success).toBe(false);
 
     const nGrande = SimulacionActuarialRequestSchema.safeParse({
       ...solicitudValida,
-      nSimulaciones: 100001,
+      nSimulaciones: 25001,
     });
     expect(nGrande.success).toBe(false);
   });

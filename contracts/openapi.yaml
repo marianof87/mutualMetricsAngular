@@ -458,8 +458,8 @@ components:
           $ref: "#/components/schemas/ParametroEstocastico"
           description: Sensibilidad de la demanda (estocástico; A >= 0 degenera la parábola)
         coeficienteB:
-          type: number
-          description: Término lineal (fijo en v1)
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Demanda base (estocástico; unidades que vende el negocio)
         coeficienteC:
           $ref: "#/components/schemas/ParametroEstocastico"
           description: Término independiente neto (costos fijos incluidos; puede ser negativo)
@@ -469,7 +469,7 @@ components:
         nSimulaciones:
           type: integer
           minimum: 100
-          maximum: 100000
+          maximum: 25000
           default: 10000
         nivelConfianza:
           type: number
