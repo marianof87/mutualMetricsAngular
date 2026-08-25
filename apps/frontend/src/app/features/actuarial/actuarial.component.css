@@ -235,6 +235,38 @@
   width: 100%;
 }
 
+.guardado-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.btn-guardar {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: var(--mm-radius-md);
+  background: var(--mm-color-advertencia);
+  color: #1a1a2e;
+  font-size: var(--mm-font-size-sm);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-guardar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guardado-error {
+  color: var(--mm-color-error);
+  font-size: var(--mm-font-size-sm);
+}
+
 @media (max-width: 600px) {
   .actuarial-container {
     padding: 1.5rem 1rem;

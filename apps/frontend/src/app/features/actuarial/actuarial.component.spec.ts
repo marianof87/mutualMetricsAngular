@@ -1,10 +1,16 @@
 import { Component, Input } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { BaseChartDirective } from 'ng2-charts';
 import { vi } from 'vitest';
 import type { SimulacionActuarialResponse } from '@mutual-metrics/shared';
 import { ActuarialComponent } from './actuarial.component';
 import { ActuarialService } from './actuarial.service';
+import { entorno } from '../../core/configuracion/entorno';
 
 // Stub del gráfico: jsdom no implementa canvas 2D, evitamos romper el test.
 @Component({
@@ -145,20 +151,25 @@ describe('ActuarialComponent', () => {
 });
 
 describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
+  let http: HttpTestingController;
+
   beforeEach(async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     await TestBed.configureTestingModule({
       imports: [ActuarialComponent],
-      providers: [ActuarialService],
+      providers: [ActuarialService, provideHttpClient(), provideHttpClientTesting()],
     })
       .overrideComponent(ActuarialComponent, {
         remove: { imports: [BaseChartDirective] },
         add: { imports: [CanvasStubDirective] },
       })
       .compileComponents();
+
+    http = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
+    http.verify();
     vi.useRealTimers();
   });
 
@@ -204,5 +215,33 @@ describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
     expect(comp.error()).toBeNull();
     expect(comp.resultado()).not.toBeNull();
     expect(comp.resultado()!.muestrasInvalidas).toBe(100);
+  });
+
+  it('guardarResultado hace POST al endpoint de guardar con el payload del resumen', async () => {
+    const fixture = TestBed.createComponent(ActuarialComponent);
+    const comp = fixture.componentInstance;
+    comp.semilla.set(42);
+    comp.nSimulaciones.set(100);
+
+    comp.simular();
+
+    for (let i = 0; i < 20; i++) {
+      await vi.advanceTimersByTimeAsync(0);
+    }
+    fixture.detectChanges();
+
+    expect(comp.resultado()).not.toBeNull();
+    expect(comp.guardado()).toBe('pendiente');
+
+    comp.guardarResultado();
+    expect(comp.guardado()).toBe('guardando');
+
+    const peticion = http.expectOne(`${entorno.apiBaseUrl}/actuarial/simulaciones/guardar`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body.coeficienteBTipo).toBe('fijo');
+    expect(peticion.request.body.nSimulaciones).toBe(100);
+    peticion.flush({ id: 'uuid-test' });
+
+    expect(comp.guardado()).toBe('ok');
   });
 });

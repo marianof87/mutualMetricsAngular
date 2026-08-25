@@ -112,6 +112,33 @@ describe('ActuarialPersistenciaService', () => {
     expect(llamada.data.leadId).toBeNull();
   });
 
+  it('guarda desde resumen (guardarDesdeResumen) con payload Zod directo', async () => {
+    const payload = {
+      leadId: 'uuid-lead-2',
+      coeficienteBTipo: 'estocástico' as const,
+      nSimulaciones: 10000,
+      nivelConfianza: 0.95,
+      precioOptimoMedia: 30,
+      precioOptimoP5: 28,
+      precioOptimoP95: 32,
+      pisoSolvencia: 10.2,
+      probPerdidaOptimo: 0.05,
+      probPerdidaActual: 0.1,
+    };
+
+    const resultado = await servicio.guardarDesdeResumen(payload);
+
+    expect(resultado.id).toBe('uuid-falso');
+    expect(prismaMock.simulacionActuarial.create).toHaveBeenCalledTimes(1);
+
+    const llamada = prismaMock.simulacionActuarial.create.mock.calls[0][0];
+    expect(llamada.data.leadId).toBe('uuid-lead-2');
+    expect(llamada.data.coeficienteBTipo).toBe('estocástico');
+    expect(llamada.data.nSimulaciones).toBe(10000);
+    expect(llamada.data.precioOptimoP5).toBe(28);
+    expect(llamada.data.precioOptimoP95).toBe(32);
+  });
+
   it('usa intervalo.minimo/maximo como fallback cuando percentiles están vacíos', async () => {
     const resultadoSinPercentiles: SimulacionActuarialResponse = {
       ...resultadoMock,

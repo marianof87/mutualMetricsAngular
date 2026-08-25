@@ -174,6 +174,31 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
+  /actuarial/simulaciones/guardar:
+    post:
+      tags: [actuarial]
+      summary: Guarda el resumen de una corrida actuarial (Monte Carlo) vinculada a un Lead opcional.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GuardarSimulacionActuarial" }
+      responses:
+        "201":
+          description: Simulación guardada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id: { type: string, format: uuid }
+        "422":
+          description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
   # ================ Slice 4 — Escenarios ================
   /escenarios:
     get:
@@ -539,6 +564,37 @@ components:
           type: array
           items: { type: string }
           description: Causas y acciones sugeridas (OBJ-2), nunca números falsos
+
+    GuardarSimulacionActuarial:
+      type: object
+      required:
+        [coeficienteBTipo, nSimulaciones, nivelConfianza, precioOptimoMedia,
+         precioOptimoP5, precioOptimoP95, pisoSolvencia, probPerdidaOptimo,
+         probPerdidaActual]
+      properties:
+        leadId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Lead vinculado (opcional; null si la simulación es anónima)
+        coeficienteBTipo:
+          type: string
+          enum: [fijo, estocástico]
+          description: Tipo del coeficiente B usado en la corrida
+        nSimulaciones: { type: integer, minimum: 1 }
+        nivelConfianza: { type: number, minimum: 0.8, maximum: 0.99 }
+        precioOptimoMedia: { type: number }
+        precioOptimoP5: { type: number, description: Percentil 5 del precio óptimo }
+        precioOptimoP95: { type: number, description: Percentil 95 del precio óptimo }
+        pisoSolvencia:
+          type: number
+          nullable: true
+        probPerdidaOptimo: { type: number, minimum: 0, maximum: 1 }
+        probPerdidaActual:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
 
     Escenario:
       type: object

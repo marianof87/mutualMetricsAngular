@@ -4,6 +4,7 @@ import request from 'supertest';
 import { FiltroExcepcionesGlobal } from '../../comunes/filtros/filtro-excepciones.filtro';
 import { ActuarialController } from './actuarial.controller';
 import { ActuarialService } from './actuarial.service';
+import { ActuarialPersistenciaService } from './actuarial-persistencia.service';
 import type {
   SimulacionActuarialRequest,
   SimulacionActuarialResponse,
@@ -14,9 +15,16 @@ describe('ActuarialController (integración HTTP)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
+    const persistenciaMock = {
+      guardarDesdeResumen: jest.fn().mockResolvedValue({ id: 'uuid-guardado' }),
+    };
+
     const modulo: TestingModule = await Test.createTestingModule({
       controllers: [ActuarialController],
-      providers: [ActuarialService],
+      providers: [
+        ActuarialService,
+        { provide: ActuarialPersistenciaService, useValue: persistenciaMock },
+      ],
     }).compile();
 
     app = modulo.createNestApplication();
@@ -132,6 +140,25 @@ describe('ActuarialController (integración HTTP)', () => {
     expect(res.body.muestrasInvalidas).toBe(500);
     expect(res.body.advertencias[0]).toContain('Ningún escenario fue aprovechable');
   });
+
+  it('POST /actuarial/simulaciones/guardar responde 201 con el id del registro', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/actuarial/simulaciones/guardar')
+      .send({
+        coeficienteBTipo: 'fijo',
+        nSimulaciones: 1000,
+        nivelConfianza: 0.95,
+        precioOptimoMedia: 30,
+        precioOptimoP5: 28,
+        precioOptimoP95: 32,
+        pisoSolvencia: 10.2,
+        probPerdidaOptimo: 0.05,
+        probPerdidaActual: 0.1,
+      })
+      .expect(201);
+
+    expect(res.body.id).toBe('uuid-guardado');
+  });
 });
 
 describe('ActuarialController (unitario)', () => {
@@ -174,9 +201,16 @@ describe('ActuarialController (unitario)', () => {
       simularRiesgo: jest.fn().mockResolvedValue(respuestaMock),
     };
 
+    const persistenciaMock = {
+      guardarDesdeResumen: jest.fn().mockResolvedValue({ id: 'uuid-unitario' }),
+    };
+
     const modulo: TestingModule = await Test.createTestingModule({
       controllers: [ActuarialController],
-      providers: [{ provide: ActuarialService, useValue: servicioMock }],
+      providers: [
+        { provide: ActuarialService, useValue: servicioMock },
+        { provide: ActuarialPersistenciaService, useValue: persistenciaMock },
+      ],
     }).compile();
 
     controlador = modulo.get<ActuarialController>(ActuarialController);

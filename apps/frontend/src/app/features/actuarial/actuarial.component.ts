@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import type {
+  GuardarSimulacionActuarial,
   ParametroEstocastico,
   SimulacionActuarialResponse,
 } from '@mutual-metrics/shared';
@@ -55,6 +56,7 @@ export class ActuarialComponent {
   cargando = signal(false);
   error = signal<string | null>(null);
   resultado = signal<SimulacionActuarialResponse | null>(null);
+  guardado = signal<'pendiente' | 'guardando' | 'ok' | 'error'>('pendiente');
 
   sinIncertidumbre = computed(
     () => this.modoA() === 'fijo' && this.modoB() === 'fijo' && this.modoC() === 'fijo',
@@ -136,12 +138,43 @@ export class ActuarialComponent {
       try {
         const resultado = await simularRiesgoAsync(solicitud);
         this.resultado.set(resultado);
+        this.guardado.set('pendiente');
       } catch (e) {
         this.error.set(e instanceof Error ? e.message : 'No se pudo completar la simulación.');
       } finally {
         this.cargando.set(false);
       }
     }, 0);
+  }
+
+  guardarResultado(): void {
+    const resultado = this.resultado();
+    if (!resultado || this.guardado() === 'guardando') return;
+
+    this.guardado.set('guardando');
+
+    const solicitud = this.construirSolicitud();
+    const esEstocastico =
+      typeof solicitud.coeficienteB === 'object' && solicitud.coeficienteB.tipo !== 'fijo';
+
+    const payload: GuardarSimulacionActuarial = {
+      coeficienteBTipo: esEstocastico ? 'estocástico' : 'fijo',
+      nSimulaciones: resultado.nSimulaciones,
+      nivelConfianza: resultado.nivelConfianza,
+      precioOptimoMedia: resultado.precioOptimo.media,
+      precioOptimoP5:
+        resultado.precioOptimo.percentiles['5'] ?? resultado.precioOptimo.intervalo.minimo,
+      precioOptimoP95:
+        resultado.precioOptimo.percentiles['95'] ?? resultado.precioOptimo.intervalo.maximo,
+      pisoSolvencia: resultado.pisoSolvencia,
+      probPerdidaOptimo: resultado.probabilidadPerdida.enPrecioOptimo,
+      probPerdidaActual: resultado.probabilidadPerdida.enPrecioActual ?? null,
+    };
+
+    this.servicio.guardar(payload).subscribe({
+      next: () => this.guardado.set('ok'),
+      error: () => this.guardado.set('error'),
+    });
   }
 
   private construirSolicitud() {

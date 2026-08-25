@@ -45,4 +45,24 @@ export class ActuarialPersistenciaService {
     this.logger.log(`Simulación actuarial guardada: id=${registro.id} leadId=${leadId ?? 'ninguno'}`);
     return { id: registro.id };
   }
+
+  async guardarDesdeResumen(datos: GuardarSimulacionActuarial): Promise<{ id: string }> {
+    const registro = await this.prisma.simulacionActuarial.create({
+      data: {
+        leadId: datos.leadId ?? null,
+        coeficienteBTipo: datos.coeficienteBTipo,
+        nSimulaciones: datos.nSimulaciones,
+        nivelConfianza: datos.nivelConfianza,
+        precioOptimoMedia: datos.precioOptimoMedia,
+        precioOptimoP5: datos.precioOptimoP5,
+        precioOptimoP95: datos.precioOptimoP95,
+        pisoSolvencia: datos.pisoSolvencia,
+        probPerdidaOptimo: datos.probPerdidaOptimo,
+        probPerdidaActual: datos.probPerdidaActual,
+      },
+    });
+
+    this.logger.log(`Simulación actuarial guardada (resumen): id=${registro.id}`);
+    return { id: registro.id };
+  }
 }

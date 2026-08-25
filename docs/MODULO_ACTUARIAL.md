@@ -5,8 +5,7 @@ Documentación del módulo actuarial implementado en la rama `feature/cuadratica
 ## 1. Qué es
 
 El módulo actuarial agrega una capa de **riesgo e incertidumbre** sobre el simulador cuadrático de ganancia
-`G(P) = A·P² + B·P + C`. En lugar de asumir que `A` (sensibilidad de la demanda) y `C` (término
-independiente neto, costos fijos con signo) son números fijos, el dueño los declara con **rangos
+`G(P) = A·P² + B·P + C`. Los tres coeficientes (`A`, `B` y `C`) pueden declararse con **rangos
 probabilísticos** y el motor corre una **simulación Monte Carlo** que responde:
 
 - ¿Con 95% de certeza, entre qué precios está el óptimo?
@@ -21,8 +20,7 @@ con dos decimales, siempre un intervalo con su causa y una acción.
 
 ### 2.1 Parámetros estocásticos
 
-El coeficiente `A` (estocástico en v1) y `C` (estocástico en v1) se modelan con una de tres
-distribuciones (`B` queda fijo):
+Los coeficientes `A`, `B` y `C` se modelan con una de tres distribuciones:
 
 | Tipo | Campos | Uso |
 |---|---|---|
@@ -33,13 +31,19 @@ distribuciones (`B` queda fijo):
 Muestreo: transformada inversa (uniforme directa, triangular por tramos `F⁻¹(u)`, normal con Box-Muller).
 RNG determinista `mulberry32` con semilla — **misma semilla ⇒ mismo resultado**.
 
-### 2.2 Motor Monte Carlo (`simularRiesgo`)
+### 2.2 Motor Monte Carlo
 
-Por cada una de las `nSimulaciones` (default 10.000, rango 100–100.000):
+Existen dos variantes del motor, con la misma matemática:
 
-1. Sortear `aᵢ` y `cᵢ` de sus distribuciones.
+- **`simularRiesgo`** (síncrono): usado en tests unitarios del dominio. Bloquea el event loop.
+- **`simularRiesgoAsync`** (asíncrono): usado en producción (backend y frontend). Cede el control al
+  event loop cada `TAMANO_LOTE = 5000` iteraciones via `setTimeout(0)`, evitando bloqueos prolongados.
+
+Por cada una de las `nSimulaciones` (default 10.000, rango 100–25.000):
+
+1. Sortear `aᵢ`, `bᵢ` y `cᵢ` de sus distribuciones.
 2. Si `aᵢ ≥ 0` → muestra degenerada (demanda creciente con el precio): **se descarta y se cuenta** en `muestrasInvalidas`.
-3. Calcular `p* = clamp(−B/(2a), precioMinimo, precioMaximo)` y `g* = a·p*² + B·p* + c`.
+3. Calcular `p* = clamp(−bᵢ/(2aᵢ), precioMinimo, precioMaximo)` y `g* = aᵢ·p*² + bᵢ·p* + cᵢ`.
 4. Calcular el **piso de equilibrio** de la muestra (raíz menor ≥ 0 de `G(P)=0`; `null` si ningún precio cubre los costos).
 
 ### 2.3 Estadística sobre las muestras
@@ -59,11 +63,12 @@ Por cada una de las `nSimulaciones` (default 10.000, rango 100–100.000):
 
 | Capa | Ubicación | Responsabilidad |
 |---|---|---|
-| Dominio puro (compartido) | `packages/shared/src/dominio/actuarial/` | `distribuciones.ts` (RNG + muestreo + `cuantilNormal`), `estadistica.ts` (media, desvío muestral, percentil R-7, `aDosDecimales`), `monteCarlo.ts` (`simularRiesgo`). Sin dependencias de Nest/Prisma. |
-| Schemas compartidos | `packages/shared/src/dtos/actuarial.ts` | `ParametroEstocasticoSchema` (unión discriminada `fijo | triangular | normal` con `superRefine`), `SimulacionActuarialRequestSchema`, `SimulacionActuarialResponseSchema`. Tipos vía `z.infer`. |
-| Backend | `apps/backend/src/modules/actuarial/` | `POST /api/v1/actuarial/simulaciones`. El service **delega** la matemática en el dominio (no la duplica, a diferencia del anti-patrón de `optimizador.service.ts`) y valida la condición de negocio "al menos un coeficiente estocástico". |
-| Frontend | `apps/frontend/src/app/features/actuarial/` | `actuarial.service.ts` (patrón `contacto.service.ts`, `entorno.apiBaseUrl`), `actuarial.component.{ts,html,css}` con sliders de incertidumbre, tarjetas de resultados, percentiles, advertencias y gráfico de la curva de riesgo (chart.js). Ruta lazy `/actuarial` en `app.routes.ts`. |
+| Dominio puro (compartido) | `packages/shared/src/dominio/actuarial/` | `distribuciones.ts` (RNG + muestreo + `cuantilNormal`), `estadistica.ts` (media, desvío muestral, percentil R-7, `aDosDecimales`), `monteCarlo.ts` (`simularRiesgo`, `simularRiesgoAsync`, `tieneIncertidumbre`). Sin dependencias de Nest/Prisma. |
+| Schemas compartidos | `packages/shared/src/dtos/actuarial.ts` | `ParametroEstocasticoSchema` (unión discriminada `fijo | triangular | normal` con `superRefine`), `SimulacionActuarialRequestSchema`, `SimulacionActuarialResponseSchema`, `GuardarSimulacionActuarialSchema`. Tipos vía `z.infer`. |
+| Backend | `apps/backend/src/modules/actuarial/` | `POST /api/v1/actuarial/simulaciones` (service + controller async), `ActuarialPersistenciaService` (guarda resumen vinculado a Lead en Prisma). El service delega la matemática en `simularRiesgoAsync` y valida la condición de negocio "al menos un coeficiente estocástico". |
+| Frontend | `apps/frontend/src/app/features/actuarial/` | Ejecuta `simularRiesgoAsync` **localmente en el browser** (sin roundtrip HTTP). Sliders de incertidumbre, tarjetas de resultados, percentiles, advertencias y gráfico responsive de la curva de riesgo (chart.js). Ruta lazy `/actuarial` en `app.routes.ts`. |
 | Contrato | `contracts/openapi.yaml` | Endpoint + schemas `ParametroEstocastico`, `SimulacionActuarialRequest`, `DistribucionResumen`, `SimulacionActuarialResponse`. |
+| Persistencia | `apps/backend/prisma/schema.prisma` | Modelo `SimulacionActuarial` con FK a `Lead`. Resumen de cada corrida (coeficienteBTipo, precioOptimoMedia/P5/P95, pisoSolvencia, probPerdida). |
 
 Errores: validación Zod → `422 ENTRADA_INVALIDA` (envelope único); sin incertidumbre → `400 SIMULACION_SIN_INCERTIDUMBRE`
 (ver `docs/CODIGOS_ERROR.md`). La condición la verifica el service y no el schema, para emitir el código
@@ -78,7 +83,7 @@ específico en lugar del 422 genérico; el motor corre igual el caso determinís
 ```json
 {
   "coeficienteA": { "tipo": "triangular", "minimo": -3, "moda": -2, "maximo": -1 },
-  "coeficienteB": 120,
+  "coeficienteB": { "tipo": "fijo", "valor": 120 },
   "coeficienteC": { "tipo": "normal", "minimo": -1100, "maximo": -900, "nivelConfianza": 0.9 },
   "precioMinimo": 10,
   "precioMaximo": 100,
@@ -87,6 +92,12 @@ específico en lugar del 422 genérico; el motor corre igual el caso determinís
   "nivelConfianza": 0.95,
   "semilla": 42
 }
+```
+
+Los tres coeficientes aceptan `ParametroEstocastico` (`fijo | triangular | normal`). Para B estocástico:
+
+```json
+"coeficienteB": { "tipo": "triangular", "minimo": 80, "moda": 120, "maximo": 160 }
 ```
 
 Campos opcionales: `precioActual` (evalúa el riesgo ahí), `semilla` (reproducibilidad exacta);
@@ -117,91 +128,91 @@ Campos opcionales: `precioActual` (evalúa el riesgo ahí), `semilla` (reproduci
 }
 ```
 
+### Persistencia (resumen)
+
+Las simulaciones se persisten en `SimulacionActuarial` (Prisma) vinculadas a un `Lead` opcional:
+
+```json
+{
+  "leadId": "uuid-lead",
+  "coeficienteBTipo": "fijo",
+  "nSimulaciones": 10000,
+  "nivelConfianza": 0.95,
+  "precioOptimoMedia": 29.85,
+  "precioOptimoP5": 28.81,
+  "precioOptimoP95": 30.92,
+  "pisoSolvencia": 11.05,
+  "probPerdidaOptimo": 0.02,
+  "probPerdidaActual": 0.05
+}
+```
+
+Validado por `GuardarSimulacionActuarialSchema` (Zod). `coeficienteBTipo` se determina automáticamente
+inspeccionando `solicitud.coeficienteB`.
+
 ## 5. Tests
 
-Estrategia de pruebas del módulo (TDD, cobertura en 4 capas):
+**Total: 179 tests** (113 shared + 32 backend + 34 frontend). Detalle completo en `docs/TESTING_ACTUARIAL.md`.
 
-- **Shared (vitest)** — `packages/shared/src/dominio/actuarial/*.test.ts`, `dtos/actuarial.test.ts` y
-  `propiedadesActuarial.test.ts` (fast-check):
-  - invariantes matemáticas (media empírica ≈ media teórica, percentiles R-7 con valores a mano, desvío acotado);
-  - caso determinístico exacto (vértice, piso, curva de riesgo escalón 0/1);
-  - probabilidad de pérdida calculada a mano con tolerancia;
-  - reproducibilidad: misma semilla ⇒ misma respuesta; semilla distinta ⇒ respuesta distinta;
-  - muestras degeneradas (`A ≥ 0`) contadas y advertidas;
-  - schemas Zod: defaults, rechazos (rangos, moda, precios, N, confianza, semilla, tipo);
-  - invariantes de salida: P5 ≤ P50 ≤ P95, probabilidad ∈ [0,1], `muestrasInvalidas` entero ≥ 0,
-    sin NaN/infinitos, `pisoSolvencia` null o ≥ 0;
-  - property-based: cientos de combinaciones aleatorias de solicitudes y distribuciones (fast-check)
-    sin crash, sin NaN y con muestreos siempre dentro de [min, max].
-- **Backend (jest + supertest)** — `actuarial.service.spec.ts` (código `SIMULACION_SIN_INCERTIDUMBRE`,
-  delegación al dominio, traducción de errores) y `actuarial.controller.spec.ts` (integración HTTP:
-  200 validado por el schema compartido, reproducibilidad por semilla a nivel HTTP, 400
-  `ENTRADA_INVALIDA` y `SIMULACION_SIN_INCERTIDUMBRE`, caso degenerado con advertencia).
-- **Frontend (vitest + jsdom)** — `actuarial.service.spec.ts` (POST a la URL del entorno) y
-  `actuarial.component.spec.ts` (request construido desde las señales, render de métricas/percentiles/
-  advertencias, envelope de error, bloqueo sin incertidumbre, stub de canvas).
-- **Rendimiento** — `apps/backend/bench/` (motor y concurrencia HTTP), script `test:rendimiento`
-  (no entra en CI); resultados en §6.1.
+Estrategia de pruebas (TDD, cobertura en 4 capas):
 
-Ejecución: `npm test --workspace=@mutual-metrics/shared`, `npm test --workspace=@mutual-metrics/backend`,
-`npm test --workspace=@mutual-metrics/frontend` y `npm run test:rendimiento --workspace=@mutual-metrics/backend`.
+- **Shared (vitest)** — `distribuciones.test.ts`, `estadistica.test.ts`, `monteCarlo.test.ts`,
+  `dtos/actuarial.test.ts`, `propiedadesActuarial.test.ts` (fast-check):
+  - determinístico exacto, reproducibilidad, B estocástico en el motor, boundaries de chunking async,
+    invariantes de respuesta, muestras degeneradas, schemas Zod (request, response y persistencia),
+    property-based con fast-check.
+- **Backend (jest + supertest)** — `actuarial.service.spec.ts`, `actuarial.controller.spec.ts`,
+  `actuarial-persistencia.service.spec.ts`: validación de negocio, integración HTTP, persistencia con Prisma.
+- **Frontend (vitest + jsdom)** — `actuarial.component.spec.ts` (con `vi.useFakeTimers` para flush async),
+  `actuarial.service.spec.ts`.
+- **Rendimiento** — `apps/backend/bench/` (motor sync/async y concurrencia HTTP).
 
 ## 6. Decisiones técnicas
 
 - **El dominio vive en shared, no en `modules/cuadratica`** (decidido con el dueño): patrón del
   `optimizador` existente, único lugar con la matemática, testeable y compartido FE/BE.
-- **Stateless en v1**: las corridas no se persisten (no se toca Prisma); el endpoint devuelve todo en la
-  respuesta. Si se necesita historial, se puede ampliar `Escenario.tipo` a `actuarial`.
-- El motor **permite fijo+fijo** como caso degenerado determinístico; la protección de negocio la aplica
+- **B estocástico habilitado**: el schema, el muestreo en el motor y el contrato lo soportan.
+  `tieneIncertidumbre` validaba B estocástico desde v1; el schema era el cuello de botella.
+- El motor **permite fijo+fijo+fijo** como caso degenerado determinístico; la protección de negocio la aplica
   el service con un código de error específico (`SIMULACION_SIN_INCERTIDUMBRE`).
-- La condición "al menos un coeficiente estocástico" se evalúa con `tieneIncertidumbre` (dominio
-  compartido), que acepta coeficientes numéricos y paramétricos: si `coeficienteB` pasa a ser
-  estocástico en el futuro, la validación sigue funcionando sin cambios.
-- Los errores matemáticos del dominio (hoy inalcanzables porque Zod valida los rangos antes del motor)
-  se traducen en el service a `422 ENTRADA_INVALIDA` dentro del envelope único, por si el motor gana
-  validaciones nuevas.
+- Los errores matemáticos del dominio se traducen en el service a `422 ENTRADA_INVALIDA` dentro del envelope
+  único, por si el motor gana validaciones nuevas.
 - La pérdida no sale del vértice (la parábola en su máximo es ≥ su mínimo), sale de **vender a un precio
-  dado**: por eso la curva de riesgo y la probabilidad en el óptimo capturan la falta de solvencia
-  (costos que ni el mejor precio cubren).
+  dado**: por eso la curva de riesgo y la probabilidad en el óptimo capturan la falta de solvencia.
 
-### 6.1 Procesamiento síncrono: decisión medida
+### 6.1 Procesamiento asíncrono por lotes
 
-`simularRiesgo` es **síncrono**: bloquea el event loop de Node mientras corre. Medido con
-`npm run test:rendimiento --workspace=@mutual-metrics/backend` (bench scripts en `apps/backend/bench/`,
-Windows, engine compilado, en aislamiento):
+`simularRiesgoAsync` cede el control al event loop cada `TAMANO_LOTE = 5000` iteraciones via
+`setTimeout(0)`. Esto evita bloqueos prolongados del event loop en Node.js y en el browser.
 
-| nSimulaciones | Tiempo | Ticks de event loop perdidos |
+| nSimulaciones | Tiempo aprox. | Bloqueo máximo del event loop |
 |---|---|---|
-| 1.000 | ~34 ms | ~34 |
-| 10.000 (default del schema) | ~108 ms | ~108 |
-| 50.000 | ~391 ms | ~391 |
-| 100.000 (máximo permitido) | ~851 ms | ~851 |
+| 1.000 | ~34 ms | ~34 ms (1 solo lote) |
+| 5.000 | ~50 ms | ~50 ms (1 solo lote) |
+| 10.000 (default) | ~108 ms | ~50 ms |
+| 25.000 (máx.) | ~400 ms | ~50 ms |
 
-Los ticks perdidos ≈ duración: durante la simulación el event loop no atiende nada (el motor es
-síncrono). Bajo carga concurrente se confirma la serialización: **5 requests de N=100.000 en paralelo
-tardaron 5,7 s en total (p95 por request 5,7 s, +267 MB de heap)** — las peticiones se encolan, no se
-superponen.
+`simularRiesgo` (síncrono) se mantiene para tests unitarios de dominio donde el determinismo
+y la simplicidad son prioridad. En producción se usa `simularRiesgoAsync`.
 
-Con el perfil actual (default 10.000, uso de bajo volumen) el bloqueo es aceptable y se mantiene el
-cálculo síncrono. Se descartan por ahora:
+### 6.2 Ejecución local en el frontend
 
-- **Worker Threads**: paralelismo real (~0.9 s → ~0.25 s), pero agrega script de worker, protocolo de
-  mensajes y config de build/tests — desproporcionado sin evidencia de carga.
-- **Cola de tareas (BullMQ/Redis)**: dependencia nueva + infraestructura para un proyecto sin carga.
+El frontend ejecuta `simularRiesgoAsync` directamente en el browser dentro de `setTimeout(async () => { ... }, 0)`.
+Esto reduce latencia (sin roundtrip HTTP) y descarga el backend. El servicio HTTP se mantiene
+como fallback opcional.
 
-Upgrade barato si algún día hay carga: **async por lotes** (chunks de ~10.000 muestras con
-`await setImmediate()` entre lotes) — el event loop nunca queda bloqueado más de ~100 ms y el
-determinismo se conserva (misma semilla, RNG secuencial). Revisitar esta sección cuando haya evidencia
-de tráfico.
+### 6.3 Persistencia
 
-## 7. Pendientes fuera de alcance (v2)
+Las simulaciones se guardan como `SimulacionActuarial` (resumen) vinculadas a un `Lead` opcional
+(vía FK `leadId`). Se persisten solo los campos necesarios para auditoría del producto (OBJ-2):
+coeficienteBTipo, precioOptimo (media/P5/P95), pisoSolvencia, probPerdida.
 
-- `CoeficienteB` estocástico: el engine y la validación (`tieneIncertidumbre`) ya están preparados; falta
-  cambiar el schema (`coeficienteB` pasa de `z.number()` a `ParametroEstocastico`), el muestreo en el
-  motor y el contrato.
+## 7. Pendientes
+
 - Distribuciones adicionales (log-normal, PERT).
-- Persistencia de corridas como `Escenario` (Prisma + enum en contrato).
 - Histograma de la distribución del precio óptimo en el frontend (hoy se muestra la curva de riesgo).
 - E2E con Playwright (flujo form → POST → renderizado de resultados y advertencias): postergado
   deliberadamente; los tests unitarios del componente + la integración HTTP cubren la misma superficie
   con mucho menos mantenimiento.
+- Conexión del frontend con `ActuarialPersistenciaService` (actualmente la persistencia solo está
+  expuesta en el endpoint backend, el frontend ejecuta localmente sin persistir).

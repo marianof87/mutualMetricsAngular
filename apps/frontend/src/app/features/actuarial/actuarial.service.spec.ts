@@ -4,7 +4,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import type { SimulacionActuarialRequest } from '@mutual-metrics/shared';
+import type { GuardarSimulacionActuarial, SimulacionActuarialRequest } from '@mutual-metrics/shared';
 import { ActuarialService } from './actuarial.service';
 import { entorno } from '../../core/configuracion/entorno';
 
@@ -71,5 +71,28 @@ describe('ActuarialService', () => {
       curvaRiesgo: [],
       advertencias: [],
     });
+  });
+
+  it('hace POST a guardar con el payload del resumen y devuelve el id', () => {
+    const payload: GuardarSimulacionActuarial = {
+      coeficienteBTipo: 'fijo',
+      nSimulaciones: 1000,
+      nivelConfianza: 0.95,
+      precioOptimoMedia: 30,
+      precioOptimoP5: 28,
+      precioOptimoP95: 32,
+      pisoSolvencia: 10.2,
+      probPerdidaOptimo: 0.05,
+      probPerdidaActual: 0.1,
+    };
+
+    servicio.guardar(payload).subscribe((res) => {
+      expect(res.id).toBe('uuid-falso');
+    });
+
+    const peticion = http.expectOne(`${entorno.apiBaseUrl}/actuarial/simulaciones/guardar`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual(payload);
+    peticion.flush({ id: 'uuid-falso' });
   });
 });

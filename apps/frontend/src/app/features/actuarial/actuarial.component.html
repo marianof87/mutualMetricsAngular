@@ -258,6 +258,19 @@
           {{ resultado.nSimulaciones | number }} escenarios simulados · semilla {{ resultado.semilla }} ·
           {{ resultado.muestrasInvalidas }} descartados por datos inconsistentes
         </p>
+
+        <div class="guardado-section">
+          <button
+            class="btn-guardar"
+            (click)="guardarResultado()"
+            [disabled]="guardado() === 'guardando' || guardado() === 'ok'"
+          >
+            {{ guardado() === 'guardando' ? 'Guardando…' : guardado() === 'ok' ? 'Guardado' : 'Guardar resultado' }}
+          </button>
+          <span class="guardado-error" *ngIf="guardado() === 'error'">
+            No se pudo guardar. Intentá de nuevo.
+          </span>
+        </div>
       </div>
 
       <div class="card-panel" *ngIf="!resultado() && !error()">
