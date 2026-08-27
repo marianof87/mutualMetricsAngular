@@ -1,0 +1,61 @@
+<div class="modal-overlay" (click)="cerrar()">
+  <div
+    class="modal panel-vidrio"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-modal"
+    (click)="$event.stopPropagation()"
+  >
+    <button type="button" class="modal-cerrar" (click)="cerrar()" aria-label="Cerrar">×</button>
+
+    <h2 id="titulo-modal">Descargá tu informe actuarial</h2>
+    <p class="modal-intro">
+      Completá tus datos y te enviamos el informe en PDF junto con un diagnóstico
+      gratuito de 30 minutos.
+    </p>
+
+    <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate class="form">
+      <label>
+        <span>Nombre y Apellido</span>
+        <input type="text" formControlName="nombre" autocomplete="name" placeholder="Ej: Ana Pérez" />
+      </label>
+      @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+        <small class="error">El nombre y apellido son obligatorios.</small>
+      }
+
+      <label>
+        <span>Empresa / Rubro</span>
+        <input type="text" formControlName="empresa" autocomplete="organization" placeholder="Ej: Textil Sur" />
+      </label>
+      @if (formulario.controls.empresa.touched && formulario.controls.empresa.invalid) {
+        <small class="error">La empresa o rubro es obligatoria.</small>
+      }
+
+      <label>
+        <span>WhatsApp</span>
+        <input type="tel" formControlName="whatsapp" autocomplete="tel" placeholder="Ej: +54 9 351 555-1234" />
+      </label>
+      @if (formulario.controls.whatsapp.touched && formulario.controls.whatsapp.invalid) {
+        <small class="error">Ingresá un WhatsApp válido.</small>
+      }
+
+      <label>
+        <span>Email laboral</span>
+        <input type="email" formControlName="email" autocomplete="email" placeholder="Ej: ana@empresa.com" />
+      </label>
+      @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
+        <small class="error">Ingresá un email laboral válido.</small>
+      }
+
+      <button type="submit" [disabled]="enviando() || formulario.invalid" class="btn-descargar">
+        {{ enviando() ? 'Registrando...' : 'Descargar Informe en PDF' }}
+      </button>
+    </form>
+
+    @if (mensajeError()) {
+      <p class="error" role="alert">{{ mensajeError() }}</p>
+    }
+
+    <p class="modal-legal">Tus datos solo se usan para enviarte el informe y ofrecerte el diagnóstico.</p>
+  </div>
+</div>
