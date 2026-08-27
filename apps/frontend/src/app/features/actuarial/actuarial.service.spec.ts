@@ -4,7 +4,10 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import type { GuardarSimulacionActuarial, SimulacionActuarialRequest } from '@mutual-metrics/shared';
+import type {
+  GuardarSimulacionActuarial,
+  SimulacionActuarialRequest,
+} from '@mutual-metrics/shared';
 import { ActuarialService } from './actuarial.service';
 import { entorno } from '../../core/configuracion/entorno';
 
@@ -94,5 +97,23 @@ describe('ActuarialService', () => {
     expect(peticion.request.method).toBe('POST');
     expect(peticion.request.body).toEqual(payload);
     peticion.flush({ id: 'uuid-falso' });
+  });
+
+  it('hace POST a /leads con los datos del contacto y devuelve el id del lead', () => {
+    const lead = {
+      nombre: 'Ana Pérez',
+      empresa: 'Textil Sur',
+      whatsapp: '+54 9 351 555-1234',
+      email: 'ana@empresa.com',
+    };
+
+    servicio.registrarLead(lead).subscribe((respuesta) => {
+      expect(respuesta.id).toBe('uuid-lead');
+    });
+
+    const peticion = http.expectOne(`${entorno.apiBaseUrl}/leads`);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.body).toEqual(lead);
+    peticion.flush({ id: 'uuid-lead', recibidoEn: '2026-08-25T00:00:00Z' });
   });
 });
