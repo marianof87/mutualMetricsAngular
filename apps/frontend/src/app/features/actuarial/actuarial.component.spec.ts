@@ -10,6 +10,7 @@ import { vi } from 'vitest';
 import type { SimulacionActuarialResponse } from '@mutual-metrics/shared';
 import { ActuarialComponent } from './actuarial.component';
 import { ActuarialService } from './actuarial.service';
+import { InformeActuarialPdfService } from './servicios/informe-actuarial-pdf.service';
 import { entorno } from '../../core/configuracion/entorno';
 
 // Stub del gráfico: jsdom no implementa canvas 2D, evitamos romper el test.
@@ -152,12 +153,21 @@ describe('ActuarialComponent', () => {
 
 describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
   let http: HttpTestingController;
+  let pdfMock: { generarPdf: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     await TestBed.configureTestingModule({
       imports: [ActuarialComponent],
-      providers: [ActuarialService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        ActuarialService,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: InformeActuarialPdfService,
+          useValue: { generarPdf: vi.fn().mockResolvedValue(undefined) },
+        },
+      ],
     })
       .overrideComponent(ActuarialComponent, {
         remove: { imports: [BaseChartDirective] },
@@ -166,6 +176,9 @@ describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
       .compileComponents();
 
     http = TestBed.inject(HttpTestingController);
+    pdfMock = TestBed.inject(InformeActuarialPdfService) as unknown as {
+      generarPdf: ReturnType<typeof vi.fn>;
+    };
   });
 
   afterEach(() => {
@@ -241,6 +254,45 @@ describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
     expect(peticion.request.body.coeficienteBTipo).toBe('fijo');
     expect(peticion.request.body.nSimulaciones).toBe(100);
     peticion.flush({ id: 'uuid-test' });
+
+    expect(comp.guardado()).toBe('ok');
+  });
+
+  it('exportarInforme cierra el modal, guarda con el leadId y genera el PDF', async () => {
+    const fixture = TestBed.createComponent(ActuarialComponent);
+    const comp = fixture.componentInstance;
+    comp.semilla.set(42);
+    comp.nSimulaciones.set(100);
+
+    comp.simular();
+
+    for (let i = 0; i < 20; i++) {
+      await vi.advanceTimersByTimeAsync(0);
+    }
+    fixture.detectChanges();
+
+    expect(comp.resultado()).not.toBeNull();
+
+    comp.abrirModal();
+    expect(comp.modalAbierto()).toBe(true);
+
+    const lead = {
+      nombre: 'Ana Pérez',
+      empresa: 'Textil Sur',
+      whatsapp: '+54 9 351 555-1234',
+      email: 'ana@empresa.com',
+    };
+    comp.exportarInforme({ lead, leadId: 'uuid-lead' });
+
+    expect(comp.modalAbierto()).toBe(false);
+    expect(pdfMock.generarPdf).toHaveBeenCalledTimes(1);
+    expect(pdfMock.generarPdf.mock.calls[0][0].lead.nombre).toBe('Ana Pérez');
+    expect(pdfMock.generarPdf.mock.calls[0][0].resultado.nSimulaciones).toBe(100);
+
+    const guardar = http.expectOne(`${entorno.apiBaseUrl}/actuarial/simulaciones/guardar`);
+    expect(guardar.request.method).toBe('POST');
+    expect(guardar.request.body.leadId).toBe('uuid-lead');
+    guardar.flush({ id: 'uuid-simulacion' });
 
     expect(comp.guardado()).toBe('ok');
   });

@@ -10,18 +10,22 @@ import type {
 } from '@mutual-metrics/shared';
 import { simularRiesgoAsync } from '@mutual-metrics/shared';
 import { ActuarialService } from './actuarial.service';
+import type { InformeExportado } from './modal-exportar-informe/modal-exportar-informe.component';
+import { ModalExportarInformeComponent } from './modal-exportar-informe/modal-exportar-informe.component';
+import { InformeActuarialPdfService } from './servicios/informe-actuarial-pdf.service';
 
 type ModoParametro = 'fijo' | 'triangular' | 'normal';
 
 @Component({
   selector: 'app-actuarial',
   standalone: true,
-  imports: [CommonModule, FormsModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, BaseChartDirective, ModalExportarInformeComponent],
   templateUrl: './actuarial.component.html',
   styleUrl: './actuarial.component.css',
 })
 export class ActuarialComponent {
   private readonly servicio = inject(ActuarialService);
+  private readonly informePdf = inject(InformeActuarialPdfService);
 
   // Coeficiente A — sensibilidad de la demanda (estocástico)
   modoA = signal<ModoParametro>('triangular');
@@ -57,6 +61,7 @@ export class ActuarialComponent {
   error = signal<string | null>(null);
   resultado = signal<SimulacionActuarialResponse | null>(null);
   guardado = signal<'pendiente' | 'guardando' | 'ok' | 'error'>('pendiente');
+  modalAbierto = signal(false);
 
   sinIncertidumbre = computed(
     () => this.modoA() === 'fijo' && this.modoB() === 'fijo' && this.modoC() === 'fijo',
@@ -147,7 +152,7 @@ export class ActuarialComponent {
     }, 0);
   }
 
-  guardarResultado(): void {
+  guardarResultado(leadId?: string): void {
     const resultado = this.resultado();
     if (!resultado || this.guardado() === 'guardando') return;
 
@@ -158,6 +163,7 @@ export class ActuarialComponent {
       typeof solicitud.coeficienteB === 'object' && solicitud.coeficienteB.tipo !== 'fijo';
 
     const payload: GuardarSimulacionActuarial = {
+      leadId,
       coeficienteBTipo: esEstocastico ? 'estocástico' : 'fijo',
       nSimulaciones: resultado.nSimulaciones,
       nivelConfianza: resultado.nivelConfianza,
@@ -174,6 +180,33 @@ export class ActuarialComponent {
     this.servicio.guardar(payload).subscribe({
       next: () => this.guardado.set('ok'),
       error: () => this.guardado.set('error'),
+    });
+  }
+
+  abrirModal(): void {
+    this.modalAbierto.set(true);
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto.set(false);
+  }
+
+  exportarInforme(datos: InformeExportado): void {
+    const resultado = this.resultado();
+    this.cerrarModal();
+    if (!resultado) return;
+
+    this.guardado.set('pendiente');
+    this.guardarResultado(datos.leadId);
+
+    const solicitud = this.construirSolicitud();
+    const esEstocastico =
+      typeof solicitud.coeficienteB === 'object' && solicitud.coeficienteB.tipo !== 'fijo';
+
+    void this.informePdf.generarPdf({
+      lead: datos.lead,
+      resultado,
+      coeficienteBTipo: esEstocastico ? 'estocástico' : 'fijo',
     });
   }
 

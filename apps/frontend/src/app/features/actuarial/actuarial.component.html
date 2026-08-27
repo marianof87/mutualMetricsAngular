@@ -267,6 +267,9 @@
           >
             {{ guardado() === 'guardando' ? 'Guardando…' : guardado() === 'ok' ? 'Guardado' : 'Guardar resultado' }}
           </button>
+          <button class="btn-descargar-informe" (click)="abrirModal()">
+            Descargar reporte PDF
+          </button>
           <span class="guardado-error" *ngIf="guardado() === 'error'">
             No se pudo guardar. Intentá de nuevo.
           </span>
@@ -282,4 +285,10 @@
       </div>
     </div>
   </div>
+
+  <app-modal-exportar-informe
+    *ngIf="modalAbierto()"
+    (exportado)="exportarInforme($event)"
+    (cerrado)="cerrarModal()"
+  ></app-modal-exportar-informe>
 </section>

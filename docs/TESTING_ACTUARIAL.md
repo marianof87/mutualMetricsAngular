@@ -8,11 +8,11 @@ Registro de los tests llevados a cabo sobre el módulo actuarial (Monte Carlo so
 | Suites | Tests | Resultado |
 |---|---|---|
 | Shared (`packages/shared`) — vitest | 113 | ✅ verdes |
-| Backend (`apps/backend`) — jest + supertest | 32 | ✅ verdes |
-| Frontend (`apps/frontend`) — vitest + jsdom | 34 | ✅ verdes |
+| Backend (`apps/backend`) — jest + supertest | 34 | ✅ verdes |
+| Frontend (`apps/frontend`) — vitest + jsdom | 43 | ✅ verdes |
 | Rendimiento (`apps/backend/bench`) — ts-node | — | ✅ corre (no va en CI) |
 
-**Total: 179 tests.**
+**Total: 190 tests.**
 
 Ejecución:
 
@@ -116,14 +116,15 @@ npm run test:rendimiento --workspace=@mutual-metrics/backend   # manual, no CI
 - `RangeError` del motor → `422 ENTRADA_INVALIDA`.
 - Otras excepciones se re-lanzan para el filtro global.
 
-### 3.2 Persistencia — `modules/actuarial/actuarial-persistencia.service.spec.ts` (4 tests)
+### 3.2 Persistencia — `modules/actuarial/actuarial-persistencia.service.spec.ts` (5 tests)
 
 - **Guarda con campos resumidos**: verifica `leadId`, `coeficienteBTipo`, `nSimulaciones`, `precioOptimoMedia`, `pisoSolvencia`, `probPerdidaOptimo`, `probPerdidaActual`.
 - **B triangular → "estocástico"**: `coeficienteBTipo` se marca correctamente.
 - **leadId undefined → null**: simulación anónima.
-- **Fallback percentiles** (NUEVO): mock con `percentiles: {}` → `precioOptimoP5 = intervalo.minimo`, `precioOptimoP95 = intervalo.maximo`.
+- **Fallback percentiles**: mock con `percentiles: {}` → `precioOptimoP5 = intervalo.minimo`, `precioOptimoP95 = intervalo.maximo`.
+- **`guardarDesdeResumen`** (NUEVO): persiste directo desde el payload `GuardarSimulacionActuarial`, incluye `leadId` y campos resumidos.
 
-### 3.3 Integración HTTP — `modules/actuarial/actuarial.controller.spec.ts` (8 tests)
+### 3.3 Integración HTTP — `modules/actuarial/actuarial.controller.spec.ts` (9 tests)
 
 - `POST /actuarial/simulaciones` → `200` validado contra `SimulacionActuarialResponseSchema`.
 - **Reproducibilidad HTTP**: dos requests con la misma semilla → respuestas idénticas.
@@ -132,17 +133,20 @@ npm run test:rendimiento --workspace=@mutual-metrics/backend   # manual, no CI
 - N fuera de rango → `400 ENTRADA_INVALIDA`.
 - Sin incertidumbre → `400 SIMULACION_SIN_INCERTIDUMBRE`.
 - Caso degenerado → `200` con `muestrasInvalidas = n` y advertencia.
+- **`POST /actuarial/simulaciones/guardar`** (NUEVO): `201` con `{ id }` (persistencia mockeada).
 - Unitario: delega en servicio mockeado.
 
 ---
 
 ## 4. Frontend (vitest + jsdom, `@angular/build:unit-test`)
 
-### 4.1 Servicio — `features/actuarial/actuarial.service.spec.ts` (1 test)
+### 4.1 Servicio — `features/actuarial/actuarial.service.spec.ts` (3 tests)
 
 - `simular()` hace `POST` a `${entorno.apiBaseUrl}/actuarial/simulaciones` con el body exacto.
+- `guardar()` (NUEVO) hace `POST` a `${entorno.apiBaseUrl}/actuarial/simulaciones/guardar` con el resumen y devuelve `{ id }`.
+- `registrarLead()` (NUEVO) hace `POST` a `${entorno.apiBaseUrl}/leads` con los datos del contacto y devuelve el id del lead.
 
-### 4.2 Componente — `features/actuarial/actuarial.component.spec.ts` (8 tests)
+### 4.2 Componente — `features/actuarial/actuarial.component.spec.ts` (10 tests)
 
 #### Render y guard (3 tests — preexistentes)
 - Render inicial: título, panel "Esperando simulación", botón habilitado.
@@ -155,9 +159,22 @@ npm run test:rendimiento --workspace=@mutual-metrics/backend   # manual, no CI
 #### Datos auxiliares (1 test — preexistente)
 - `percentilesDe()` mapea claves/valores correctamente.
 
-#### **Ejecución asíncrona con fake timers** (2 tests — NUEVOS)
+#### **Ejecución asíncrona con fake timers** (4 tests)
 - **Flush con `vi.useFakeTimers()`**: llama `simular()`, avanza timers con `vi.advanceTimersByTimeAsync(0)` en loop, verifica que `resultado()` se popula con `nSimulaciones = 100`, `cargando()` vuelve a `false`, `error()` es `null`.
 - **Escenarios degenerados (A >= 0)**: todos los samples inválidos, la simulación completa sin crashear, `cargando()` vuelve a `false`, `resultado()` tiene `muestrasInvalidas = 100`.
+- **`guardarResultado()`** (NUEVO): hace POST a `/guardar` con el resumen (sin lead); `guardado()` pasa por `guardando` → `ok`.
+- **`exportarInforme()`** (NUEVO): cierra el modal, llama `guardar()` con el `leadId` del contacto y genera el PDF con `InformeActuarialPdfService` (mockeado). Verifica `guardado()` → `ok` y que `generarPdf` recibe el lead y el resultado.
+
+### 4.3 Modal de exportación — `features/actuarial/modal-exportar-informe/modal-exportar-informe.component.spec.ts` (3 tests)
+
+- **Formulario incompleto**: no registra el lead y muestra "Revisá los datos del formulario.".
+- **Registro exitoso**: emite `exportado` con `{ lead, leadId }` usando el id devuelto por `POST /leads`.
+- **Falla del backend**: muestra el `message` del envelope de error y no emite.
+
+### 4.4 Reporte PDF — `features/actuarial/servicios/informe-actuarial-pdf.service.spec.ts` (2 tests)
+
+- **`generarBytes()` sin tocar el DOM**: devuelve bytes > 100 con header `%PDF`.
+- **Fallback de percentiles → intervalo**: con `percentiles: {}` genera PDF válido usando `intervalo.minimo/maximo`.
 
 ---
 
