@@ -262,6 +262,23 @@
   cursor: not-allowed;
 }
 
+.btn-descargar-informe {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid var(--mm-color-primario);
+  border-radius: var(--mm-radius-md);
+  background: transparent;
+  color: var(--mm-color-primario);
+  font-size: var(--mm-font-size-sm);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--mm-transition-rapida), color var(--mm-transition-rapida);
+}
+
+.btn-descargar-informe:hover {
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+}
+
 .guardado-error {
   color: var(--mm-color-error);
   font-size: var(--mm-font-size-sm);
