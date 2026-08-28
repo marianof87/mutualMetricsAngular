@@ -1,0 +1,290 @@
+/*
+ * Componentes reutilizables.
+ * Modales, formularios, botones, tarjetas y métricas que se repiten entre features.
+ * Regla: si un estilo sólo sirve para una feature, vivirá en su CSS local, no acá.
+ */
+
+/* ===== Modal ===== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--mm-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mm-space-4);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: var(--mm-space-6);
+  background: var(--mm-color-superficie);
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: var(--mm-space-3);
+  right: var(--mm-space-4);
+  background: transparent;
+  border: none;
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-2xl);
+  line-height: 1;
+  transition: color var(--mm-transition-rapida);
+}
+
+.modal-cerrar:hover {
+  color: var(--mm-color-texto);
+}
+
+.modal h2 {
+  font-size: var(--mm-font-size-xl);
+  margin-bottom: var(--mm-space-2);
+}
+
+.modal-intro {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+  margin-bottom: var(--mm-space-5);
+}
+
+.modal-legal {
+  margin-top: var(--mm-space-4);
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-xs);
+  text-align: center;
+}
+
+/* ===== Formularios ===== */
+
+.form {
+  display: grid;
+  gap: var(--mm-space-3);
+}
+
+.form label {
+  display: grid;
+  gap: var(--mm-space-1);
+}
+
+.form label span {
+  font-weight: var(--mm-font-weight-medium);
+  font-size: var(--mm-font-size-sm);
+}
+
+.form input {
+  width: 100%;
+  padding: var(--mm-space-3);
+  border-radius: var(--mm-radius-md);
+  border: 1px solid var(--mm-color-borde);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+}
+
+.form input:focus {
+  outline: none;
+  border-color: var(--mm-color-acento);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--mm-color-texto-tenue);
+  font-weight: var(--mm-font-weight-medium);
+  font-size: var(--mm-font-size-sm);
+}
+
+.form-group input,
+.select-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--mm-radius-md);
+  border: 1px solid var(--mm-color-borde);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  transition: border-color var(--mm-transition-rapida);
+}
+
+.form-group input:focus,
+.select-input:focus {
+  outline: none;
+  border-color: var(--mm-color-primario);
+}
+
+.hint {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+/* ===== Botones ===== */
+
+.btn-primario {
+  width: 100%;
+  padding: 0.9rem;
+  border: none;
+  border-radius: var(--mm-radius-md);
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-base);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+}
+
+.btn-primario:hover:not(:disabled) {
+  background: var(--mm-color-primario-hover);
+}
+
+.btn-primario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-advertencia {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: var(--mm-radius-md);
+  background: var(--mm-color-advertencia);
+  color: #1a1a2e;
+  font-size: var(--mm-font-size-sm);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+}
+
+.btn-advertencia:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.btn-advertencia:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secundario {
+  padding: 0.7rem 1.5rem;
+  border: 1px solid var(--mm-color-primario);
+  border-radius: var(--mm-radius-md);
+  background: transparent;
+  color: var(--mm-color-primario);
+  font-size: var(--mm-font-size-sm);
+  font-weight: var(--mm-font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--mm-transition-rapida), color var(--mm-transition-rapida);
+}
+
+.btn-secundario:hover {
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+}
+
+.btn-descargar {
+  margin-top: var(--mm-space-2);
+  width: 100%;
+  padding: var(--mm-space-3) var(--mm-space-5);
+  border-radius: var(--mm-radius-pill);
+  border: none;
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+  font-weight: var(--mm-font-weight-semibold);
+  transition: background var(--mm-transition-rapida);
+}
+
+.btn-descargar:hover:not(:disabled) {
+  background: var(--mm-color-primario-hover);
+}
+
+.btn-descargar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== Tarjetas y métricas ===== */
+
+.card-panel {
+  background: var(--mm-color-vidrio);
+  border: 1px solid var(--mm-color-borde-vidrio);
+  border-radius: var(--mm-radius-lg);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-panel h2 {
+  font-size: var(--mm-font-size-xl);
+  color: var(--mm-color-advertencia);
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--mm-color-borde);
+  padding-bottom: 0.5rem;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--mm-color-borde);
+  border-radius: var(--mm-radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.metric-label {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+}
+
+.metric-value {
+  color: var(--mm-color-texto);
+  font-size: var(--mm-font-size-xl);
+  font-weight: var(--mm-font-weight-bold);
+}
+
+.metric-detail {
+  color: var(--mm-color-texto-tenue);
+  font-size: var(--mm-font-size-sm);
+}
+
+.metric-danger {
+  color: var(--mm-color-error);
+}
+
+/* ===== Mensajes de error ===== */
+
+.error-message {
+  margin-bottom: 1rem;
+  color: var(--mm-color-error);
+  background: rgba(255, 107, 107, 0.1);
+  padding: 0.9rem;
+  border-radius: var(--mm-radius-md);
+  text-align: center;
+}
+
+.error-text {
+  color: var(--mm-color-error);
+}
+
+.error {
+  color: var(--mm-color-error);
+  font-size: var(--mm-font-size-sm);
+}

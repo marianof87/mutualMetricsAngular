@@ -160,4 +160,42 @@ describe('ActuarialPersistenciaService', () => {
     expect(llamada.data.precioOptimoP5).toBe(28);
     expect(llamada.data.precioOptimoP95).toBe(32);
   });
+
+  it('guarda como null probPerdidaActual cuando no hay precio actual', async () => {
+    const resultadoSinPrecioActual: SimulacionActuarialResponse = {
+      ...resultadoMock,
+      probabilidadPerdida: { enPrecioOptimo: 0.03, enPrecioActual: null },
+    };
+
+    await servicio.guardar({
+      solicitud: solicitudMock,
+      resultado: resultadoSinPrecioActual,
+    });
+
+    const llamada = prismaMock.simulacionActuarial.create.mock.calls[0][0];
+    expect(llamada.data.probPerdidaActual).toBeNull();
+  });
+
+  it('guarda desde resumen sin leadId (simulación anónima)', async () => {
+    const payload = {
+      leadId: undefined,
+      coeficienteBTipo: 'fijo' as const,
+      nSimulaciones: 10000,
+      nivelConfianza: 0.95,
+      precioOptimoMedia: 30,
+      precioOptimoP5: 28,
+      precioOptimoP95: 32,
+      pisoSolvencia: null,
+      probPerdidaOptimo: 0.05,
+      probPerdidaActual: null,
+    };
+
+    const resultado = await servicio.guardarDesdeResumen(payload);
+
+    expect(resultado.id).toBe('uuid-falso');
+    const llamada = prismaMock.simulacionActuarial.create.mock.calls[0][0];
+    expect(llamada.data.leadId).toBeNull();
+    expect(llamada.data.pisoSolvencia).toBeNull();
+    expect(llamada.data.probPerdidaActual).toBeNull();
+  });
 });
