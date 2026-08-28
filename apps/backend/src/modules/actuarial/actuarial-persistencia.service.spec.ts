@@ -5,7 +5,11 @@ import type { SimulacionActuarialRequest, SimulacionActuarialResponse } from '@m
 
 describe('ActuarialPersistenciaService', () => {
   let servicio: ActuarialPersistenciaService;
-  let prismaMock: { simulacionActuarial: { create: jest.Mock } };
+  let prismaMock: {
+    simulacionActuarial: { create: jest.Mock };
+    lead: { create: jest.Mock };
+    $transaction: jest.Mock;
+  };
 
   const solicitudMock: SimulacionActuarialRequest = {
     coeficienteA: { tipo: 'triangular', minimo: -3, moda: -2, maximo: -1 },
@@ -55,6 +59,15 @@ describe('ActuarialPersistenciaService', () => {
       simulacionActuarial: {
         create: jest.fn().mockResolvedValue({ id: 'uuid-falso' }),
       },
+      lead: {
+        create: jest.fn().mockResolvedValue({ id: 'uuid-lead-nuevo' }),
+      },
+      $transaction: jest.fn(async (fn: (tx: unknown) => Promise<unknown>) =>
+        fn({
+          lead: prismaMock.lead,
+          simulacionActuarial: prismaMock.simulacionActuarial,
+        }),
+      ),
     };
 
     const modulo: TestingModule = await Test.createTestingModule({
@@ -197,5 +210,43 @@ describe('ActuarialPersistenciaService', () => {
     expect(llamada.data.leadId).toBeNull();
     expect(llamada.data.pisoSolvencia).toBeNull();
     expect(llamada.data.probPerdidaActual).toBeNull();
+  });
+
+  it('crea lead y simulación en una sola transacción cuando viene lead embebido', async () => {
+    const payload = {
+      lead: {
+        nombre: 'Ana Pérez',
+        empresa: 'Textil Sur',
+        whatsapp: '+54 9 351 555-1234',
+        email: 'ana@empresa.com',
+      },
+      coeficienteBTipo: 'fijo' as const,
+      nSimulaciones: 5000,
+      nivelConfianza: 0.95,
+      precioOptimoMedia: 30,
+      precioOptimoP5: 28,
+      precioOptimoP95: 32,
+      pisoSolvencia: 10.2,
+      probPerdidaOptimo: 0.05,
+      probPerdidaActual: 0.1,
+    };
+
+    const resultado = await servicio.guardarDesdeResumen(payload);
+
+    expect(resultado).toEqual({ id: 'uuid-falso', leadId: 'uuid-lead-nuevo' });
+    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+
+    const llamadaLead = prismaMock.lead.create.mock.calls[0][0];
+    expect(llamadaLead.data).toEqual({
+      nombre: 'Ana Pérez',
+      empresa: 'Textil Sur',
+      whatsapp: '+54 9 351 555-1234',
+      email: 'ana@empresa.com',
+    });
+
+    const llamadaSimulacion = prismaMock.simulacionActuarial.create.mock.calls[0][0];
+    expect(llamadaSimulacion.data.leadId).toBe('uuid-lead-nuevo');
+    expect(llamadaSimulacion.data.coeficienteBTipo).toBe('fijo');
+    expect(llamadaSimulacion.data.nSimulaciones).toBe(5000);
   });
 });

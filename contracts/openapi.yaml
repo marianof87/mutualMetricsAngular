@@ -179,7 +179,7 @@ paths:
   /actuarial/simulaciones/guardar:
     post:
       tags: [actuarial]
-      summary: Guarda el resumen de una corrida actuarial (Monte Carlo) vinculada a un Lead opcional.
+      summary: Guarda el resumen de una corrida actuarial (Monte Carlo). Si `lead` viene embebido, crea el lead y la simulación en una sola transacción atómica.
       requestBody:
         required: true
         content:
@@ -195,6 +195,10 @@ paths:
                 required: [id]
                 properties:
                   id: { type: string, format: uuid }
+                  leadId:
+                    type: string
+                    format: uuid
+                    description: Id del lead creado en la misma transacción (sólo si se envió `lead`)
         "422":
           description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
           content:
@@ -680,6 +684,12 @@ components:
           format: uuid
           nullable: true
           description: Lead vinculado (opcional; null si la simulación es anónima)
+        lead:
+          $ref: "#/components/schemas/LeadRequest"
+          description: >
+            Datos del lead a crear junto con la simulación, en una sola
+            transacción (evita leads huérfanos si el guardado falla).
+            Si viene este campo, se ignora `leadId`.
         coeficienteBTipo:
           type: string
           enum: [fijo, estocástico]
