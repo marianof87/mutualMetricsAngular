@@ -34,7 +34,7 @@ export class ActuarialController {
   async guardar(
     @Body(new ZodValidationPipe(GuardarSimulacionActuarialSchema))
     datos: GuardarSimulacionActuarial,
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; leadId?: string }> {
     return await this.persistencia.guardarDesdeResumen(datos);
   }
 }

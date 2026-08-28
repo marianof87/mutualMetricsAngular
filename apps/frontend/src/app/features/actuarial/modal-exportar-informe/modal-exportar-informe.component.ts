@@ -1,17 +1,6 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  LeadRequestSchema,
-  type EnvelopeError,
-  type LeadRequest,
-  type LeadResponse,
-} from '@mutual-metrics/shared';
-import { ActuarialService } from '../actuarial.service';
-
-export interface InformeExportado {
-  lead: LeadRequest;
-  leadId: string;
-}
+import { LeadRequestSchema, type LeadRequest } from '@mutual-metrics/shared';
 
 @Component({
   selector: 'app-modal-exportar-informe',
@@ -21,12 +10,10 @@ export interface InformeExportado {
 })
 export class ModalExportarInformeComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly servicio = inject(ActuarialService);
 
-  readonly enviando = signal(false);
   readonly mensajeError = signal<string | null>(null);
 
-  readonly exportado = output<InformeExportado>();
+  readonly exportado = output<LeadRequest>();
   readonly cerrado = output<void>();
 
   readonly formulario = this.fb.nonNullable.group({
@@ -46,22 +33,10 @@ export class ModalExportarInformeComponent {
       return;
     }
 
-    this.enviando.set(true);
-    this.servicio.registrarLead(parseado.data).subscribe({
-      next: (respuesta: LeadResponse) => {
-        this.enviando.set(false);
-        this.exportado.emit({ lead: parseado.data, leadId: respuesta.id });
-      },
-      error: (envelope: EnvelopeError) => {
-        this.enviando.set(false);
-        this.mensajeError.set(envelope?.error?.message ?? 'No se pudo registrar tu contacto.');
-      },
-    });
+    this.exportado.emit(parseado.data);
   }
 
   cerrar(): void {
-    if (!this.enviando()) {
-      this.cerrado.emit();
-    }
+    this.cerrado.emit();
   }
 }

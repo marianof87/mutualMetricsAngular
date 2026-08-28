@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LeadRequestSchema } from './lead';
 
 // Parámetro estocástico: modela un coeficiente de la parábola que el dueño
 // declara con incertidumbre (rango triangular o normal con nivel de confianza)
@@ -119,8 +120,12 @@ export const SimulacionActuarialResponseSchema = z.object({
 export type SimulacionActuarialResponse = z.infer<typeof SimulacionActuarialResponseSchema>;
 
 // Guardado de simulación actuarial (resumen) vinculada a un Lead.
+// `leadId` referencia un lead ya creado; `lead` embebe los datos del lead y
+// hace que backend lo cree y guarde la simulación en una sola transacción
+// (evita leads huérfanos si el guardado falla). Si `lead` viene, `leadId` se ignora.
 export const GuardarSimulacionActuarialSchema = z.object({
   leadId: z.string().uuid().optional(),
+  lead: LeadRequestSchema.optional(),
   coeficienteBTipo: z.enum(['fijo', 'estocástico']),
   nSimulaciones: z.number().int().positive(),
   nivelConfianza: z.number().min(0.8).max(0.99),

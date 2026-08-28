@@ -5,12 +5,12 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import type {
   GuardarSimulacionActuarial,
+  LeadRequest,
   ParametroEstocastico,
   SimulacionActuarialResponse,
 } from '@mutual-metrics/shared';
 import { simularRiesgoAsync } from '@mutual-metrics/shared';
 import { ActuarialService } from './actuarial.service';
-import type { InformeExportado } from './modal-exportar-informe/modal-exportar-informe.component';
 import { ModalExportarInformeComponent } from './modal-exportar-informe/modal-exportar-informe.component';
 import { InformeActuarialPdfService } from './servicios/informe-actuarial-pdf.service';
 
@@ -152,7 +152,7 @@ export class ActuarialComponent {
     }, 0);
   }
 
-  guardarResultado(leadId?: string): void {
+  guardarResultado(lead?: LeadRequest): void {
     const resultado = this.resultado();
     if (!resultado || this.guardado() === 'guardando') return;
 
@@ -163,7 +163,7 @@ export class ActuarialComponent {
       typeof solicitud.coeficienteB === 'object' && solicitud.coeficienteB.tipo !== 'fijo';
 
     const payload: GuardarSimulacionActuarial = {
-      leadId,
+      lead,
       coeficienteBTipo: esEstocastico ? 'estocástico' : 'fijo',
       nSimulaciones: resultado.nSimulaciones,
       nivelConfianza: resultado.nivelConfianza,
@@ -191,20 +191,20 @@ export class ActuarialComponent {
     this.modalAbierto.set(false);
   }
 
-  exportarInforme(datos: InformeExportado): void {
+  exportarInforme(lead: LeadRequest): void {
     const resultado = this.resultado();
     this.cerrarModal();
     if (!resultado) return;
 
     this.guardado.set('pendiente');
-    this.guardarResultado(datos.leadId);
+    this.guardarResultado(lead);
 
     const solicitud = this.construirSolicitud();
     const esEstocastico =
       typeof solicitud.coeficienteB === 'object' && solicitud.coeficienteB.tipo !== 'fijo';
 
     void this.informePdf.generarPdf({
-      lead: datos.lead,
+      lead,
       resultado,
       coeficienteBTipo: esEstocastico ? 'estocástico' : 'fijo',
     });

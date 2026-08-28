@@ -47,8 +47,8 @@
         <small class="error">Ingresá un email laboral válido.</small>
       }
 
-      <button type="submit" [disabled]="enviando() || formulario.invalid" class="btn-descargar">
-        {{ enviando() ? 'Registrando...' : 'Descargar Informe en PDF' }}
+      <button type="submit" [disabled]="formulario.invalid" class="btn-descargar">
+        Descargar Informe en PDF
       </button>
     </form>
 

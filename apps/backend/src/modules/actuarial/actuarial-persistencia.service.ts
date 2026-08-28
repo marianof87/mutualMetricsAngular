@@ -46,23 +46,28 @@ export class ActuarialPersistenciaService {
     return { id: registro.id };
   }
 
-  async guardarDesdeResumen(datos: GuardarSimulacionActuarial): Promise<{ id: string }> {
-    const registro = await this.prisma.simulacionActuarial.create({
-      data: {
-        leadId: datos.leadId ?? null,
-        coeficienteBTipo: datos.coeficienteBTipo,
-        nSimulaciones: datos.nSimulaciones,
-        nivelConfianza: datos.nivelConfianza,
-        precioOptimoMedia: datos.precioOptimoMedia,
-        precioOptimoP5: datos.precioOptimoP5,
-        precioOptimoP95: datos.precioOptimoP95,
-        pisoSolvencia: datos.pisoSolvencia,
-        probPerdidaOptimo: datos.probPerdidaOptimo,
-        probPerdidaActual: datos.probPerdidaActual,
-      },
-    });
+  async guardarDesdeResumen(
+    datos: GuardarSimulacionActuarial,
+  ): Promise<{ id: string; leadId?: string }> {
+    const { lead, leadId, ...resumen } = datos;
 
-    this.logger.log(`Simulación actuarial guardada (resumen): id=${registro.id}`);
-    return { id: registro.id };
+    if (lead) {
+      return this.prisma.$transaction(async (tx) => {
+        const leadCreado = await tx.lead.create({ data: lead });
+        const simulacion = await tx.simulacionActuarial.create({
+          data: { ...resumen, leadId: leadCreado.id },
+        });
+        this.logger.log(
+          `Simulación actuarial y lead guardados en transacción: id=${simulacion.id} leadId=${leadCreado.id}`,
+        );
+        return { id: simulacion.id, leadId: leadCreado.id };
+      });
+    }
+
+    const { id } = await this.prisma.simulacionActuarial.create({
+      data: { ...resumen, leadId: leadId ?? null },
+    });
+    this.logger.log(`Simulación actuarial guardada (resumen): id=${id}`);
+    return { id };
   }
 }
