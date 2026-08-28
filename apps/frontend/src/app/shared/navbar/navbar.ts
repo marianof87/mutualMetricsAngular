@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SesionService } from '../../core/servicios/sesion.service';
 
@@ -7,6 +7,7 @@ import { SesionService } from '../../core/servicios/sesion.service';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Navbar {
   private readonly sesion = inject(SesionService);
