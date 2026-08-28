@@ -8,7 +8,6 @@ import { LeadsService } from '../servicios/leads.service';
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './modal-captura-lead.component.html',
-  styleUrl: './modal-captura-lead.component.css',
 })
 export class ModalCapturaLeadComponent {
   private readonly fb = inject(FormBuilder);

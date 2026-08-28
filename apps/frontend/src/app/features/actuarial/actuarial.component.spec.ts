@@ -80,7 +80,7 @@ describe('ActuarialComponent', () => {
 
     expect(el.textContent).toContain('Módulo Actuarial');
     expect(el.textContent).toContain('Esperando simulación');
-    expect(el.querySelector('button.btn-simular')).not.toBeNull();
+    expect(el.querySelector('button.btn-primario')).not.toBeNull();
   });
 
   it('deshabilita el botón y avisa cuando A, B y C son fijos (sin incertidumbre)', () => {
@@ -92,7 +92,7 @@ describe('ActuarialComponent', () => {
     fixture.detectChanges();
 
     const boton = (fixture.nativeElement as HTMLElement).querySelector(
-      'button.btn-simular',
+      'button.btn-primario',
     ) as HTMLButtonElement;
     expect(boton.disabled).toBe(true);
     expect((fixture.nativeElement as HTMLElement).textContent).toContain(

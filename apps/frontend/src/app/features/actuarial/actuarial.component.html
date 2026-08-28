@@ -182,7 +182,7 @@
         Para simular riesgo, al menos un dato tiene que tener variación (no todo puede ser fijo).
       </div>
 
-      <button class="btn-simular" (click)="simular()" [disabled]="sinIncertidumbre() || cargando()">
+      <button class="btn-primario" (click)="simular()" [disabled]="sinIncertidumbre() || cargando()">
         {{ cargando() ? 'Calculando…' : 'Calcular mi riesgo' }}
       </button>
     </div>
@@ -261,13 +261,13 @@
 
         <div class="guardado-section">
           <button
-            class="btn-guardar"
+            class="btn-advertencia"
             (click)="guardarResultado()"
             [disabled]="guardado() === 'guardando' || guardado() === 'ok'"
           >
             {{ guardado() === 'guardando' ? 'Guardando…' : guardado() === 'ok' ? 'Guardado' : 'Guardar resultado' }}
           </button>
-          <button class="btn-descargar-informe" (click)="abrirModal()">
+          <button class="btn-secundario" (click)="abrirModal()">
             Descargar reporte PDF
           </button>
           <span class="guardado-error" *ngIf="guardado() === 'error'">

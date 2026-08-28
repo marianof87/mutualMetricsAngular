@@ -18,7 +18,6 @@ export interface InformeExportado {
   standalone: true,
   imports: [ReactiveFormsModule],
   templateUrl: './modal-exportar-informe.component.html',
-  styleUrl: './modal-exportar-informe.component.css',
 })
 export class ModalExportarInformeComponent {
   private readonly fb = inject(FormBuilder);
