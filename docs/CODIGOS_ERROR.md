@@ -38,6 +38,7 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 | Código | HTTP | Uso |
 |---|---|---|
 | `CUADRATICA_A_CERO` | 422 | `a === 0` — no es cuadrática, es lineal. |
+| `SIMULACION_SIN_INCERTIDUMBRE` | 400 | Módulo actuarial: ambos coeficientes son fijos; no hay riesgo que simular. Se exige al menos un parámetro estocástico. |
 
 ### Slice 3 — Pricing (@Monzon1983)
 
@@ -59,6 +60,13 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 | `CONTACTO_EMAIL_INVALIDO` | 422 | Email con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
 | `CONTACTO_MENSAJE_VACIO` | 422 | Mensaje vacío o muy corto. |
 | (Novedades — pendiente) | — | — |
+
+### Lead Magnet — captación de leads (gated content)
+
+| Código | HTTP | Uso |
+|---|---|---|
+| `LEAD_EMAIL_INVALIDO` | 422 | Email laboral con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
+| `LEAD_WHATSAPP_INVALIDO` | 422 | WhatsApp con formato inválido (usualmente ya atrapado por Zod → `ENTRADA_INVALIDA`). |
 
 ## Cómo agregar un código nuevo
 

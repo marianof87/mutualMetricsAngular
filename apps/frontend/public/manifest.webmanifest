@@ -1,0 +1,20 @@
+{
+  "name": "Metrix IA — Simulador de precios",
+  "short_name": "Metrix IA",
+  "description": "Descubrí el precio óptimo de tu producto y descargá un informe personalizado en PDF.",
+  "start_url": "/lead-magnet",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f111a",
+  "theme_color": "#3a7bd5",
+  "orientation": "portrait-primary",
+  "lang": "es-AR",
+  "icons": [
+    {
+      "src": "icons/logo-metrix.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 /*
- * Design tokens — MutualMetrics
+ * Design tokens — Metrix IA
  *
  * Toda variable reutilizable del diseño vive acá.
  * Regla: los componentes NO definen colores, espaciados o tipografías
@@ -12,7 +12,7 @@
 
 :root {
   /* ===== Color: superficie ===== */
-  --mm-color-fondo: #0f111a;
+  --mm-color-fondo: #1a1a1a;
   --mm-color-superficie: #1a1d2d;
   --mm-color-superficie-elevada: #242942;
   --mm-color-vidrio: rgba(26, 29, 45, 0.6);
@@ -20,6 +20,10 @@
   /* ===== Color: borde ===== */
   --mm-color-borde: rgba(255, 255, 255, 0.1);
   --mm-color-borde-vidrio: rgba(255, 255, 255, 0.08);
+
+  /* ===== Cuadrícula de fondo (estilo hoja de cálculo) ===== */
+  --mm-color-cuadricula: rgba(255, 255, 255, 0.07);
+  --mm-size-grid-celda: 64px;
 
   /* ===== Color: texto ===== */
   --mm-color-texto: #f8f9fa;
@@ -62,6 +66,7 @@
   /* ===== Tipografía ===== */
   --mm-font-sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --mm-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mm-font-marca: 'Pixelify Sans', var(--mm-font-sans);
 
   --mm-font-size-xs: 0.75rem;
   --mm-font-size-sm: 0.875rem;

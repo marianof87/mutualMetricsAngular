@@ -39,6 +39,39 @@ model Contacto {
   mensaje    String
   recibidoEn DateTime @default(now())
 }
+
+// Lead Magnet — leads capturados por el informe gated (descarga de PDF).
+model Lead {
+  id           String   @id @default(uuid())
+  nombre       String
+  empresa      String
+  whatsapp     String
+  email        String
+  recibidoEn   DateTime @default(now())
+  simulaciones SimulacionActuarial[]
+}
+
+// Resultado resumido de una corrida actuarial (Monte Carlo), vinculada a un Lead.
+model SimulacionActuarial {
+  id                 String   @id @default(uuid())
+  leadId             String?
+  lead               Lead?    @relation(fields: [leadId], references: [id])
+
+  // Parámetros clave (resumen)
+  coeficienteBTipo   String   // "fijo" | "estocástico"
+  nSimulaciones      Int
+  nivelConfianza     Float
+
+  // Resultados resumidos
+  precioOptimoMedia  Float
+  precioOptimoP5     Float
+  precioOptimoP95    Float
+  pisoSolvencia      Float?
+  probPerdidaOptimo  Float
+  probPerdidaActual  Float?
+
+  simuladoEn         DateTime @default(now())
+}
 model Optimizacion {
   id                 String   @id @default(uuid())
   coeficienteA       Float

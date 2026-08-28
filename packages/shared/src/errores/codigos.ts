@@ -23,6 +23,7 @@ export const CodigoError = {
 
   // Slice 2 — Cuadrática (@marianof87)
   CUADRATICA_A_CERO: 'CUADRATICA_A_CERO',
+  SIMULACION_SIN_INCERTIDUMBRE: 'SIMULACION_SIN_INCERTIDUMBRE',
 
   // Slice 3 — Pricing (@Monzon1983)
   PRICING_SENSIBILIDAD_CERO: 'PRICING_SENSIBILIDAD_CERO',
@@ -34,6 +35,10 @@ export const CodigoError = {
   // Slice 5 — Contacto & Novedades (@Ange1809)
   CONTACTO_EMAIL_INVALIDO: 'CONTACTO_EMAIL_INVALIDO',
   CONTACTO_MENSAJE_VACIO: 'CONTACTO_MENSAJE_VACIO',
+
+  // Lead Magnet — captación de leads (gated content)
+  LEAD_EMAIL_INVALIDO: 'LEAD_EMAIL_INVALIDO',
+  LEAD_WHATSAPP_INVALIDO: 'LEAD_WHATSAPP_INVALIDO',
 } as const;
 
 export type CodigoError = (typeof CodigoError)[keyof typeof CodigoError];

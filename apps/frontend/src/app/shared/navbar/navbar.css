@@ -10,10 +10,19 @@
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: var(--mm-space-2);
   font-size: var(--mm-font-size-lg);
   font-weight: var(--mm-font-weight-bold);
   text-decoration: none;
   color: var(--mm-color-texto);
+}
+
+.logo-img {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 
 .nav-links {
@@ -47,6 +56,31 @@
   height: 2px;
   background: var(--mm-color-texto);
   border-radius: 2px;
+}
+
+.nav-link.nav-cta {
+  padding: var(--mm-space-1) var(--mm-space-4);
+  border-radius: var(--mm-radius-pill);
+  background: var(--mm-color-primario);
+  color: var(--mm-color-texto);
+}
+
+.nav-link.nav-cta:hover {
+  background: var(--mm-color-primario-hover);
+  color: var(--mm-color-texto);
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: var(--mm-space-3);
+    border-radius: var(--mm-radius-lg);
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    gap: var(--mm-space-3);
+  }
 }
 
 .nav-auth {

@@ -56,6 +56,11 @@ export const routes: Routes = [
       import('./features/pricing/pricing.component').then((m) => m.PricingComponent),
   },
   {
+    path: 'actuarial',
+    loadComponent: () =>
+      import('./features/actuarial/actuarial.component').then((m) => m.ActuarialComponent),
+  },
+  {
     path: 'optimizador',
     loadComponent: () =>
       import('./features/optimizador/optimizador.component').then((m) => m.OptimizadorComponent),
@@ -64,6 +69,13 @@ export const routes: Routes = [
     path: 'financiera',
     loadComponent: () =>
       import('./features/financiera/financiera.component').then((m) => m.FinancieraComponent),
+  },
+
+  // Lead Magnet — herramienta interactiva de captación de leads (informe en PDF)
+  {
+    path: 'lead-magnet',
+    loadComponent: () =>
+      import('./features/lead-magnet/lead-magnet.component').then((m) => m.LeadMagnetComponent),
   },
 
   // Historial — Slice 4 (@Franco1212)

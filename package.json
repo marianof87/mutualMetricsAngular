@@ -2,13 +2,14 @@
   "name": "mutual-metrics",
   "version": "0.1.0",
   "private": true,
-  "description": "MutualMetrics — proyecto académico Angular + NestJS (monorepo).",
+  "description": "Metrix IA — proyecto académico Angular + NestJS (monorepo).",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "packageManager": "npm@11.12.1",
   "scripts": {
+    "postinstall": "npm run prisma:generate",
     "dev": "npm-run-all --sequential build:shared dev:all",
     "dev:all": "npm-run-all --parallel dev:frontend dev:backend",
     "dev:frontend": "npm --workspace @mutual-metrics/frontend run start",

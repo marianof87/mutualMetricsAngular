@@ -21,6 +21,10 @@ body {
   line-height: var(--mm-line-height-normal);
   color: var(--mm-color-texto);
   background-color: var(--mm-color-fondo);
+  background-image:
+    linear-gradient(var(--mm-color-cuadricula) 1px, transparent 1px),
+    linear-gradient(90deg, var(--mm-color-cuadricula) 1px, transparent 1px);
+  background-size: var(--mm-size-grid-celda) var(--mm-size-grid-celda);
   min-height: 100vh;
   overflow-x: hidden;
 }

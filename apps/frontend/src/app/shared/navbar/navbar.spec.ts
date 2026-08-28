@@ -18,7 +18,7 @@ describe('Navbar', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('renderiza las 5 secciones', () => {
+  it('renderiza las secciones', () => {
     const fixture = TestBed.createComponent(Navbar);
     fixture.detectChanges();
     const links = (fixture.nativeElement as HTMLElement).querySelectorAll('.nav-link');
@@ -28,6 +28,8 @@ describe('Navbar', () => {
       'Sobre nosotros',
       'Servicios',
       'Novedades',
+      'Módulo Actuarial',
+      'Simulador de precios',
       'Contacto',
     ]);
   });

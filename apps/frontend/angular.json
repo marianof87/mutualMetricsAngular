@@ -25,6 +25,8 @@
                 "input": "public"
               }
             ],
+            "allowedCommonJsDependencies": ["pako"],
+            "serviceWorker": "ngsw-config.json",
             "styles": ["src/styles.css"]
           },
           "configurations": {
@@ -37,7 +39,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
+                  "maximumWarning": "6kB",
                   "maximumError": "8kB"
                 }
               ],

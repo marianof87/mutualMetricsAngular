@@ -1,0 +1,81 @@
+<section class="lead-magnet">
+  <header class="hero">
+    <p class="badge">Herramienta gratuita de Metrix AI</p>
+    <h1>Descubrí el precio óptimo de tu producto</h1>
+    <p class="sub">
+      Simulá tu escenario de negocio en segundos y descargá un informe personalizado
+      en PDF con tus métricas y una estrategia de precios.
+    </p>
+  </header>
+
+  <div class="grid">
+    <aside class="panel panel-vidrio">
+      <h2>Simulador de precios</h2>
+
+      <label class="campo">
+        <span>Coeficiente A — sensibilidad (negativo)</span>
+        <input type="number" [ngModel]="modelo.coeficienteA()" (ngModelChange)="modelo.coeficienteA.set($event)" />
+      </label>
+
+      <label class="campo">
+        <span>Coeficiente B — demanda</span>
+        <input type="number" [ngModel]="modelo.coeficienteB()" (ngModelChange)="modelo.coeficienteB.set($event)" />
+      </label>
+
+      <label class="campo">
+        <span>Coeficiente C — costos fijos</span>
+        <input type="number" [ngModel]="modelo.coeficienteC()" (ngModelChange)="modelo.coeficienteC.set($event)" />
+      </label>
+
+      <label class="campo">
+        <span>Precio mínimo ($)</span>
+        <input type="number" [ngModel]="modelo.precioMinimo()" (ngModelChange)="modelo.precioMinimo.set($event)" />
+      </label>
+
+      <label class="campo">
+        <span>Precio máximo ($)</span>
+        <input type="number" [ngModel]="modelo.precioMaximo()" (ngModelChange)="modelo.precioMaximo.set($event)" />
+      </label>
+    </aside>
+
+    <section class="panel resumen panel-vidrio">
+      @if (modelo.resultados(); as resultados) {
+        <h2>Tu escenario en números</h2>
+
+        <div class="metricas">
+          <div class="metrica">
+            <span class="metrica-etiqueta">Precio óptimo sugerido</span>
+            <strong class="metrica-valor">$ {{ resultados.precioOptimo }}</strong>
+          </div>
+          <div class="metrica">
+            <span class="metrica-etiqueta">Ganancia máxima estimada</span>
+            <strong class="metrica-valor metrica-destacada">$ {{ resultados.gananciaMaxima }}</strong>
+          </div>
+        </div>
+
+        <div class="estrategia">
+          <span class="estrategia-etiqueta">Estrategia recomendada</span>
+          <p>{{ resultados.estrategiaSugerida }}</p>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" type="line"></canvas>
+        </div>
+
+        <button type="button" class="btn-descargar" (click)="abrirModal()">
+          Descargar Informe Personalizado en PDF
+        </button>
+      } @else {
+        <p class="aviso">Ajustá los parámetros para ver tu escenario inicial.</p>
+      }
+    </section>
+  </div>
+
+  @if (mensajeExito()) {
+    <p class="ok" role="status">{{ mensajeExito() }}</p>
+  }
+</section>
+
+@if (modalAbierto()) {
+  <app-modal-captura-lead (registrado)="onRegistrado($event)" (cerrado)="cerrarModal()"></app-modal-captura-lead>
+}

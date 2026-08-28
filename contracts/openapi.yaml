@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: MutualMetrics API
+  title: Metrix IA API
   description: |
-    API REST del proyecto MutualMetrics (NestJS).
+    API REST del proyecto Metrix IA (NestJS).
     Organizada en 5 slices verticales. Cada slice lo posee un integrante
     distinto (ver GUIA.md §1).
     Todas las respuestas de error siguen el esquema `ErrorEnvelope`.
@@ -19,12 +19,16 @@ tags:
     description: Slice 2 — Calculadora Cuadrática (@marianof87)
   - name: pricing
     description: Slice 3 — Optimizador de Precios (@Monzon1983)
+  - name: actuarial
+    description: Slice 2 — Módulo Actuarial (Monte Carlo sobre la parábola de ganancia) (@marianof87)
   - name: escenarios
     description: Slice 4 — Historial & Escenarios (@Franco1212)
   - name: novedades
     description: Slice 5 — Contenido Público (@Ange1809)
   - name: contacto
     description: Slice 5 — Contacto (@Ange1809)
+  - name: leads
+    description: Lead Magnet — captación de leads del informe gated en PDF
   - name: finanzas
     description: Extra — Calculadora Financiera (interés simple/compuesto, ROI, VAN, TIR)
 
@@ -137,6 +141,65 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/PricingResponse" }
+
+  # ================ Slice 2 — Módulo Actuarial ================
+  /actuarial/simulaciones:
+    post:
+      tags: [actuarial]
+      summary: |
+        Simulación estocástica (Monte Carlo) de la parábola de ganancia
+        G(P) = A·P² + B·P + C con A y C estocásticos: intervalo de confianza
+        del precio óptimo, probabilidad de pérdida, piso de solvencia y curva
+        de riesgo. Alineado con OBJ-2: intervalos con probabilidad, nunca un
+        número falso con dos decimales.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SimulacionActuarialRequest" }
+      responses:
+        "200":
+          description: Resultado de la simulación
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SimulacionActuarialResponse" }
+        "400":
+          description: |
+            Sin incertidumbre para simular (código `SIMULACION_SIN_INCERTIDUMBRE`)
+            u otra validación fallida.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "422":
+          description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+  /actuarial/simulaciones/guardar:
+    post:
+      tags: [actuarial]
+      summary: Guarda el resumen de una corrida actuarial (Monte Carlo) vinculada a un Lead opcional.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/GuardarSimulacionActuarial" }
+      responses:
+        "201":
+          description: Simulación guardada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id: { type: string, format: uuid }
+        "422":
+          description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
   # ================ Slice 4 — Escenarios ================
   /escenarios:
@@ -261,6 +324,30 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+
+# ================ Lead Magnet — Leads ================
+  /leads:
+    post:
+      tags: [leads]
+      summary: Registra un lead del informe gated (formulario de descarga de PDF)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LeadRequest" }
+            examples:
+              valido:
+                value:
+                  nombre: "Ana Pérez"
+                  empresa: "Textil Sur"
+                  whatsapp: "+54 9 351 555-1234"
+                  email: "ana.perez@empresa.com"
+      responses:
+        "201":
+          description: Lead registrado
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LeadResponse" }
 
   # ================ Extra — Calculadora Financiera ================
   /finanzas/interes-simple:
@@ -468,6 +555,150 @@ components:
           type: array
           items: { type: number }
 
+    ParametroEstocastico:
+      type: object
+      required: [tipo]
+      discriminator:
+        propertyName: tipo
+      properties:
+        tipo:
+          type: string
+          enum: [fijo, triangular, normal]
+        valor: { type: number }
+        minimo: { type: number }
+        moda: { type: number }
+        maximo: { type: number }
+        nivelConfianza:
+          type: number
+          minimum: 0.51
+          maximum: 0.999
+          default: 0.9
+      description: |
+        Parámetro de la parábola declarado con incertidumbre: `fijo` (valor
+        puntual), `triangular` (minimo/moda/maximo) o `normal` (rango con nivel
+        de confianza, ej: "entre 800 y 1200 con un 90% de probabilidad").
+
+    SimulacionActuarialRequest:
+      type: object
+      required: [coeficienteA, coeficienteB, coeficienteC, precioMinimo, precioMaximo]
+      properties:
+        coeficienteA:
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Sensibilidad de la demanda (estocástico; A >= 0 degenera la parábola)
+        coeficienteB:
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Demanda base (estocástico; unidades que vende el negocio)
+        coeficienteC:
+          $ref: "#/components/schemas/ParametroEstocastico"
+          description: Término independiente neto (costos fijos incluidos; puede ser negativo)
+        precioMinimo: { type: number, minimum: 0 }
+        precioMaximo: { type: number, exclusiveMinimum: 0 }
+        precioActual: { type: number, minimum: 0 }
+        nSimulaciones:
+          type: integer
+          minimum: 100
+          maximum: 25000
+          default: 10000
+        nivelConfianza:
+          type: number
+          minimum: 0.8
+          maximum: 0.99
+          default: 0.95
+        semilla:
+          type: integer
+          minimum: 1
+          description: Semilla opcional para reproducibilidad exacta
+
+    DistribucionResumen:
+      type: object
+      required: [media, mediana, desvio, percentiles, intervalo]
+      properties:
+        media: { type: number }
+        mediana: { type: number }
+        desvio: { type: number }
+        percentiles:
+          type: object
+          additionalProperties: { type: number }
+        intervalo:
+          type: object
+          required: [minimo, maximo]
+          properties:
+            minimo: { type: number }
+            maximo: { type: number }
+
+    SimulacionActuarialResponse:
+      type: object
+      required:
+        [nSimulaciones, semilla, muestrasInvalidas, nivelConfianza, precioOptimo,
+         gananciaMaxima, puntoEquilibrio, pisoSolvencia, probabilidadPerdida,
+         curvaRiesgo, advertencias]
+      properties:
+        nSimulaciones: { type: integer }
+        semilla: { type: integer }
+        muestrasInvalidas: { type: integer }
+        nivelConfianza: { type: number }
+        precioOptimo: { $ref: "#/components/schemas/DistribucionResumen" }
+        gananciaMaxima: { $ref: "#/components/schemas/DistribucionResumen" }
+        puntoEquilibrio: { $ref: "#/components/schemas/DistribucionResumen" }
+        pisoSolvencia:
+          type: number
+          nullable: true
+          description: |
+            Precio mínimo recomendado con el nivel de confianza pedido; null si
+            la estructura no es solvente en más del (1 - nivelConfianza) de los
+            escenarios.
+        probabilidadPerdida:
+          type: object
+          required: [enPrecioOptimo]
+          properties:
+            enPrecioOptimo: { type: number }
+            enPrecioActual:
+              type: number
+              nullable: true
+        curvaRiesgo:
+          type: array
+          items:
+            type: object
+            required: [precio, probabilidadPerdida]
+            properties:
+              precio: { type: number }
+              probabilidadPerdida: { type: number }
+        advertencias:
+          type: array
+          items: { type: string }
+          description: Causas y acciones sugeridas (OBJ-2), nunca números falsos
+
+    GuardarSimulacionActuarial:
+      type: object
+      required:
+        [coeficienteBTipo, nSimulaciones, nivelConfianza, precioOptimoMedia,
+         precioOptimoP5, precioOptimoP95, pisoSolvencia, probPerdidaOptimo,
+         probPerdidaActual]
+      properties:
+        leadId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Lead vinculado (opcional; null si la simulación es anónima)
+        coeficienteBTipo:
+          type: string
+          enum: [fijo, estocástico]
+          description: Tipo del coeficiente B usado en la corrida
+        nSimulaciones: { type: integer, minimum: 1 }
+        nivelConfianza: { type: number, minimum: 0.8, maximum: 0.99 }
+        precioOptimoMedia: { type: number }
+        precioOptimoP5: { type: number, description: Percentil 5 del precio óptimo }
+        precioOptimoP95: { type: number, description: Percentil 95 del precio óptimo }
+        pisoSolvencia:
+          type: number
+          nullable: true
+        probPerdidaOptimo: { type: number, minimum: 0, maximum: 1 }
+        probPerdidaActual:
+          type: number
+          minimum: 0
+          maximum: 1
+          nullable: true
+
     Escenario:
       type: object
       required: [id, tipo, inputs, outputs, creadoEn]
@@ -495,6 +726,22 @@ components:
         mensaje: { type: string, minLength: 10, maxLength: 2000 }
 
     ContactoResponse:
+      type: object
+      required: [id, recibidoEn]
+      properties:
+        id: { type: string, format: uuid }
+        recibidoEn: { type: string, format: date-time }
+
+    LeadRequest:
+      type: object
+      required: [nombre, empresa, whatsapp, email]
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 120 }
+        empresa: { type: string, minLength: 1, maxLength: 120 }
+        whatsapp: { type: string, minLength: 6, maxLength: 20 }
+        email: { type: string, format: email }
+
+    LeadResponse:
       type: object
       required: [id, recibidoEn]
       properties:
