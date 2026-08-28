@@ -78,23 +78,23 @@ Cada slice tiene su `README.md` en las carpetas propias con endpoints, schemas, 
 
 ---
 
-### Estado actual de los slices (al 2026-06-15)
+### Estado actual de los slices (al 2026-08-27)
 
-Foto del avance real, leída del código en `main` y de las ramas WIP. **Slice 1 está terminado (DoD §7 completo); el resto sigue en curso.** Mantener esta tabla al día cuando se mergea trabajo.
+Foto del avance real, leída del código en `main` y de las ramas WIP. **Slices 1 y 2 están terminados (DoD §7 completo); el resto sigue en curso.** Mantener esta tabla al día cuando se mergea trabajo.
 
 | Slice | Dueño | Estado | Avance | Dónde vive |
 |---|---|---|---|---|
 | 1 — Auth & Usuarios | @Nubiru | ✅ Completo (FE + BE + tests) | 100% | Mergeado en `main` |
 | 3 — Pricing | @Monzon1983 | En curso | ~40% | Mergeado en `main` |
 | 5 — Público & Contacto | @Ange1809 | En curso | ~26% | Mergeado en `main` |
-| 2 — Cuadrática | @marianof87 | En curso (solo FE) | ~35% | Rama `quad-solver` (sin mergear) |
+| 2 — Cuadrática | @marianof87 | ✅ Completo (calculadora + módulo actuarial) | 100% | Mergeado en `main` (PR #22, commit `45389d2`) |
 | 4 — Historial | @Franco1212 | Sin arrancar (solo diseño) | ~10% | Rama `feature/historial/diseno-slice4` |
 
 **Detalle por slice:**
 
 - **Slice 3 (Pricing):** optimizador cuadrático funcional end-to-end (FE → controller/service NestJS → modelo Prisma `Optimizacion` + migración). Pendiente: se implementó bajo el nombre `optimizador` mientras las carpetas `pricing` quedaron como stub vacío; el contrato OpenAPI declara `/pricing/optimizar` pero el código sirve `/optimizador/calcular` (desalineado); faltan tests.
 - **Slice 5 (Contacto/Novedades):** `contacto` es la referencia end-to-end (form reactivo → controller validado → modelo Prisma `Contacto`), **pero el service no persiste todavía** (TODO en su README). `novedades` tiene schema Zod + OpenAPI pero sin modelo Prisma ni wiring de FE. Páginas públicas (inicio/sobre-nosotros/servicios) son placeholders.
-- **Slice 2 (Cuadrática):** componente frontend real en `quad-solver`, sin backend ni schema compartido ni integración HTTP aún. ⚠️ La rama incluye un archivo vacío `mutualMetricsAngular` en la raíz (commit accidental) — limpiar antes de mergear.
+- **Slice 2 (Cuadrática):** ✅ **Completo end-to-end.** Por un lado la calculadora básica `ax² + bx + c` (mergeada en `main` el 2026-06-26 desde `quad-solver`); por otro el **módulo actuarial** (Monte Carlo sobre `G(P) = A·P² + B·P + C`) entregado el **2026-08-27**: motor en `packages/shared/src/dominio/actuarial/` (distribuciones, RNG mulberry32, percentiles R-7, piso de solvencia), endpoints `POST /actuarial/simulaciones`, `POST /actuarial/simulaciones/guardar` y `POST /leads`, feature `features/actuarial/` (form, gráfico, resultados con rango P5–P95 e informe PDF con captura de contacto gated), modelos Prisma `SimulacionActuarial` y `Lead`, y 219 tests verdes con CI en `main` (lint, tests+coverage, builds). Mergeado en `main` vía PRs #18–#22 (squash `45389d2`). Ver `docs/MODULO_ACTUARIAL.md` y `docs/TESTING_ACTUARIAL.md`.
 - **Slice 4 (Historial):** solo documento de diseño. **Desbloqueado:** el modelo `Usuario` y el `JwtAuthGuard` de Slice 1 ya están en `main`, así que `Escenario` (FK a `Usuario`) y la protección de endpoints se pueden implementar ya.
 - **Slice 1 (Auth & Usuarios):** ✅ **Completo end-to-end.** Backend: `AuthService` (registrar/login con bcrypt + JWT), `modules/usuarios` (`GET/PATCH /usuarios/yo`), `JwtAuthGuard` reutilizable, modelo `Usuario` + migración. Frontend: `SesionService` (signal `usuarioActual()`), `jwt.interceptor`, `auth.guard`, formularios login/registrar, navbar con login/logout. Schemas Zod en `shared`, contrato OpenAPI alineado, códigos `AUTH_*` documentados, tests unit + integración en backend y frontend. (Refresh queda fuera del MVP por decisión, ver README del slice.)
 
