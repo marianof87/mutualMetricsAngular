@@ -1,18 +1,30 @@
 # Testing del Módulo Actuarial — Metrix AI
 
 Registro de los tests llevados a cabo sobre el módulo actuarial (Monte Carlo sobre
-`G(P) = A·P² + B·P + C`), rama `feature/cuadratica/actuarial`. Complementa `docs/MODULO_ACTUARIAL.md` §5.
+`G(P) = A·P² + B·P + C`). Complementa `docs/MODULO_ACTUARIAL.md` §5.
+
+> **El módulo está mergeado en `main`** (2026-08-27, commit `45389d2`, PR #22).
+> Durante el desarrollo vivió en la rama `feature/cuadratica/actuarial`.
 
 ## 1. Estado general
 
 | Suites | Tests | Resultado |
 |---|---|---|
-| Shared (`packages/shared`) — vitest | 113 | ✅ verdes |
+| Shared (`packages/shared`) — vitest | 136 | ✅ verdes |
 | Backend (`apps/backend`) — jest + supertest | 34 | ✅ verdes |
-| Frontend (`apps/frontend`) — vitest + jsdom | 43 | ✅ verdes |
+| Frontend (`apps/frontend`) — vitest + jsdom | 49 | ✅ verdes |
 | Rendimiento (`apps/backend/bench`) — ts-node | — | ✅ corre (no va en CI) |
 
-**Total: 190 tests.**
+**Total: 219 tests.**
+
+El delta +29 respecto del cierre anterior (190) corresponde a lo que trajo `main`
+al integrar la feature: +23 de shared (dominio y dtos de finanzas) y +6 de frontend
+(sesión y coverage del feed de auth de Slice 1). El conjunto del módulo actuarial
+no cambió: era 190 antes de la entrega y sigue siendo íntegro en `main`.
+
+CI (`main`): el job `Tests unit + coverage` corre `npm test` + `npm run test:cov`
+sobre las 3 suites y pasa (los thresholds siguen comentados en
+`packages/shared/vitest.config.ts`; backend sin `coverageThreshold`).
 
 Ejecución:
 
