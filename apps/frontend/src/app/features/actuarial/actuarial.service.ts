@@ -3,8 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import type {
   GuardarSimulacionActuarial,
-  LeadRequest,
-  LeadResponse,
   SimulacionActuarialRequest,
   SimulacionActuarialResponse,
 } from '@mutual-metrics/shared';
@@ -21,14 +19,10 @@ export class ActuarialService {
     );
   }
 
-  guardar(datos: GuardarSimulacionActuarial): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(
+  guardar(datos: GuardarSimulacionActuarial): Observable<{ id: string; leadId?: string }> {
+    return this.http.post<{ id: string; leadId?: string }>(
       `${entorno.apiBaseUrl}/actuarial/simulaciones/guardar`,
       datos,
     );
-  }
-
-  registrarLead(datos: LeadRequest): Observable<LeadResponse> {
-    return this.http.post<LeadResponse>(`${entorno.apiBaseUrl}/leads`, datos);
   }
 }

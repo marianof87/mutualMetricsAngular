@@ -282,7 +282,7 @@ describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
       whatsapp: '+54 9 351 555-1234',
       email: 'ana@empresa.com',
     };
-    comp.exportarInforme({ lead, leadId: 'uuid-lead' });
+    comp.exportarInforme(lead);
 
     expect(comp.modalAbierto()).toBe(false);
     expect(pdfMock.generarPdf).toHaveBeenCalledTimes(1);
@@ -291,8 +291,12 @@ describe('ActuarialComponent — ejecución asíncrona con fake timers', () => {
 
     const guardar = http.expectOne(`${entorno.apiBaseUrl}/actuarial/simulaciones/guardar`);
     expect(guardar.request.method).toBe('POST');
-    expect(guardar.request.body.leadId).toBe('uuid-lead');
-    guardar.flush({ id: 'uuid-simulacion' });
+    expect(guardar.request.body).toEqual(
+      expect.objectContaining({
+        lead: expect.objectContaining({ nombre: 'Ana Pérez', email: 'ana@empresa.com' }),
+      }),
+    );
+    guardar.flush({ id: 'uuid-simulacion', leadId: 'uuid-lead' });
 
     expect(comp.guardado()).toBe('ok');
   });
