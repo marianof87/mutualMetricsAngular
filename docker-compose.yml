@@ -16,6 +16,9 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - CORS_ORIGIN=http://localhost:8080,http://localhost:4200
+      # Se puede sobreescribir con un .env junto al compose (variables fuera del repo).
+      - DATABASE_URL=${DATABASE_URL:-file:./prisma/mutualmetrics.db}
+      - JWT_SECRET=${JWT_SECRET:-dev-only-cambiar-en-produccion}
     ports:
       - "3000:3000"
     restart: unless-stopped

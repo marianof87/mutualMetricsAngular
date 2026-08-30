@@ -41,4 +41,6 @@ COPY --from=builder /repo/packages/shared/package.json ./node_modules/@mutual-me
 COPY --from=builder /repo/apps/backend/prisma ./prisma
 
 EXPOSE 3000
-CMD ["node", "dist/main.js"]
+# Aplica migraciones de Prisma antes de arrancar para que la base nunca quede
+# sin tablas (prisma migrate deploy es idempotente y seguro en producción).
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]

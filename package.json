@@ -41,5 +41,19 @@
     "@typescript-eslint/parser": "^8.59.0",
     "eslint": "^8.57.0",
     "npm-run-all": "^4.1.5"
+  },
+  "overrides": {
+    "@angular/animations": "21.2.22",
+    "@angular/build": "21.2.22",
+    "@angular/cli": "21.2.22",
+    "@angular/common": "21.2.22",
+    "@angular/compiler": "21.2.22",
+    "@angular/compiler-cli": "21.2.22",
+    "@angular/core": "21.2.22",
+    "@angular/forms": "21.2.22",
+    "@angular/platform-browser": "21.2.22",
+    "@angular/platform-browser-dynamic": "21.2.22",
+    "@angular/router": "21.2.22",
+    "@angular/service-worker": "21.2.22"
   }
 }
