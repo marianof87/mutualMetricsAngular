@@ -14,7 +14,7 @@ import { ActuarialService } from './actuarial.service';
 import { ModalExportarInformeComponent } from './modal-exportar-informe/modal-exportar-informe.component';
 import { InformeActuarialPdfService } from './servicios/informe-actuarial-pdf.service';
 
-type ModoParametro = 'fijo' | 'triangular' | 'normal';
+type ModoParametro = 'fijo' | 'triangular' | 'pert' | 'normal';
 
 @Component({
   selector: 'app-actuarial',
@@ -258,6 +258,8 @@ export class ActuarialComponent {
         return { tipo: 'fijo', valor };
       case 'triangular':
         return { tipo: 'triangular', minimo, moda, maximo };
+      case 'pert':
+        return { tipo: 'pert', minimo, moda, maximo };
       case 'normal':
         return { tipo: 'normal', minimo, maximo, nivelConfianza: confianza };
     }

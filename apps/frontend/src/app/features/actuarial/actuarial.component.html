@@ -22,6 +22,7 @@
             class="select-input"
           >
             <option value="triangular">Tres escenarios (pesimista / esperado / optimista)</option>
+            <option value="pert">Beta-PERT (escenarios con curva suavizada)</option>
             <option value="normal">Rango probable</option>
             <option value="fijo">Sé exactamente cuánto es</option>
           </select>
@@ -36,13 +37,17 @@
             (ngModelChange)="aValor.set($event)"
           />
         </div>
-        <div class="form-group" *ngIf="modoA() === 'triangular'">
+        <div class="form-group" *ngIf="modoA() === 'triangular' || modoA() === 'pert'">
           <label for="a-minimo">Pesimista (baja sensibilidad)</label>
           <input id="a-minimo" type="number" [ngModel]="aMinimo()" (ngModelChange)="aMinimo.set($event)" />
           <label for="a-moda">Esperado</label>
           <input id="a-moda" type="number" [ngModel]="aModa()" (ngModelChange)="aModa.set($event)" />
           <label for="a-maximo">Optimista (alta sensibilidad)</label>
           <input id="a-maximo" type="number" [ngModel]="aMaximo()" (ngModelChange)="aMaximo.set($event)" />
+          <p class="hint" *ngIf="modoA() === 'pert'">
+            Beta-PERT: misma idea que los tres escenarios, pero con una curva más
+            suave y continua entre el pesimista y el optimista.
+          </p>
         </div>
         <div class="form-group" *ngIf="modoA() === 'normal'">
           <label for="a-minimo-n">Menor sensibilidad esperada</label>
@@ -62,6 +67,7 @@
           <select id="modo-b" [ngModel]="modoB()" (ngModelChange)="cambiarModoB($event)" class="select-input">
             <option value="fijo">Fijo</option>
             <option value="triangular">Tres escenarios (pesimista / esperado / optimista)</option>
+            <option value="pert">Beta-PERT (escenarios con curva suavizada)</option>
             <option value="normal">Rango probable</option>
           </select>
         </div>
@@ -70,13 +76,16 @@
           <label for="b-valor">Valor fijo</label>
           <input id="b-valor" type="number" [ngModel]="bValor()" (ngModelChange)="bValor.set($event)" />
         </div>
-        <div class="form-group" *ngIf="modoB() === 'triangular'">
+        <div class="form-group" *ngIf="modoB() === 'triangular' || modoB() === 'pert'">
           <label for="b-minimo">Pesimista</label>
           <input id="b-minimo" type="number" [ngModel]="bMinimo()" (ngModelChange)="bMinimo.set($event)" />
           <label for="b-moda">Esperado</label>
           <input id="b-moda" type="number" [ngModel]="bModa()" (ngModelChange)="bModa.set($event)" />
           <label for="b-maximo">Optimista</label>
           <input id="b-maximo" type="number" [ngModel]="bMaximo()" (ngModelChange)="bMaximo.set($event)" />
+          <p class="hint" *ngIf="modoB() === 'pert'">
+            Beta-PERT: curva suavizada entre el pesimista y el optimista.
+          </p>
         </div>
         <div class="form-group" *ngIf="modoB() === 'normal'">
           <label for="b-minimo-n">Rango mínimo</label>
@@ -96,6 +105,7 @@
           <select id="modo-c" [ngModel]="modoC()" (ngModelChange)="cambiarModoC($event)" class="select-input">
             <option value="normal">Rango probable</option>
             <option value="triangular">Tres escenarios (pesimista / esperado / optimista)</option>
+            <option value="pert">Beta-PERT (escenarios con curva suavizada)</option>
             <option value="fijo">Sé exactamente cuánto es</option>
           </select>
         </div>
@@ -104,13 +114,16 @@
           <label for="c-valor">Valor fijo</label>
           <input id="c-valor" type="number" [ngModel]="cValor()" (ngModelChange)="cValor.set($event)" />
         </div>
-        <div class="form-group" *ngIf="modoC() === 'triangular'">
+        <div class="form-group" *ngIf="modoC() === 'triangular' || modoC() === 'pert'">
           <label for="c-minimo">Pesimista (costos altos)</label>
           <input id="c-minimo" type="number" [ngModel]="cMinimo()" (ngModelChange)="cMinimo.set($event)" />
           <label for="c-moda">Esperado</label>
           <input id="c-moda" type="number" [ngModel]="cModa()" (ngModelChange)="cModa.set($event)" />
           <label for="c-maximo">Optimista (costos bajos)</label>
           <input id="c-maximo" type="number" [ngModel]="cMaximo()" (ngModelChange)="cMaximo.set($event)" />
+          <p class="hint" *ngIf="modoC() === 'pert'">
+            Beta-PERT: curva suavizada entre el pesimista y el optimista.
+          </p>
         </div>
         <div class="form-group" *ngIf="modoC() === 'normal'">
           <label for="c-minimo-n">Menor costo esperado</label>

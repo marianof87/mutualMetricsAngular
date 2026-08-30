@@ -28,8 +28,8 @@ interface EstadoParcial {
 
 /**
  * Verdadero si al menos un coeficiente de la parábola es estocástico. Acepta
- * coeficientes numéricos y paramétricos (tipo fijo/triangular/normal) para que
- * siga funcionando si en el futuro `coeficienteB` deja de ser un número fijo.
+ * coeficientes numéricos y paramétricos (tipo fijo/triangular/pert/normal) para
+ * que siga funcionando si en el futuro `coeficienteB` deja de ser un número fijo.
  */
 export function tieneIncertidumbre(solicitud: SimulacionActuarialRequest): boolean {
   return [solicitud.coeficienteA, solicitud.coeficienteB, solicitud.coeficienteC].some(

@@ -567,7 +567,7 @@ components:
       properties:
         tipo:
           type: string
-          enum: [fijo, triangular, normal]
+          enum: [fijo, triangular, pert, normal]
         valor: { type: number }
         minimo: { type: number }
         moda: { type: number }
@@ -579,8 +579,9 @@ components:
           default: 0.9
       description: |
         Parámetro de la parábola declarado con incertidumbre: `fijo` (valor
-        puntual), `triangular` (minimo/moda/maximo) o `normal` (rango con nivel
-        de confianza, ej: "entre 800 y 1200 con un 90% de probabilidad").
+        puntual), `triangular` (minimo/moda/maximo), `pert` (Beta-PERT, curva
+        suavizada sobre los mismos minimo/moda/maximo) o `normal` (rango con
+        nivel de confianza, ej: "entre 800 y 1200 con un 90% de probabilidad").
 
     SimulacionActuarialRequest:
       type: object

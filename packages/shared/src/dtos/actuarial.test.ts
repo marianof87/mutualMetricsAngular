@@ -98,6 +98,64 @@ describe('SimulacionActuarialRequestSchema', () => {
     expect(negativa.success).toBe(false);
   });
 
+  it('acepta un parámetro pert válido', () => {
+    const resultado = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteB: { tipo: 'pert', minimo: 100, moda: 120, maximo: 140 },
+    });
+    expect(resultado.success).toBe(true);
+  });
+
+  it('acepta pert con la moda en el mínimo o en el máximo', () => {
+    const conModaEnMinimo = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteB: { tipo: 'pert', minimo: 100, moda: 100, maximo: 140 },
+    });
+    expect(conModaEnMinimo.success).toBe(true);
+
+    const conModaEnMaximo = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteB: { tipo: 'pert', minimo: 100, moda: 140, maximo: 140 },
+    });
+    expect(conModaEnMaximo.success).toBe(true);
+  });
+
+  it('rechaza pert con minimo >= maximo', () => {
+    const resultado = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteA: { tipo: 'pert', minimo: -1, moda: -2, maximo: -3 },
+    });
+    expect(resultado.success).toBe(false);
+  });
+
+  it('rechaza pert con la moda fuera del rango [minimo, maximo]', () => {
+    const modaBaja = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteA: { tipo: 'pert', minimo: -3, moda: -4, maximo: -1 },
+    });
+    expect(modaBaja.success).toBe(false);
+
+    const modaAlta = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteA: { tipo: 'pert', minimo: -3, moda: 0, maximo: -1 },
+    });
+    expect(modaAlta.success).toBe(false);
+  });
+
+  it('rechaza pert con valores no finitos', () => {
+    const conNaN = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteA: { tipo: 'pert', minimo: Number.NaN, moda: -2, maximo: -1 },
+    });
+    expect(conNaN.success).toBe(false);
+
+    const conInfinito = SimulacionActuarialRequestSchema.safeParse({
+      ...solicitudValida,
+      coeficienteA: { tipo: 'pert', minimo: -3, moda: -2, maximo: Number.POSITIVE_INFINITY },
+    });
+    expect(conInfinito.success).toBe(false);
+  });
+
   it('rechaza un tipo de parámetro desconocido', () => {
     const resultado = SimulacionActuarialRequestSchema.safeParse({
       ...solicitudValida,

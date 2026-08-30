@@ -25,10 +25,21 @@ const arbitrarioNormal = fc.record({
   nivelConfianza: 0.9,
 }));
 
+const arbitrarioPert = fc.record({
+  tipo: fc.constant('pert' as const),
+  minimo: fc.integer({ min: -10_000, max: -2 }),
+  moda: fc.integer({ min: -10_000, max: -2 }),
+  maximo: fc.integer({ min: -10_000, max: -2 }),
+}).map((p) => {
+  const [minimo, moda, maximo] = [p.minimo, p.moda, p.maximo].sort((a, b) => a - b);
+  return { tipo: 'pert' as const, minimo, moda, maximo };
+});
+
 const arbitrarioEstocastico = fc.oneof(
   fc.record({ tipo: fc.constant('fijo' as const), valor: fc.integer({ min: -10_000, max: -1 }) }),
   arbitrarioTriangular,
   arbitrarioNormal,
+  arbitrarioPert,
 );
 
 const arbitrarioSolicitud: fc.Arbitrary<SimulacionActuarialRequest> = fc
@@ -111,6 +122,21 @@ describe('muestrearParametro — propiedades de rango (fast-check)', () => {
     fc.assert(
       fc.property(arbitrarioNormal, (parametro) => {
         const aleatorio = crearAleatorio(11);
+        for (let i = 0; i < 20; i++) {
+          const valor = muestrearParametro(aleatorio, parametro);
+          expect(valor).toBeGreaterThanOrEqual(parametro.minimo);
+          expect(valor).toBeLessThanOrEqual(parametro.maximo);
+          expect(Number.isFinite(valor)).toBe(true);
+        }
+      }),
+      { numRuns: 200 },
+    );
+  });
+
+  it('todo muestreo pert cae dentro de [minimo, maximo]', () => {
+    fc.assert(
+      fc.property(arbitrarioPert, (parametro) => {
+        const aleatorio = crearAleatorio(13);
         for (let i = 0; i < 20; i++) {
           const valor = muestrearParametro(aleatorio, parametro);
           expect(valor).toBeGreaterThanOrEqual(parametro.minimo);

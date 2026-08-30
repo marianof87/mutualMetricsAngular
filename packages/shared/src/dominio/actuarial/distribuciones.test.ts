@@ -4,6 +4,7 @@ import {
   muestrearTriangular,
   muestrearNormalTruncada,
   muestrearUniforme,
+  muestrearPert,
   cuantilNormal,
 } from './distribuciones';
 
@@ -109,6 +110,59 @@ describe('muestrearNormalTruncada', () => {
     );
     expect(desvio).toBeLessThan(20);
     expect(desvio).toBeGreaterThan(1);
+  });
+});
+
+describe('muestrearPert', () => {
+  it('devuelve valores dentro del rango [minimo, maximo]', () => {
+    const aleatorio = crearAleatorio(41);
+    for (let i = 0; i < 5000; i++) {
+      const valor = muestrearPert(aleatorio, { tipo: 'pert', minimo: 0, moda: 3, maximo: 10 });
+      expect(valor).toBeGreaterThanOrEqual(0);
+      expect(valor).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it('la media empírica converge a (min + 4·moda + max) / 6', () => {
+    const aleatorio = crearAleatorio(43);
+    const valores = Array.from({ length: 40000 }, () =>
+      muestrearPert(aleatorio, { tipo: 'pert', minimo: 0, moda: 3, maximo: 10 }),
+    );
+    const media = valores.reduce((acc, v) => acc + v, 0) / valores.length;
+    expect(media).toBeCloseTo((0 + 4 * 3 + 10) / 6, 1);
+  });
+
+  it('con moda en el extremo la media empírica converge al sesgo esperado', () => {
+    const aleatorio = crearAleatorio(47);
+    // moda = minimo -> Beta(1, 5): la media cae en min + (max - min)/6.
+    const valores = Array.from({ length: 40000 }, () =>
+      muestrearPert(aleatorio, { tipo: 'pert', minimo: -2, moda: -2, maximo: 4 }),
+    );
+    const media = valores.reduce((acc, v) => acc + v, 0) / valores.length;
+    expect(media).toBeCloseTo((-2 + 4 * -2 + 4) / 6, 1);
+  });
+
+  it('con moda en el máximo la media empírica converge al sesgo esperado', () => {
+    const aleatorio = crearAleatorio(59);
+    // moda = maximo -> Beta(5, 1): la media cae en min + (max - min)·5/6.
+    const valores = Array.from({ length: 40000 }, () =>
+      muestrearPert(aleatorio, { tipo: 'pert', minimo: -2, moda: 4, maximo: 4 }),
+    );
+    const media = valores.reduce((acc, v) => acc + v, 0) / valores.length;
+    expect(media).toBeCloseTo((-2 + 4 * 4 + 4) / 6, 1);
+  });
+
+  it('devuelve NaN ante parámetros no finitos (sin colgarse en el loop de Gamma)', () => {
+    const aleatorio = crearAleatorio(61);
+    const resultado = muestrearPert(aleatorio, { tipo: 'pert', minimo: Number.NaN, moda: 1, maximo: 2 });
+    expect(Number.isNaN(resultado)).toBe(true);
+  });
+
+  it('con rango degenerado (min = max) devuelve siempre ese valor', () => {
+    const aleatorio = crearAleatorio(53);
+    for (let i = 0; i < 100; i++) {
+      expect(muestrearPert(aleatorio, { tipo: 'pert', minimo: 5, moda: 5, maximo: 5 })).toBe(5);
+    }
   });
 });
 

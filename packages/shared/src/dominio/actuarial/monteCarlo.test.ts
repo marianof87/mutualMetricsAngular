@@ -237,6 +237,20 @@ describe('tieneIncertidumbre', () => {
       }),
     ).toBe(true);
   });
+
+  it('es verdadero con un coeficiente pert (Beta-PERT)', () => {
+    expect(
+      tieneIncertidumbre({
+        coeficienteA: { tipo: 'pert', minimo: -3, moda: -2, maximo: -1 },
+        coeficienteB: { tipo: 'fijo', valor: 120 },
+        coeficienteC: { tipo: 'fijo', valor: -1000 },
+        precioMinimo: 10,
+        precioMaximo: 100,
+        nSimulaciones: 500,
+        nivelConfianza: 0.95,
+      }),
+    ).toBe(true);
+  });
 });
 
 describe('simularRiesgo — invariantes de la respuesta', () => {

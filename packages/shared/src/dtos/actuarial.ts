@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { LeadRequestSchema } from './lead';
 
 // Parámetro estocástico: modela un coeficiente de la parábola que el dueño
-// declara con incertidumbre (rango triangular o normal con nivel de confianza)
-// en lugar de un número fijo.
+// declara con incertidumbre (rango triangular, Beta-PERT o normal con nivel de
+// confianza) en lugar de un número fijo.
 
 export const ParametroFijoSchema = z.object({
   tipo: z.literal('fijo'),
@@ -15,6 +15,16 @@ export const ParametroTriangularSchema = z.object({
   minimo: z.number(),
   moda: z.number(),
   maximo: z.number(),
+});
+
+// Beta-PERT: curva suavizada a partir de los mismos tres escenarios
+// (pesimista / esperado / optimista) que la triangular. `.finite()` evita que
+// NaN/Infinity lleguen al sampler Gamma (cuyo loop de rechazo no terminaría).
+export const ParametroPertSchema = z.object({
+  tipo: z.literal('pert'),
+  minimo: z.number().finite(),
+  moda: z.number().finite(),
+  maximo: z.number().finite(),
 });
 
 export const ParametroNormalSchema = z.object({
@@ -33,6 +43,7 @@ export const ParametroEstocasticoSchema = z
   .discriminatedUnion('tipo', [
     ParametroFijoSchema,
     ParametroTriangularSchema,
+    ParametroPertSchema,
     ParametroNormalSchema,
   ])
   .superRefine((parametro, contexto) => {
@@ -44,16 +55,20 @@ export const ParametroEstocasticoSchema = z
         path: ['minimo'],
       });
     }
-    if (parametro.tipo === 'triangular' && (parametro.moda < parametro.minimo || parametro.moda > parametro.maximo)) {
+    if (
+      (parametro.tipo === 'triangular' || parametro.tipo === 'pert') &&
+      (parametro.moda < parametro.minimo || parametro.moda > parametro.maximo)
+    ) {
       contexto.addIssue({
         code: 'custom',
-        message: 'El parámetro triangular debe cumplir minimo <= moda <= maximo',
+        message: 'El parámetro debe cumplir minimo <= moda <= maximo',
         path: ['moda'],
       });
     }
   });
 
 export type ParametroEstocastico = z.infer<typeof ParametroEstocasticoSchema>;
+export type ParametroPert = z.infer<typeof ParametroPertSchema>;
 
 // Solicitud de simulación actuarial (Monte Carlo) sobre la parábola de ganancia
 // G(P) = A·P² + B·P + C. Los tres coeficientes pueden ser estocásticos.

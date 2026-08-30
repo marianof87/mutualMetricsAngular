@@ -1,4 +1,4 @@
-import type { ParametroEstocastico } from '../../dtos/actuarial';
+import type { ParametroEstocastico, ParametroPert } from '../../dtos/actuarial';
 
 // Generador de números pseudoaleatorios determinista (mulberry32): la misma
 // semilla produce la misma secuencia, lo que hace los tests reproducibles.
@@ -69,6 +69,8 @@ export function muestrearParametro(
       return parametro.valor;
     case 'triangular':
       return muestrearTriangular(aleatorio, parametro.minimo, parametro.moda, parametro.maximo);
+    case 'pert':
+      return muestrearPert(aleatorio, parametro);
     case 'normal':
       return muestrearNormalTruncada(
         aleatorio,
@@ -76,6 +78,52 @@ export function muestrearParametro(
         parametro.maximo,
         parametro.nivelConfianza,
       );
+  }
+}
+
+/**
+ * Muestreo Beta-PERT sobre [minimo, maximo]. La media esperada es
+ * μ = (min + 4·moda + max) / 6 y los parámetros de forma valen
+ * α₁ = 1 + 4·(moda − min)/(max − min) y α₂ = 1 + 4·(max − moda)/(max − min).
+ * La Beta se obtiene como G1/(G1 + G2) con G1 ~ Gamma(α₁) y G2 ~ Gamma(α₂):
+ * suave y determinista porque deriva del mismo PRNG mulberry32.
+ */
+export function muestrearPert(aleatorio: GeneradorAleatorio, param: ParametroPert): number {
+  const { minimo, moda, maximo } = param;
+  // Defensa en profundidad: el schema ya exige mínimos/máximos finitos, pero si
+  // se llamara con NaN/Infinity el loop de rechazo de Gamma no terminaría nunca.
+  if (!Number.isFinite(minimo) || !Number.isFinite(moda) || !Number.isFinite(maximo)) {
+    return NaN;
+  }
+  if (maximo === minimo) return minimo;
+  const alfaUno = 1 + (4 * (moda - minimo)) / (maximo - minimo);
+  const alfaDos = 1 + (4 * (maximo - moda)) / (maximo - minimo);
+  const gammaUno = muestrearGamma(aleatorio, alfaUno);
+  const gammaDos = muestrearGamma(aleatorio, alfaDos);
+  const beta = gammaUno / (gammaUno + gammaDos);
+  return minimo + beta * (maximo - minimo);
+}
+
+/**
+ * Muestreo de una Gamma(forma, 1) por Marsaglia & Tsang (2000), válido para
+ * forma >= 1 — condición que los parámetros PERT siempre cumplen. El loop de
+ * rechazo consume un número variable de uniformes, pero el PRNG determinista
+ * garantiza reproducibilidad para una misma semilla.
+ */
+function muestrearGamma(aleatorio: GeneradorAleatorio, forma: number): number {
+  const d = forma - 1 / 3;
+  const c = 1 / Math.sqrt(9 * d);
+  for (;;) {
+    let x: number;
+    let v: number;
+    do {
+      x = muestrearZNormal(aleatorio);
+      v = 1 + c * x;
+    } while (v <= 0);
+    v = v * v * v;
+    const u = aleatorio();
+    if (u < 1 - 0.0331 * x ** 4) return d * v;
+    if (Math.log(u) < 0.5 * x ** 2 + d * (1 - v + Math.log(v))) return d * v;
   }
 }
 
