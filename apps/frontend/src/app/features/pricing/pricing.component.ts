@@ -37,7 +37,5 @@ export class PricingComponent implements OnInit {
       gananciaMaxima: 230000.50,
       estrategiaSugerida: 'Estrategia Óptima de Temporada Alta (Simulada)'
     };
-    
-    console.log('Datos del formulario listos para enviar:', this.form.value);
   }
 }
