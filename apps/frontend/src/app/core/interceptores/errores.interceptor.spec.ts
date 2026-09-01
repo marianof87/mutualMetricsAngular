@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { CodigoError, type EnvelopeError } from '@mutual-metrics/shared';
 import { erroresInterceptor } from './errores.interceptor';
 import { SesionService } from '../servicios/sesion.service';
+import { OMITIR_REDIRECCION_SESION } from './contexto-http';
 
 function configurar() {
   const cerrarSesion = vi.fn();
@@ -79,6 +80,58 @@ describe('erroresInterceptor', () => {
 
     const envelope = await recibido;
     expect(envelope.error.code).toBe(CodigoError.SERVICIO_NO_DISPONIBLE);
+    ctrl.verify();
+  });
+});
+
+describe('erroresInterceptor con OMITIR_REDIRECCION_SESION', () => {
+  it('NO cierra sesión ni redirige cuando OMITIR_REDIRECCION_SESION=true aunque el código sea AUTH_TOKEN_EXPIRADO', async () => {
+    const { cerrarSesion, navigate } = configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http
+        .get('/protegido', {
+          context: new HttpContext().set(OMITIR_REDIRECCION_SESION, true),
+        })
+        .subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/protegido').flush(
+      { error: { code: CodigoError.AUTH_TOKEN_EXPIRADO, message: 'Token expirado' } },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.AUTH_TOKEN_EXPIRADO);
+    expect(cerrarSesion).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    ctrl.verify();
+  });
+
+  it('no redirige a /login durante la revalidación silenciosa (simula sesion.service.revalidar())', async () => {
+    const { cerrarSesion, navigate } = configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http
+        .get('/usuarios/yo', {
+          context: new HttpContext().set(OMITIR_REDIRECCION_SESION, true),
+        })
+        .subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/usuarios/yo').flush(
+      { error: { code: CodigoError.AUTH_TOKEN_EXPIRADO, message: 'Token expirado en revalidación' } },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.AUTH_TOKEN_EXPIRADO);
+    expect(cerrarSesion).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
     ctrl.verify();
   });
 });
