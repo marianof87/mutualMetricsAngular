@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { CodigoError, type EnvelopeError } from '@mutual-metrics/shared';
+import { CODIGOS_TOKEN_RECHAZADO, type EnvelopeError } from '@mutual-metrics/shared';
 import type {
   LoginRequest,
   RegistrarRequest,
@@ -12,13 +12,6 @@ import { entorno } from '../configuracion/entorno';
 import { OMITIR_REDIRECCION_SESION } from '../interceptores/contexto-http';
 
 const CLAVE_ALMACEN = 'mm_sesion';
-
-// Solo estos códigos significan "tu token ya no sirve" → limpiar sesión.
-// Un error transitorio (red caída, 500) NO debe desloguear al usuario.
-const CODIGOS_TOKEN_RECHAZADO: string[] = [
-  CodigoError.AUTH_TOKEN_EXPIRADO,
-  CodigoError.AUTH_TOKEN_INVALIDO,
-];
 
 interface SesionAlmacenada {
   accessToken: string;

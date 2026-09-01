@@ -42,3 +42,12 @@ export const CodigoError = {
 } as const;
 
 export type CodigoError = (typeof CodigoError)[keyof typeof CodigoError];
+
+// Códigos que significan "la sesión/token ya no es válido": usados por el
+// interceptor de errores y por el servicio de sesión (fuente única de verdad).
+export const CODIGOS_TOKEN_RECHAZADO: readonly string[] = [
+  CodigoError.AUTH_TOKEN_EXPIRADO,
+  CodigoError.AUTH_TOKEN_INVALIDO,
+] as const;
+
+export type CodigoTokenRechazado = (typeof CODIGOS_TOKEN_RECHAZADO)[number];
