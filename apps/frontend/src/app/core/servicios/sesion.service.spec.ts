@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -50,7 +50,7 @@ describe('SesionService', () => {
     expect(servicio.autenticado()).toBe(true);
   });
 
-  it('persiste la sesión en localStorage', () => {
+  it('persiste la sesion en localStorage', () => {
     servicio.registrar({ email: 'ana@example.com', password: 'unaClaveSegura', nombre: 'Ana' }).subscribe();
     http.expectOne(`${entorno.apiBaseUrl}/auth/registrar`).flush(sesionFalsa);
 
@@ -69,7 +69,7 @@ describe('SesionService', () => {
   });
 });
 
-describe('SesionService — revalidación al iniciar', () => {
+describe('SesionService — revalidacion al iniciar', () => {
   function montar() {
     TestBed.configureTestingModule({
       providers: [
@@ -102,7 +102,7 @@ describe('SesionService — revalidación al iniciar', () => {
     localStorage.clear();
   });
 
-  it('limpia la sesión si el backend rechaza el token guardado', () => {
+  it('limpia la sesion si el backend rechaza el token guardado', () => {
     localStorage.setItem(
       'mm_sesion',
       JSON.stringify({ accessToken: 'token.vencido', usuario: sesionFalsa.usuario }),
@@ -123,7 +123,7 @@ describe('SesionService — revalidación al iniciar', () => {
     http.verify();
   });
 
-  it('conserva la sesión ante un error transitorio (500)', () => {
+  it('conserva la sesion ante un error transitorio (500)', () => {
     localStorage.setItem(
       'mm_sesion',
       JSON.stringify({ accessToken: 'token.jwt', usuario: sesionFalsa.usuario }),
@@ -140,6 +140,128 @@ describe('SesionService — revalidación al iniciar', () => {
       );
 
     expect(servicio.autenticado()).toBe(true);
+    http.verify();
+    localStorage.clear();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AMPLIACION RED — casos borde de SesionService
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('SesionService — casos borde (RED)', () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('revalidar() sin token NO dispara ninguna request HTTP', () => {
+    localStorage.clear();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+
+    expect(servicio.obtenerToken()).toBeNull();
+    expect(servicio.autenticado()).toBe(false);
+
+    servicio.revalidar();
+
+    // No debe haber ninguna request pendiente a /usuarios/yo
+    http.expectNone(`${entorno.apiBaseUrl}/usuarios/yo`);
+    http.verify();
+  });
+
+  it('hidratar() con JSON corrupto en localStorage deja sesion vacia y REMUEVE el item', () => {
+    localStorage.setItem('mm_sesion', 'no-es-json');
+
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+
+    expect(servicio.autenticado()).toBe(false);
+    expect(servicio.obtenerToken()).toBeNull();
+    expect(servicio.usuarioActual()).toBeNull();
+    expect(localStorage.getItem('mm_sesion')).toBeNull();
+
+    http.verify();
+  });
+
+  it('registrar() tras flush deja signals autenticado=true y usuarioActual con nombre correcto', () => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+
+    servicio
+      .registrar({ email: 'ana@example.com', password: 'unaClaveSegura', nombre: 'Ana' })
+      .subscribe();
+
+    const req = http.expectOne(`${entorno.apiBaseUrl}/auth/registrar`);
+    expect(req.request.method).toBe('POST');
+    req.flush(sesionFalsa);
+
+    // Asimetrico vs iniciarSesion: verificar que registrar tambien setea signals
+    expect(servicio.autenticado()).toBe(true);
+    expect(servicio.usuarioActual()?.nombre).toBe('Ana');
+    expect(servicio.usuarioActual()?.email).toBe('ana@example.com');
+    expect(servicio.obtenerToken()).toBe('token.jwt');
+    expect(localStorage.getItem('mm_sesion')).toContain('token.jwt');
+
+    http.verify();
+  });
+
+  it('limpia la sesion si revalidar recibe AUTH_TOKEN_INVALIDO (segundo codigo del array)', () => {
+    localStorage.setItem(
+      'mm_sesion',
+      JSON.stringify({ accessToken: 'token.invalido', usuario: sesionFalsa.usuario }),
+    );
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([jwtInterceptor, erroresInterceptor])),
+        provideHttpClientTesting(),
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+
+    servicio.revalidar();
+
+    http
+      .expectOne(`${entorno.apiBaseUrl}/usuarios/yo`)
+      .flush(
+        { error: { code: 'AUTH_TOKEN_INVALIDO', message: 'Token invalido' } },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+
+    expect(servicio.autenticado()).toBe(false);
+    expect(servicio.obtenerToken()).toBeNull();
+    expect(localStorage.getItem('mm_sesion')).toBeNull();
+    http.verify();
+    localStorage.clear();
+  });
+
+  it('hidratar() con JSON valido restaura sesion correctamente', () => {
+    localStorage.setItem(
+      'mm_sesion',
+      JSON.stringify({ accessToken: 'token.restaurado', usuario: sesionFalsa.usuario }),
+    );
+
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const servicio = TestBed.inject(SesionService);
+    const http = TestBed.inject(HttpTestingController);
+
+    expect(servicio.autenticado()).toBe(true);
+    expect(servicio.obtenerToken()).toBe('token.restaurado');
+    expect(servicio.usuarioActual()?.nombre).toBe('Ana');
+
     http.verify();
     localStorage.clear();
   });

@@ -1,12 +1,20 @@
-import { describe, it, expect, vi } from 'vitest';
+﻿import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpContext,
+  HttpHandlerFn,
+  HttpRequest,
+  provideHttpClient,
+  withInterceptors,
+} from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { CodigoError, type EnvelopeError } from '@mutual-metrics/shared';
+import { throwError } from 'rxjs';
 import { erroresInterceptor } from './errores.interceptor';
 import { SesionService } from '../servicios/sesion.service';
 import { OMITIR_REDIRECCION_SESION } from './contexto-http';
@@ -26,7 +34,7 @@ function configurar() {
 }
 
 describe('erroresInterceptor', () => {
-  it('cierra la sesión y redirige a /login cuando el token expiró', async () => {
+  it('cierra la sesion y redirige a /login cuando el token expiro', async () => {
     const { cerrarSesion, navigate } = configurar();
     const http = TestBed.inject(HttpClient);
     const ctrl = TestBed.inject(HttpTestingController);
@@ -46,7 +54,7 @@ describe('erroresInterceptor', () => {
     ctrl.verify();
   });
 
-  it('NO cierra la sesión ante credenciales inválidas (login fallido)', async () => {
+  it('NO cierra la sesion ante credenciales invalidas (login fallido)', async () => {
     const { cerrarSesion, navigate } = configurar();
     const http = TestBed.inject(HttpClient);
     const ctrl = TestBed.inject(HttpTestingController);
@@ -56,7 +64,7 @@ describe('erroresInterceptor', () => {
     });
 
     ctrl.expectOne('/auth/login').flush(
-      { error: { code: CodigoError.AUTH_CREDENCIALES_INVALIDAS, message: 'Credenciales inválidas' } },
+      { error: { code: CodigoError.AUTH_CREDENCIALES_INVALIDAS, message: 'Credenciales invalidas' } },
       { status: 401, statusText: 'Unauthorized' },
     );
 
@@ -67,7 +75,7 @@ describe('erroresInterceptor', () => {
     ctrl.verify();
   });
 
-  it('normaliza una caída de red (status 0) a SERVICIO_NO_DISPONIBLE', async () => {
+  it('normaliza una caida de red (status 0) a SERVICIO_NO_DISPONIBLE', async () => {
     configurar();
     const http = TestBed.inject(HttpClient);
     const ctrl = TestBed.inject(HttpTestingController);
@@ -85,7 +93,7 @@ describe('erroresInterceptor', () => {
 });
 
 describe('erroresInterceptor con OMITIR_REDIRECCION_SESION', () => {
-  it('NO cierra sesión ni redirige cuando OMITIR_REDIRECCION_SESION=true aunque el código sea AUTH_TOKEN_EXPIRADO', async () => {
+  it('NO cierra sesion ni redirige cuando OMITIR_REDIRECCION_SESION=true aunque el codigo sea AUTH_TOKEN_EXPIRADO', async () => {
     const { cerrarSesion, navigate } = configurar();
     const http = TestBed.inject(HttpClient);
     const ctrl = TestBed.inject(HttpTestingController);
@@ -110,7 +118,7 @@ describe('erroresInterceptor con OMITIR_REDIRECCION_SESION', () => {
     ctrl.verify();
   });
 
-  it('no redirige a /login durante la revalidación silenciosa (simula sesion.service.revalidar())', async () => {
+  it('no redirige a /login durante la revalidacion silenciosa (simula sesion.service.revalidar())', async () => {
     const { cerrarSesion, navigate } = configurar();
     const http = TestBed.inject(HttpClient);
     const ctrl = TestBed.inject(HttpTestingController);
@@ -124,7 +132,7 @@ describe('erroresInterceptor con OMITIR_REDIRECCION_SESION', () => {
     });
 
     ctrl.expectOne('/usuarios/yo').flush(
-      { error: { code: CodigoError.AUTH_TOKEN_EXPIRADO, message: 'Token expirado en revalidación' } },
+      { error: { code: CodigoError.AUTH_TOKEN_EXPIRADO, message: 'Token expirado en revalidacion' } },
       { status: 401, statusText: 'Unauthorized' },
     );
 
@@ -132,6 +140,141 @@ describe('erroresInterceptor con OMITIR_REDIRECCION_SESION', () => {
     expect(envelope.error.code).toBe(CodigoError.AUTH_TOKEN_EXPIRADO);
     expect(cerrarSesion).not.toHaveBeenCalled();
     expect(navigate).not.toHaveBeenCalled();
+    ctrl.verify();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AMPLIACION RED — brechas MEDIA de la auditoria
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('erroresInterceptor — cobertura AUTH_TOKEN_INVALIDO (RED)', () => {
+  it('cierra la sesion y redirige a /login cuando el token es invalido (AUTH_TOKEN_INVALIDO) sin omitir-redireccion', async () => {
+    const { cerrarSesion, navigate } = configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http.get('/protegido').subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/protegido').flush(
+      { error: { code: CodigoError.AUTH_TOKEN_INVALIDO, message: 'Token invalido' } },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.AUTH_TOKEN_INVALIDO);
+    expect(cerrarSesion).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+    ctrl.verify();
+  });
+
+  it('NO cierra sesion ni redirige cuando OMITIR_REDIRECCION_SESION=true y code es AUTH_TOKEN_INVALIDO', async () => {
+    const { cerrarSesion, navigate } = configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http
+        .get('/protegido', {
+          context: new HttpContext().set(OMITIR_REDIRECCION_SESION, true),
+        })
+        .subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/protegido').flush(
+      { error: { code: CodigoError.AUTH_TOKEN_INVALIDO, message: 'Token invalido' } },
+      { status: 401, statusText: 'Unauthorized' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.AUTH_TOKEN_INVALIDO);
+    expect(cerrarSesion).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    ctrl.verify();
+  });
+});
+
+describe('erroresInterceptor — normalizacion aEnvelope() (RED)', () => {
+  it('normaliza 401 con body NO-envelope (sin error.code) a ERROR_INTERNO', async () => {
+    configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http.get('/algo').subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    // Body sin forma envelope: { mensaje: ''x'' } sin error.code
+    ctrl.expectOne('/algo').flush(
+      { mensaje: 'x' } as unknown as object,
+      { status: 401, statusText: 'Unauthorized' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.ERROR_INTERNO);
+    ctrl.verify();
+  });
+
+  it('normaliza 500 con body NO-envelope a ERROR_INTERNO', async () => {
+    configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http.get('/algo').subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/algo').flush(
+      { mensaje: 'x' } as unknown as object,
+      { status: 500, statusText: 'Server Error' },
+    );
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.ERROR_INTERNO);
+    ctrl.verify();
+  });
+
+  it('normaliza un error que NO es HttpErrorResponse (Error generico) a ERROR_INTERNO', async () => {
+    const cerrarSesion = vi.fn();
+    const navigate = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([erroresInterceptor])),
+        provideHttpClientTesting(),
+        { provide: SesionService, useValue: { cerrarSesion } },
+        { provide: Router, useValue: { navigate } },
+      ],
+    });
+
+    const envelope = await TestBed.runInInjectionContext(() => {
+      const req = new HttpRequest('GET', '/test');
+      const next: HttpHandlerFn = () => throwError(() => new Error('boom'));
+      return new Promise<EnvelopeError>((resolve) => {
+        erroresInterceptor(req, next).subscribe({ error: (e: EnvelopeError) => resolve(e) });
+      });
+    });
+
+    expect(envelope.error.code).toBe(CodigoError.ERROR_INTERNO);
+    expect(envelope.error.message).toBe('Ocurrió un error inesperado en el cliente');
+    expect(cerrarSesion).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('normaliza body null/undefined a ERROR_INTERNO', async () => {
+    configurar();
+    const http = TestBed.inject(HttpClient);
+    const ctrl = TestBed.inject(HttpTestingController);
+
+    const recibido = new Promise<EnvelopeError>((resolve) => {
+      http.get('/algo').subscribe({ error: (e: EnvelopeError) => resolve(e) });
+    });
+
+    ctrl.expectOne('/algo').flush(null as unknown as object, { status: 500, statusText: 'Server Error' });
+
+    const envelope = await recibido;
+    expect(envelope.error.code).toBe(CodigoError.ERROR_INTERNO);
     ctrl.verify();
   });
 });
