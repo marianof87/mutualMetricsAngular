@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { CODIGOS_TOKEN_RECHAZADO, type EnvelopeError, type EscenarioResponse } from '@mutual-metrics/shared';
 import { HistorialService } from './historial.service';
+import { ModalDetalleEscenarioComponent } from './modal-detalle-escenario/modal-detalle-escenario.component';
 
 @Component({
   selector: 'app-historial',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ModalDetalleEscenarioComponent],
   templateUrl: './historial.component.html',
   styleUrl: './historial.component.css',
 })
@@ -22,6 +23,8 @@ export class HistorialComponent implements OnInit, OnDestroy {
   readonly pagina = signal(1);
   readonly error = signal<string | null>(null);
   readonly borrandoIds = signal<Set<string>>(new Set());
+  readonly modalAbierto = signal(false);
+  readonly escenarioDetalleId = signal<string | null>(null);
 
   readonly totalPaginas = computed(() => Math.ceil(this.total() / this.tamano()));
 
@@ -89,6 +92,16 @@ export class HistorialComponent implements OnInit, OnDestroy {
 
   etiquetaTipo(tipo: EscenarioResponse['tipo']): string {
     return tipo === 'cuadratica' ? 'Cuadrática' : 'Pricing';
+  }
+
+  verDetalle(id: string): void {
+    this.escenarioDetalleId.set(id);
+    this.modalAbierto.set(true);
+  }
+
+  cerrarDetalle(): void {
+    this.modalAbierto.set(false);
+    this.escenarioDetalleId.set(null);
   }
 
   private quitarDeBorrando(id: string): void {

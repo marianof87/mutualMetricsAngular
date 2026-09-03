@@ -1,0 +1,76 @@
+<div class="modal-overlay" (click)="cerrar()">
+  <div
+    class="modal panel-vidrio modal-detalle"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-detalle"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      type="button"
+      class="modal-cerrar"
+      (click)="cerrar()"
+      aria-label="Cerrar detalle del escenario"
+    >×</button>
+
+    @if (estaCargando()) {
+      <p class="estado" role="status">Cargando detalle…</p>
+    } @else if (error()) {
+      <p class="estado error" role="alert">{{ error() }}</p>
+      <div class="detalle-cerrar-acciones">
+        <button type="button" class="btn-secundario" (click)="cerrar()">
+          Volver al historial
+        </button>
+      </div>
+    } @else if (escenario(); as esc) {
+      <h2 id="titulo-detalle">Detalle del escenario</h2>
+
+      <dl class="detalle-meta">
+        <dt>Tipo</dt>
+        <dd>{{ etiquetaTipo(esc.tipo) }}</dd>
+        <dt>Fecha</dt>
+        <dd>
+          <time [attr.datetime]="esc.creadoEn">
+            {{ esc.creadoEn | date: 'dd/MM/yyyy HH:mm' }}
+          </time>
+        </dd>
+      </dl>
+
+      <section class="detalle-seccion">
+        <h3>Inputs</h3>
+        @if (claves(esc.inputs).length === 0) {
+          <p class="detalle-sin-datos">Sin datos</p>
+        } @else {
+          <dl class="detalle-clave-valor">
+            @for (clave of claves(esc.inputs); track clave) {
+              <dt>{{ clave }}</dt>
+              <dd>
+                <pre class="detalle-json">{{ formatoValor(esc.inputs[clave]) }}</pre>
+              </dd>
+            }
+          </dl>
+        }
+      </section>
+
+      <section class="detalle-seccion">
+        <h3>Outputs</h3>
+        @if (claves(esc.outputs).length === 0) {
+          <p class="detalle-sin-datos">Sin datos</p>
+        } @else {
+          <dl class="detalle-clave-valor">
+            @for (clave of claves(esc.outputs); track clave) {
+              <dt>{{ clave }}</dt>
+              <dd>
+                <pre class="detalle-json">{{ formatoValor(esc.outputs[clave]) }}</pre>
+              </dd>
+            }
+          </dl>
+        }
+      </section>
+
+      <div class="detalle-cerrar-acciones">
+        <button type="button" class="btn-secundario" (click)="cerrar()">Cerrar</button>
+      </div>
+    }
+  </div>
+</div>

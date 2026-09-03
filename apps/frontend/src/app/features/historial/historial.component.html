@@ -19,6 +19,9 @@
           >
             {{ esc.creadoEn | date: 'dd/MM/yyyy HH:mm' }}
           </time>
+          <button type="button" class="btn-secundario" (click)="verDetalle(esc.id)">
+            Ver
+          </button>
           <button
             type="button"
             class="btn-advertencia"
@@ -54,3 +57,10 @@
     }
   }
 </section>
+
+@if (modalAbierto() && escenarioDetalleId()) {
+  <app-modal-detalle-escenario
+    [escenarioId]="escenarioDetalleId()!"
+    (cerrado)="cerrarDetalle()"
+  ></app-modal-detalle-escenario>
+}

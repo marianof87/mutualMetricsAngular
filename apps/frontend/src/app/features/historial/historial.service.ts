@@ -16,4 +16,8 @@ export class HistorialService {
   borrar(id: string): Observable<void> {
     return this.http.delete<void>(`${entorno.apiBaseUrl}/escenarios/${id}`);
   }
+
+  obtenerPorId(id: string): Observable<EscenarioResponse> {
+    return this.http.get<EscenarioResponse>(`${entorno.apiBaseUrl}/escenarios/${id}`);
+  }
 }

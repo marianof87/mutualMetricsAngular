@@ -16,6 +16,7 @@
   --mm-color-superficie: #1a1d2d;
   --mm-color-superficie-elevada: #242942;
   --mm-color-vidrio: rgba(26, 29, 45, 0.6);
+  --mm-color-vidrio-claro: rgba(255, 255, 255, 0.05);
 
   /* ===== Color: borde ===== */
   --mm-color-borde: rgba(255, 255, 255, 0.1);
@@ -87,6 +88,7 @@
 
   /* ===== Tamaños de layout ===== */
   --mm-size-contenedor-max: 1200px;
+  --mm-size-modal: 640px;
 
   /* ===== Z-index ===== */
   --mm-z-base: 0;
