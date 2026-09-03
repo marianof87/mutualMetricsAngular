@@ -1,15 +1,65 @@
-import { Controller, Get } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import type {
+  EscenarioCreateRequest,
+  EscenarioResponse,
+  Paginado,
+  ParametrosPaginacion,
+} from '@mutual-metrics/shared';
+import { EscenarioCreateSchema, ParametrosPaginacionSchema } from '@mutual-metrics/shared';
+import { ZodValidationPipe } from '../../comunes/pipes/zod.pipe';
+import { JwtAuthGuard, type UsuarioJwt } from '../auth/jwt-auth.guard';
+import { UsuarioActual } from '../auth/usuario-actual.decorador';
 import { EscenariosService } from './escenarios.service';
 
-// Dueño: @Franco1212 (Slice 4)
-// Endpoints esperados: POST /escenarios, GET /escenarios (paginado), GET /escenarios/:id, DELETE /escenarios/:id.
-// Todos los endpoints protegidos por JwtAuthGuard (scope al usuarioId del token).
+// Dueño: @Franco1212 (Slice 4 - Historial).
+// Todos los endpoints scoped al usuarioId del JWT: si el escenario es de otro
+// usuario (o inexistente) el service responde 404 sin filtrar acceso.
 @Controller('escenarios')
+@UseGuards(JwtAuthGuard)
 export class EscenariosController {
   constructor(private readonly servicio: EscenariosService) {}
 
-  @Get('ping')
-  ping() {
-    return this.servicio.ping();
+  @Get()
+  listar(
+    @UsuarioActual() usuario: UsuarioJwt,
+    @Query(new ZodValidationPipe(ParametrosPaginacionSchema)) params: ParametrosPaginacion,
+  ): Promise<Paginado<EscenarioResponse>> {
+    return this.servicio.listar(usuario.sub, params.page, params.tamano);
+  }
+
+  @Post()
+  @HttpCode(201)
+  crear(
+    @UsuarioActual() usuario: UsuarioJwt,
+    @Body(new ZodValidationPipe(EscenarioCreateSchema)) dto: EscenarioCreateRequest,
+  ): Promise<EscenarioResponse> {
+    return this.servicio.crear(usuario.sub, dto);
+  }
+
+  @Get(':id')
+  obtener(
+    @UsuarioActual() usuario: UsuarioJwt,
+    @Param('id') id: string,
+  ): Promise<EscenarioResponse> {
+    return this.servicio.obtenerPorId(usuario.sub, id);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async eliminar(
+    @UsuarioActual() usuario: UsuarioJwt,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.servicio.eliminar(usuario.sub, id);
   }
 }

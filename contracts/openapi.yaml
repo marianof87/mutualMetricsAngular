@@ -220,6 +220,18 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Paginado" }
+        "400":
+          description: Parámetros de paginación inválidos (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "401":
+          description: |
+            Falta el token de autenticación, es inválido o expiró
+            (código `AUTH_TOKEN_INVALIDO` / `AUTH_TOKEN_EXPIRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     post:
       tags: [escenarios]
       summary: Guarda un escenario (cuadrática o pricing)
@@ -235,6 +247,18 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Escenario" }
+        "400":
+          description: Payload inválido según el schema Zod (código `ENTRADA_INVALIDA`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "401":
+          description: |
+            Falta el token de autenticación, es inválido o expiró
+            (código `AUTH_TOKEN_INVALIDO` / `AUTH_TOKEN_EXPIRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
   /escenarios/{id}:
     get:
@@ -252,6 +276,20 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Escenario" }
+        "401":
+          description: |
+            Falta el token de autenticación, es inválido o expiró
+            (código `AUTH_TOKEN_INVALIDO` / `AUTH_TOKEN_EXPIRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "404":
+          description: |
+            El escenario no existe o pertenece a otro usuario
+            (código `ESCENARIOS_NO_ENCONTRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
     delete:
       tags: [escenarios]
       summary: Borra un escenario
@@ -264,6 +302,20 @@ paths:
       responses:
         "204":
           description: Borrado
+        "401":
+          description: |
+            Falta el token de autenticación, es inválido o expiró
+            (código `AUTH_TOKEN_INVALIDO` / `AUTH_TOKEN_EXPIRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+        "404":
+          description: |
+            El escenario no existe o pertenece a otro usuario
+            (código `ESCENARIOS_NO_ENCONTRADO`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
 
   # ================ Slice 5 — Novedades ================
   /novedades:

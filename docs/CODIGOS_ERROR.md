@@ -51,8 +51,8 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 
 | Código | HTTP | Uso |
 |---|---|---|
-| `ESCENARIOS_NO_ENCONTRADO` | 404 | El escenario solicitado no existe o fue eliminado. |
-| `ESCENARIOS_ACCESO_DENEGADO` | 403 | El escenario pertenece a otro usuario; no se permite leer/modificar/borrar. |
+| `ESCENARIOS_NO_ENCONTRADO` | 404 | El escenario solicitado no existe o fue eliminado. El CRUD (T1.3) lo usa también para un escenario de otro usuario (no se filtra acceso). |
+| `ESCENARIOS_ACCESO_DENEGADO` | 403 | Reservado para futuros casos de uso. El CRUD actual (T1.3) **no** lo emite: recurso inexistente y ajeno responden 404 `ESCENARIOS_NO_ENCONTRADO`. |
 
 ### Slice 5 — Público & Contacto (@Ange1809)
 
