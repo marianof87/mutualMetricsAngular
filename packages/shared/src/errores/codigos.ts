@@ -30,7 +30,8 @@ export const CodigoError = {
   PRICING_OPTIMO_FUERA_DE_RANGO: 'PRICING_OPTIMO_FUERA_DE_RANGO',
 
   // Slice 4 — Escenarios (@Franco1212)
-  // (agregar acá según se necesiten)
+  ESCENARIOS_NO_ENCONTRADO: 'ESCENARIOS_NO_ENCONTRADO',
+  ESCENARIOS_ACCESO_DENEGADO: 'ESCENARIOS_ACCESO_DENEGADO',
 
   // Slice 5 — Contacto & Novedades (@Ange1809)
   CONTACTO_EMAIL_INVALIDO: 'CONTACTO_EMAIL_INVALIDO',

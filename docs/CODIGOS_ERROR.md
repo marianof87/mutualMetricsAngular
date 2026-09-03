@@ -51,7 +51,8 @@ Lista autoritativa. Fuente canónica en código: `packages/shared/src/errores/co
 
 | Código | HTTP | Uso |
 |---|---|---|
-| (pendiente — el dueño agrega cuando hagan falta) | — | — |
+| `ESCENARIOS_NO_ENCONTRADO` | 404 | El escenario solicitado no existe o fue eliminado. |
+| `ESCENARIOS_ACCESO_DENEGADO` | 403 | El escenario pertenece a otro usuario; no se permite leer/modificar/borrar. |
 
 ### Slice 5 — Público & Contacto (@Ange1809)
 
