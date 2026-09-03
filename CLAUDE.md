@@ -165,6 +165,11 @@ Como todo el equipo colabora con IA, las instrucciones que dejamos escritas tien
 - Si una operación es destructiva (borrar archivos, `git reset --hard`, `--force`) → **pedir confirmación explícita**.
 - Si una dependencia nueva parece necesaria → **proponerla primero**, no instalarla.
 - Si el alcance del pedido no está claro → **preguntar**, no asumir.
+- **Prompt incompleto → NO actuar.** Si un prompt de tarea llega truncado o a medio
+  terminar (oración cortada, ruta incompleta, sin cierre), detenerse y preguntar
+  "¿El prompt está completo / hay continuación?" y esperar el Enter. No ejecutar
+  ni adivinar la parte faltante. Esta regla global aplica a toda sesión de opencode
+  (ver `~/.config/opencode/AGENTS.md` → "Gobernanza de entrada de prompts").
 
 ---
 
