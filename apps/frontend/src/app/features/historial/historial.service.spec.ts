@@ -63,4 +63,23 @@ describe('HistorialService', () => {
     peticion.flush(null, { status: 204, statusText: 'No Content' });
     expect(completado).toBe(true);
   });
+
+  it('obtenerPorId hace GET a /escenarios/{id} y devuelve el escenario', () => {
+    const detalle: EscenarioResponse = {
+      id: 'esc-1',
+      tipo: 'pricing',
+      inputs: { prima: 1000 },
+      outputs: { resultado: 1234.5 },
+      creadoEn: '2026-09-03T12:00:00.000Z',
+    };
+    let recibido: EscenarioResponse | undefined;
+    servicio.obtenerPorId('esc-1').subscribe((res) => {
+      recibido = res;
+    });
+
+    const peticion = http.expectOne(`${entorno.apiBaseUrl}/escenarios/esc-1`);
+    expect(peticion.request.method).toBe('GET');
+    peticion.flush(detalle);
+    expect(recibido).toEqual(detalle);
+  });
 });

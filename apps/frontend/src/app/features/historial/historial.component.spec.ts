@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of, Subject, throwError } from 'rxjs';
 import { HistorialComponent } from './historial.component';
 import { HistorialService } from './historial.service';
+import { ModalDetalleEscenarioComponent } from './modal-detalle-escenario/modal-detalle-escenario.component';
 import type { EnvelopeError, EscenarioResponse, Paginado } from '@mutual-metrics/shared';
 
 const escenarioBase: EscenarioResponse = {
@@ -20,15 +22,20 @@ function paginado(datos: EscenarioResponse[], total: number): Paginado<Escenario
 describe('HistorialComponent', () => {
   let mockListar: ReturnType<typeof vi.fn>;
   let mockBorrar: ReturnType<typeof vi.fn>;
+  let mockObtenerPorId: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     mockListar = vi.fn();
     mockBorrar = vi.fn();
+    mockObtenerPorId = vi.fn().mockReturnValue(of(escenarioBase));
 
     await TestBed.configureTestingModule({
       imports: [HistorialComponent],
       providers: [
-        { provide: HistorialService, useValue: { listar: mockListar, borrar: mockBorrar } },
+        {
+          provide: HistorialService,
+          useValue: { listar: mockListar, borrar: mockBorrar, obtenerPorId: mockObtenerPorId },
+        },
       ],
     }).compileComponents();
   });
@@ -254,5 +261,74 @@ describe('HistorialComponent', () => {
     // Tras borrar el único ítem de la página 2, recarga la página 1.
     expect(mockListar).toHaveBeenCalledTimes(2);
     expect(mockListar).toHaveBeenLastCalledWith(1, 20);
+  });
+
+  it('click en "Ver" abre el modal y pasa el id correcto al detalle', () => {
+    mockListar.mockReturnValue(of(paginado([escenarioBase], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const botonVer = (fixture.nativeElement as HTMLElement).querySelector(
+      '.historial-item .btn-secundario',
+    );
+    (botonVer as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(cmp.modalAbierto()).toBe(true);
+    expect(cmp.escenarioDetalleId()).toBe(escenarioBase.id);
+
+    const modal = fixture.nativeElement.querySelector('app-modal-detalle-escenario');
+    expect(modal).not.toBeNull();
+
+    const childDebug = fixture.debugElement.query(
+      By.css('app-modal-detalle-escenario'),
+    );
+    const child = childDebug.componentInstance as ModalDetalleEscenarioComponent;
+    // El input escenarioId del modal recibe el id del escenario clickeado.
+    expect(child.escenarioId()).toBe(escenarioBase.id);
+    // Al montarse con el id, el modal dispara la carga del detalle en el servicio.
+    expect(mockObtenerPorId).toHaveBeenCalledWith(escenarioBase.id);
+  });
+
+  it('emitir "cerrado" desde el modal cierra el detalle', () => {
+    mockListar.mockReturnValue(of(paginado([escenarioBase], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    cmp.verDetalle(escenarioBase.id);
+    fixture.detectChanges();
+    expect(cmp.modalAbierto()).toBe(true);
+
+    const childDebug = fixture.debugElement.query(
+      By.css('app-modal-detalle-escenario'),
+    );
+    (childDebug.componentInstance as ModalDetalleEscenarioComponent).cerrar();
+    fixture.detectChanges();
+
+    expect(cmp.modalAbierto()).toBe(false);
+    expect(cmp.escenarioDetalleId()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-modal-detalle-escenario')).toBeNull();
+  });
+
+  it('cerrarDetalle limpia el id y el modal desaparece del DOM', () => {
+    mockListar.mockReturnValue(of(paginado([escenarioBase], 1)));
+    mockObtenerPorId.mockReturnValue(of(escenarioBase));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    cmp.verDetalle(escenarioBase.id);
+    fixture.detectChanges();
+    cmp.cerrarDetalle();
+    fixture.detectChanges();
+
+    expect(cmp.modalAbierto()).toBe(false);
+    expect(cmp.escenarioDetalleId()).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-modal-detalle-escenario')).toBeNull();
   });
 });
