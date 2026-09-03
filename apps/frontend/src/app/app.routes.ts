@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 // Zona compartida — cada dueño de slice registra aquí sus rutas. Ver GUIA.md §3.
 // Todas las rutas cargan con lazy-loading para aislar bundles por slice.
@@ -81,6 +82,7 @@ export const routes: Routes = [
   // Historial — Slice 4 (@Franco1212)
   {
     path: 'historial',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./features/historial/historial.component').then((m) => m.HistorialComponent),
   },

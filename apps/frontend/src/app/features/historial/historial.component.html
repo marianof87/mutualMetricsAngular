@@ -1,5 +1,56 @@
-<section>
+<section class="historial-page">
   <h1>Mi historial</h1>
-  <p>Slice 4 — implementación pendiente por <strong>&#64;Franco1212</strong>.</p>
-  <p>Tus cálculos guardados de cuadráticas y pricing, paginados, con opción de re-ejecutar o borrar.</p>
+  <p>Tus cálculos guardados de cuadráticas y pricing.</p>
+
+  @if (estaCargando()) {
+    <p class="estado" role="status">Cargando historial…</p>
+  } @else if (error()) {
+    <p class="estado error" role="alert">{{ error() }}</p>
+  } @else if (escenarios().length === 0) {
+    <p class="estado" role="status">Todavía no guardaste ningún cálculo.</p>
+  } @else {
+    <ul class="historial-lista">
+      @for (esc of escenarios(); track esc.id) {
+        <li class="historial-item">
+          <span class="historial-tipo">{{ etiquetaTipo(esc.tipo) }}</span>
+          <time
+            class="historial-fecha"
+            [attr.datetime]="esc.creadoEn"
+          >
+            {{ esc.creadoEn | date: 'dd/MM/yyyy HH:mm' }}
+          </time>
+          <button
+            type="button"
+            class="btn-advertencia"
+            [disabled]="borrandoIds().has(esc.id)"
+            (click)="borrar(esc.id)"
+          >
+            {{ borrandoIds().has(esc.id) ? 'Borrando...' : 'Borrar' }}
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (totalPaginas() > 1) {
+      <nav class="paginacion" aria-label="Paginación del historial">
+        <button
+          type="button"
+          class="btn-secundario"
+          [disabled]="pagina() <= 1"
+          (click)="cambiarPagina(pagina() - 1)"
+        >
+          Anterior
+        </button>
+        <span class="paginacion-info">Página {{ pagina() }} de {{ totalPaginas() }}</span>
+        <button
+          type="button"
+          class="btn-secundario"
+          [disabled]="pagina() >= totalPaginas()"
+          (click)="cambiarPagina(pagina() + 1)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    }
+  }
 </section>
