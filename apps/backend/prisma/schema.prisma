@@ -92,4 +92,25 @@ model Usuario {
   passwordHash String
   nombre       String
   creadoEn     DateTime @default(now())
+  escenarios   Escenario[]
+}
+
+// ------------------------------------------------------------------
+// Slice 4 (Historial) — Escenario
+// ------------------------------------------------------------------
+
+// Escenario: resultado persistido de un c�lculo del usuario (p.ej. cuadr�tica o
+// pricing). inputs/outputs se guardan como JSON serializado (SQLite no tiene
+// tipo JSON nativo); el DTO Zod valida su estructura al leer/escribir.
+model Escenario {
+  id         String   @id @default(uuid())
+  usuarioId  String
+  tipo       String // "cuadratica" | "pricing" (validado en DTO Zod)
+  inputs     String // JSON serializado de los datos de entrada
+  outputs    String // JSON serializado de los resultados
+  creadoEn   DateTime @default(now())
+
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, creadoEn])
 }
