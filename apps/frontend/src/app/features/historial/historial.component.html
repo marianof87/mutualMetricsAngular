@@ -2,6 +2,10 @@
   <h1>Mi historial</h1>
   <p>Tus cálculos guardados de cuadráticas y pricing.</p>
 
+  @if (errorReEjecutar()) {
+    <p class="estado error" role="alert">{{ errorReEjecutar() }}</p>
+  }
+
   @if (estaCargando()) {
     <p class="estado" role="status">Cargando historial…</p>
   } @else if (error()) {
@@ -21,6 +25,9 @@
           </time>
           <button type="button" class="btn-secundario" (click)="verDetalle(esc.id)">
             Ver
+          </button>
+          <button type="button" class="btn-secundario" (click)="reejecutar(esc)">
+            Re-ejecutar
           </button>
           <button
             type="button"

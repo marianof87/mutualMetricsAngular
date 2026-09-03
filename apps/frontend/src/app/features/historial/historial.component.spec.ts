@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of, Subject, throwError } from 'rxjs';
 import { HistorialComponent } from './historial.component';
@@ -23,11 +24,13 @@ describe('HistorialComponent', () => {
   let mockListar: ReturnType<typeof vi.fn>;
   let mockBorrar: ReturnType<typeof vi.fn>;
   let mockObtenerPorId: ReturnType<typeof vi.fn>;
+  let mockNavegar: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     mockListar = vi.fn();
     mockBorrar = vi.fn();
     mockObtenerPorId = vi.fn().mockReturnValue(of(escenarioBase));
+    mockNavegar = vi.fn().mockResolvedValue(true);
 
     await TestBed.configureTestingModule({
       imports: [HistorialComponent],
@@ -36,6 +39,7 @@ describe('HistorialComponent', () => {
           provide: HistorialService,
           useValue: { listar: mockListar, borrar: mockBorrar, obtenerPorId: mockObtenerPorId },
         },
+        { provide: Router, useValue: { navigate: mockNavegar } },
       ],
     }).compileComponents();
   });
@@ -330,5 +334,75 @@ describe('HistorialComponent', () => {
     expect(cmp.modalAbierto()).toBe(false);
     expect(cmp.escenarioDetalleId()).toBeNull();
     expect(fixture.nativeElement.querySelector('app-modal-detalle-escenario')).toBeNull();
+  });
+
+  // Helper: devuelve el botón "Re-ejecutar" de la primera fila del listado.
+  // Se localiza por su texto porque comparte clase con "Ver".
+  function botonReEjecutarListado(fixture: { nativeElement: HTMLElement }): HTMLButtonElement {
+    const botones = Array.from(
+      fixture.nativeElement.querySelectorAll('.historial-item .btn-secundario'),
+    ) as HTMLButtonElement[];
+    const re = botones.find((b) => b.textContent?.includes('Re-ejecutar'));
+    expect(re).toBeDefined();
+    return re!;
+  }
+
+  it('Re-ejecutar de una fila cuadrática navega a /cuadratica con inputs en estado', () => {
+    mockListar.mockReturnValue(of(paginado([escenarioBase], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    fixture.detectChanges();
+
+    botonReEjecutarListado(fixture).click();
+    fixture.detectChanges();
+
+    expect(mockNavegar).toHaveBeenCalledWith(['/cuadratica'], { state: { inputs: escenarioBase.inputs } });
+    expect(fixture.componentInstance.errorReEjecutar()).toBeNull();
+  });
+
+  it('Re-ejecutar de una fila de pricing navega a /pricing con inputs en estado', () => {
+    const pricing: EscenarioResponse = { ...escenarioBase, id: 'pricing-1', tipo: 'pricing' };
+    mockListar.mockReturnValue(of(paginado([pricing], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    fixture.detectChanges();
+
+    botonReEjecutarListado(fixture).click();
+    fixture.detectChanges();
+
+    expect(mockNavegar).toHaveBeenCalledWith(['/pricing'], { state: { inputs: pricing.inputs } });
+  });
+
+  it('Re-ejecutar con tipo desconocido NO navega y muestra aviso', () => {
+    const desconocido = { ...escenarioBase, id: 'raro', tipo: 'exotico' as EscenarioResponse['tipo'] };
+    mockListar.mockReturnValue(of(paginado([desconocido], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    botonReEjecutarListado(fixture).click();
+    fixture.detectChanges();
+
+    expect(mockNavegar).not.toHaveBeenCalled();
+    expect(cmp.errorReEjecutar()).toContain('No se puede re-ejecutar');
+    const alerta = fixture.nativeElement.querySelector('.estado.error[role="alert"]');
+    expect(alerta).not.toBeNull();
+  });
+
+  it('Re-ejecutar con inputs vacíos NO navega y muestra aviso', () => {
+    const sinInputs: EscenarioResponse = { ...escenarioBase, id: 'vacio', inputs: {} };
+    mockListar.mockReturnValue(of(paginado([sinInputs], 1)));
+
+    const fixture = TestBed.createComponent(HistorialComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    botonReEjecutarListado(fixture).click();
+    fixture.detectChanges();
+
+    expect(mockNavegar).not.toHaveBeenCalled();
+    expect(cmp.errorReEjecutar()).toContain('No se puede re-ejecutar');
+    expect(fixture.nativeElement.querySelector('.estado.error[role="alert"]')).not.toBeNull();
   });
 });

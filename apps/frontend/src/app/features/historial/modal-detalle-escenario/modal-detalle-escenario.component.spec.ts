@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Subject, throwError } from 'rxjs';
 import { ModalDetalleEscenarioComponent } from './modal-detalle-escenario.component';
@@ -18,13 +19,16 @@ const envelope = (code: string, message?: string): EnvelopeError =>
 
 describe('ModalDetalleEscenarioComponent', () => {
   let mockObtenerPorId: ReturnType<typeof vi.fn>;
+  let mockNavegar: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     mockObtenerPorId = vi.fn();
+    mockNavegar = vi.fn().mockResolvedValue(true);
     await TestBed.configureTestingModule({
       imports: [ModalDetalleEscenarioComponent],
       providers: [
         { provide: HistorialService, useValue: { obtenerPorId: mockObtenerPorId } },
+        { provide: Router, useValue: { navigate: mockNavegar } },
       ],
     }).compileComponents();
   });
@@ -189,5 +193,80 @@ describe('ModalDetalleEscenarioComponent', () => {
     fixture.detectChanges();
 
     expect(emisor).toHaveBeenCalledTimes(1);
+  });
+
+  function cargarYBtnReEjecutar(detalle: EscenarioResponse) {
+    const sujeto = new Subject<EscenarioResponse>();
+    mockObtenerPorId.mockReturnValue(sujeto);
+
+    const { fixture, emisor } = crearComponente();
+    fixture.detectChanges();
+    sujeto.next(detalle);
+    fixture.detectChanges();
+
+    const botones = Array.from(
+      fixture.nativeElement.querySelectorAll('.detalle-cerrar-acciones .btn-secundario'),
+    ) as HTMLButtonElement[];
+    const re = botones.find((b) => b.textContent?.includes('Re-ejecutar'));
+    expect(re).toBeDefined();
+    re!.click();
+    fixture.detectChanges();
+    return { fixture, cmp: fixture.componentInstance, emisor, re: re! };
+  }
+
+  it('Re-ejecutar de un escenario cuadrático navega a /cuadratica con inputs en estado y cierra', () => {
+    const { emisor } = cargarYBtnReEjecutar(detalleBase);
+
+    expect(mockNavegar).toHaveBeenCalledWith(['/cuadratica'], {
+      state: { inputs: detalleBase.inputs },
+    });
+    // Al re-ejecutar se cierra el modal.
+    expect(emisor).toHaveBeenCalledTimes(1);
+  });
+
+  it('Re-ejecutar de un escenario de pricing navega a /pricing con inputs en estado', () => {
+    cargarYBtnReEjecutar({ ...detalleBase, tipo: 'pricing' });
+
+    expect(mockNavegar).toHaveBeenCalledWith(['/pricing'], {
+      state: { inputs: detalleBase.inputs },
+    });
+  });
+
+  it('Re-ejecutar con tipo desconocido NO navega y muestra aviso en el modal', () => {
+    const { cmp, fixture } = cargarYBtnReEjecutar({
+      ...detalleBase,
+      tipo: 'exotico' as EscenarioResponse['tipo'],
+    });
+
+    expect(mockNavegar).not.toHaveBeenCalled();
+    expect(cmp.errorReEjecutar()).toContain('No se puede re-ejecutar');
+    const alerta = fixture.nativeElement.querySelector('.estado.error[role="alert"]');
+    expect(alerta).not.toBeNull();
+    expect(alerta.textContent).toContain('No se puede re-ejecutar');
+  });
+
+  it('Re-ejecutar con inputs vacíos NO navega y muestra aviso en el modal', () => {
+    const { cmp, fixture } = cargarYBtnReEjecutar({ ...detalleBase, inputs: {} });
+
+    expect(mockNavegar).not.toHaveBeenCalled();
+    expect(cmp.errorReEjecutar()).toContain('No se puede re-ejecutar');
+    expect(fixture.nativeElement.querySelector('.estado.error[role="alert"]')).not.toBeNull();
+  });
+
+  it('cargar otro escenario limpia el errorReEjecutar previo', () => {
+    const { fixture } = cargarYBtnReEjecutar({ ...detalleBase, tipo: 'exotico' as EscenarioResponse['tipo'] });
+    const cmp = fixture.componentInstance;
+    expect(cmp.errorReEjecutar()).toContain('No se puede re-ejecutar');
+
+    // Cambiar el id dispara el effect que recarga el detalle y debe limpiar el
+    // error de re-ejecución anterior (hallazgo MEDIUM de la auditoría).
+    const sujeto2 = new Subject<EscenarioResponse>();
+    mockObtenerPorId.mockReturnValue(sujeto2);
+    fixture.componentRef.setInput('escenarioId', 'otro-escenario');
+    fixture.detectChanges();
+    sujeto2.next({ ...detalleBase, id: 'otro-escenario' });
+    fixture.detectChanges();
+
+    expect(cmp.errorReEjecutar()).toBeNull();
   });
 });
