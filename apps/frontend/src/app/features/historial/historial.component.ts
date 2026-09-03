@@ -1,9 +1,11 @@
 import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CODIGOS_TOKEN_RECHAZADO, type EnvelopeError, type EscenarioResponse } from '@mutual-metrics/shared';
 import { HistorialService } from './historial.service';
 import { ModalDetalleEscenarioComponent } from './modal-detalle-escenario/modal-detalle-escenario.component';
+import { inputsReEjecutables, rutaReEjecutar } from './reejecutar.helper';
 
 @Component({
   selector: 'app-historial',
@@ -14,6 +16,7 @@ import { ModalDetalleEscenarioComponent } from './modal-detalle-escenario/modal-
 })
 export class HistorialComponent implements OnInit, OnDestroy {
   private readonly servicio = inject(HistorialService);
+  private readonly router = inject(Router);
   private suscripcionListado?: Subscription;
 
   readonly estaCargando = signal(true);
@@ -22,6 +25,9 @@ export class HistorialComponent implements OnInit, OnDestroy {
   readonly tamano = signal(20);
   readonly pagina = signal(1);
   readonly error = signal<string | null>(null);
+  // Error específico de la acción "re-ejecutar", separado del error general del
+  // listado para que uno no sobrescriba al otro si ocurren en secuencia.
+  readonly errorReEjecutar = signal<string | null>(null);
   readonly borrandoIds = signal<Set<string>>(new Set());
   readonly modalAbierto = signal(false);
   readonly escenarioDetalleId = signal<string | null>(null);
@@ -102,6 +108,22 @@ export class HistorialComponent implements OnInit, OnDestroy {
   cerrarDetalle(): void {
     this.modalAbierto.set(false);
     this.escenarioDetalleId.set(null);
+  }
+
+  // Navega a la calculadora correspondiente al tipo del escenario pasando sus
+  // inputs como estado de navegación. Si el tipo no es re-ejecutable o los
+  // inputs no son compatibles, bloquea la navegación y muestra un aviso en vez
+  // de llegar a una calculadora vacía o a una ruta inexistente.
+  reejecutar(esc: EscenarioResponse): void {
+    const ruta = rutaReEjecutar(esc.tipo);
+    if (!ruta || !inputsReEjecutables(esc.inputs)) {
+      this.errorReEjecutar.set(
+        'No se puede re-ejecutar este escenario: los datos guardados no son compatibles con la calculadora.',
+      );
+      return;
+    }
+    this.errorReEjecutar.set(null);
+    void this.router.navigate([ruta], { state: { inputs: esc.inputs } });
   }
 
   private quitarDeBorrando(id: string): void {

@@ -8,9 +8,11 @@ import {
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { CODIGOS_TOKEN_RECHAZADO, type EnvelopeError, type EscenarioResponse } from '@mutual-metrics/shared';
 import { HistorialService } from '../historial.service';
+import { inputsReEjecutables, rutaReEjecutar } from '../reejecutar.helper';
 
 @Component({
   selector: 'app-modal-detalle-escenario',
@@ -21,6 +23,7 @@ import { HistorialService } from '../historial.service';
 })
 export class ModalDetalleEscenarioComponent implements OnDestroy {
   private readonly servicio = inject(HistorialService);
+  private readonly router = inject(Router);
   private suscripcionDetalle?: Subscription;
 
   readonly escenarioId = input.required<string>();
@@ -29,6 +32,9 @@ export class ModalDetalleEscenarioComponent implements OnDestroy {
   readonly estaCargando = signal(true);
   readonly escenario = signal<EscenarioResponse | null>(null);
   readonly error = signal<string | null>(null);
+  // Error separado del de carga: re-ejecutar falla por validación de los datos,
+  // no por un problema al obtener el detalle.
+  readonly errorReEjecutar = signal<string | null>(null);
 
   // Al cambiar el id del escenario a mostrar, dispara la carga del detalle.
   // La suscripción previa se cancela en cargarEscenario para no pisar con una
@@ -47,6 +53,7 @@ export class ModalDetalleEscenarioComponent implements OnDestroy {
     this.suscripcionDetalle?.unsubscribe();
     this.estaCargando.set(true);
     this.error.set(null);
+    this.errorReEjecutar.set(null);
     this.escenario.set(null);
 
     this.suscripcionDetalle = this.servicio.obtenerPorId(id).subscribe({
@@ -62,7 +69,28 @@ export class ModalDetalleEscenarioComponent implements OnDestroy {
   }
 
   cerrar(): void {
+    this.errorReEjecutar.set(null);
     this.cerrado.emit();
+  }
+
+  // Re-ejecuta el escenario cargado: navega a la calculadora correspondiente al
+  // tipo pasando sus inputs como estado de navegación. Si el tipo no es
+  // re-ejecutable o los inputs no son compatibles, bloquea la navegación y
+  // muestra un aviso dentro del modal.
+  reejecutar(): void {
+    const esc = this.escenario();
+    if (!esc) return;
+
+    const ruta = rutaReEjecutar(esc.tipo);
+    if (!ruta || !inputsReEjecutables(esc.inputs)) {
+      this.errorReEjecutar.set(
+        'No se puede re-ejecutar este escenario: los datos guardados no son compatibles con la calculadora.',
+      );
+      return;
+    }
+    this.errorReEjecutar.set(null);
+    this.cerrado.emit();
+    void this.router.navigate([ruta], { state: { inputs: esc.inputs } });
   }
 
   // Helper reutilizable para recorrer los pares clave/valor de inputs y outputs.

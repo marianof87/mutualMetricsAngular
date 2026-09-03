@@ -68,7 +68,14 @@
         }
       </section>
 
+      @if (errorReEjecutar()) {
+        <p class="estado error" role="alert">{{ errorReEjecutar() }}</p>
+      }
+
       <div class="detalle-cerrar-acciones">
+        <button type="button" class="btn-secundario" (click)="reejecutar()">
+          Re-ejecutar
+        </button>
         <button type="button" class="btn-secundario" (click)="cerrar()">Cerrar</button>
       </div>
     }
