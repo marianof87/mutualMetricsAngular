@@ -1,63 +1,78 @@
 <section class="solver-container">
   <div class="header-section">
     <h1 class="solver-title">Calculadora Cuadrática</h1>
-    <p class="solver-subtitle">Resuelve <code>ax² + bx + c = 0</code>: discriminante, raíces, vértice y gráfico de la parábola.</p>
+    <p class="solver-subtitle">
+      Resuelve <code>ax² + bx + c = 0</code>: discriminante, raíces, vértice y gráfico de la parábola.
+    </p>
   </div>
 
   <div class="solver-content">
     <div class="input-panel card-panel">
       <h2>Coeficientes</h2>
-      <div class="form-group">
-        <label for="coeff-a">Coeficiente a:</label>
-        <input id="coeff-a" type="number" [ngModel]="a()" (ngModelChange)="a.set($event)" placeholder="Ej. 1" />
-      </div>
-      <div class="form-group">
-        <label for="coeff-b">Coeficiente b:</label>
-        <input id="coeff-b" type="number" [ngModel]="b()" (ngModelChange)="b.set($event)" placeholder="Ej. -4" />
-      </div>
-      <div class="form-group">
-        <label for="coeff-c">Coeficiente c:</label>
-        <input id="coeff-c" type="number" [ngModel]="c()" (ngModelChange)="c.set($event)" placeholder="Ej. 4" />
-      </div>
-
-      <div class="results-section" *ngIf="a() !== 0">
-        <h3>Resultados</h3>
-        <div class="result-item">
-          <span>Discriminante (Δ):</span>
-          <strong>{{ discriminant() | number:'1.2-2' }}</strong>
+      <form [formGroup]="formulario" (ngSubmit)="resolver()">
+        <div class="form-group">
+          <label for="coeff-a">Coeficiente a:</label>
+          <input id="coeff-a" type="number" formControlName="a" placeholder="Ej. 1" />
         </div>
-        
-        <div class="result-item" *ngIf="hasRealRoots() && roots()">
-          <span>Raíz x₁:</span>
-          <strong>{{ roots()!.x1 | number:'1.2-2' }}</strong>
+        <div class="form-group">
+          <label for="coeff-b">Coeficiente b:</label>
+          <input id="coeff-b" type="number" formControlName="b" placeholder="Ej. -4" />
         </div>
-        <div class="result-item" *ngIf="hasRealRoots() && roots()?.x2 !== null">
-          <span>Raíz x₂:</span>
-          <strong>{{ roots()!.x2 | number:'1.2-2' }}</strong>
-        </div>
-        
-        <div class="result-item" *ngIf="!hasRealRoots()">
-          <span class="warning-text">No tiene raíces reales.</span>
+        <div class="form-group">
+          <label for="coeff-c">Coeficiente c:</label>
+          <input id="coeff-c" type="number" formControlName="c" placeholder="Ej. 4" />
         </div>
 
-        <div class="result-item" *ngIf="vertex()">
-          <span>Vértice:</span>
-          <strong>({{ vertex()!.x | number:'1.2-2' }}, {{ vertex()!.y | number:'1.2-2' }})</strong>
+        <button type="submit" class="solver-submit" [disabled]="enviando() || formulario.invalid">
+          {{ enviando() ? 'Resolviendo…' : 'Resolver' }}
+        </button>
+      </form>
+
+      @if (mensajeError(); as mensaje) {
+        <div class="error-message" role="alert">
+          {{ mensaje }}
         </div>
-      </div>
-      
-      <div class="error-message" *ngIf="a() === 0">
-        El coeficiente 'a' no puede ser cero para una función cuadrática.
-      </div>
+      }
+
+      @if (resultado(); as res) {
+        <div class="results-section">
+          <h3>Resultados</h3>
+          <div class="result-item">
+            <span>Discriminante (Δ):</span>
+            <strong>{{ formatear(res.discriminante) }}</strong>
+          </div>
+          <div class="result-item">
+            <span>Tipo:</span>
+            <strong>{{ etiquetaTipo(res.tipo) }}</strong>
+          </div>
+
+          @if (res.raices; as raices) {
+            <div class="result-item">
+              <span>Raíz x₁:</span>
+              <strong>{{ formatear(raices[0]) }}</strong>
+            </div>
+            <div class="result-item">
+              <span>Raíz x₂:</span>
+              <strong>{{ formatear(raices[1]) }}</strong>
+            </div>
+          } @else {
+            <div class="result-item">
+              <span class="warning-text">No tiene raíces reales.</span>
+            </div>
+          }
+
+          <div class="result-item">
+            <span>Vértice:</span>
+            <strong>({{ formatear(res.vertice.x) }}, {{ formatear(res.vertice.y) }})</strong>
+          </div>
+        </div>
+      }
     </div>
 
     <div class="chart-panel card-panel">
       <h2>Gráfico Cartesiano</h2>
       <div class="chart-wrapper">
-        <canvas baseChart
-          [data]="lineChartData()"
-          [options]="lineChartOptions"
-          type="line">
+        <canvas baseChart [data]="lineChartData()" [options]="lineChartOptions" type="line">
         </canvas>
       </div>
     </div>
