@@ -119,8 +119,13 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CuadraticaResponse" }
+        "400":
+          description: Validación fallida del body (Zod) → ENTRADA_INVALIDA
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorEnvelope" }
         "422":
-          description: a = 0 u otra validación fallida
+          description: a = 0 → CUADRATICA_A_CERO
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorEnvelope" }

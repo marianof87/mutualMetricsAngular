@@ -5,36 +5,34 @@
 
 ## Alcance
 
-Resolver la ecuación cuadrática `ax² + bx + c = 0`. Devuelve discriminante, raíces (reales o complejas) y vértice de la parábola.
+Resolver la ecuación cuadrática `ax² + bx + c = 0`. Devuelve discriminante, raíces y vértice de la parábola.
 
-## Endpoints propuestos
+## Endpoint implementado
 
 | Método | Ruta | Request | Response | Errores |
 |---|---|---|---|---|
-| POST | `/api/v1/cuadratica/resolver` | `CuadraticaRequest` (a, b, c) | `CuadraticaResponse` (discriminante, raices, vertice) | `ENTRADA_INVALIDA`, `CUADRATICA_A_CERO` |
+| POST | `/api/v1/cuadratica/resolver` | `{ a, b, c }` (números) | `{ discriminante, tipo, raices, vertice }` | 400 `ENTRADA_INVALIDA`, 422 `CUADRATICA_A_CERO` |
+
+Reglas de negocio (definidas en el dominio compartido):
+
+- `a === 0` → la ecuación no es cuadrática → **422** `CUADRATICA_A_CERO`.
+- `discriminante > 0` → `tipo: dosReales` con dos raíces reales.
+- `discriminante === 0` → `tipo: unaRealDoble` (raíz duplicada).
+- `discriminante < 0` → `tipo: sinRaicesReales` con `raices: null`.
 
 ## Shared
 
-Crear dos archivos en `packages/shared`:
+La matemática vive en `packages/shared`, el backend solo la importa (no duplica lógica):
 
-**`packages/shared/src/dominio/cuadratica/index.ts`** — funciones puras reusables:
-```ts
-export function discriminante(a: number, b: number, c: number): number;
-export function raices(a: number, b: number, c: number): { reales: [number, number] | null, complejas?: [string, string] };
-export function vertice(a: number, b: number, c: number): { x: number, y: number };
-```
+- **Dominio puro:** `packages/shared/src/dominio/cuadratica/cuadratica.ts` → `resolverCuadratica(a, b, c)`.
+- **DTOs compartidos:** `packages/shared/src/dtos/cuadratica.ts` → `CuadraticaRequestSchema`, `CuadraticaResponseSchema` (+ tipos inferidos con `z.infer`).
 
-**`packages/shared/src/dtos/cuadratica.ts`** — schemas Zod + tipos inferidos.
+## Flujo de errores
 
-El backend **importa** estas funciones; no duplica la matemática.
-
-## Códigos de error a agregar
-
-- `CUADRATICA_A_CERO` — cuando `a === 0` (no es cuadrática, es lineal).
-- `CUADRATICA_SIN_RAICES_REALES` (sólo si la política del proyecto pide advertirlo explícitamente).
+- Validación del body: `ZodValidationPipe` → **400** `ENTRADA_INVALIDA` (patrón repo).
+- `CUADRATICA_A_CERO`: el dominio lanza `Error(código)` y `CuadraticaService` lo traduce a `UnprocessableEntityException` → **422** con el envelope estándar.
 
 ## Tests
 
-- Unit de las funciones puras en `packages/shared/src/dominio/cuadratica/*.test.ts` (vitest).
-- Unit del controller en este módulo.
-- Cobertura ≥80% en tu scope.
+- Unit del dominio y DTOs en `packages/shared` (vitest).
+- Unit del `CuadraticaService` y de `CuadraticaController` + integración HTTP (Supertest) en `apps/backend/src/modules/cuadratica/*.spec.ts` (jest).
