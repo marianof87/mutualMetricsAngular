@@ -102,4 +102,72 @@ describe('PricingComponent', () => {
     expect(el.textContent).toContain('230000.5');
     expect(el.textContent).toContain('Estrategia Óptima de Temporada Alta (Simulada)');
   });
+
+  describe('Precarga desde history.state (re-ejecución de escenario)', () => {
+    afterEach(() => {
+      history.replaceState({}, '');
+    });
+
+    it('con inputs completos y numéricos → patchValue aplicado y form válido', () => {
+      history.replaceState({ inputs: { coeficienteA: -2, coeficienteB: 120, coeficienteC: -1000, precioMinimo: 10, precioMaximo: 100 } }, '');
+      const fixture = TestBed.createComponent(PricingComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.form.get('coeficienteA')!.value).toBe(-2);
+      expect(cmp.form.get('coeficienteB')!.value).toBe(120);
+      expect(cmp.form.get('coeficienteC')!.value).toBe(-1000);
+      expect(cmp.form.get('precioMinimo')!.value).toBe(10);
+      expect(cmp.form.get('precioMaximo')!.value).toBe(100);
+      expect(cmp.form.valid).toBe(true);
+    });
+
+    it('sin inputs → form vacío e inválido como siempre', () => {
+      history.replaceState({}, '');
+      const fixture = TestBed.createComponent(PricingComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.form.get('coeficienteA')!.value).toBe('');
+      expect(cmp.form.invalid).toBe(true);
+    });
+
+    it('defensivo: inputs con claves parciales → solo se precarga lo válido', () => {
+      history.replaceState({ inputs: { coeficienteA: -5, precioMaximo: 80 } }, '');
+      const fixture = TestBed.createComponent(PricingComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.form.get('coeficienteA')!.value).toBe(-5);
+      expect(cmp.form.get('coeficienteB')!.value).toBe('');
+      expect(cmp.form.get('coeficienteC')!.value).toBe('');
+      expect(cmp.form.get('precioMinimo')!.value).toBe('');
+      expect(cmp.form.get('precioMaximo')!.value).toBe(80);
+      expect(cmp.form.invalid).toBe(true); // faltan campos required
+    });
+
+    it('defensivo: valor no numérico se ignora, se precarga lo válido', () => {
+      history.replaceState({ inputs: { coeficienteA: 'abc', coeficienteB: 42, precioMinimo: 5, precioMaximo: Infinity } }, '');
+      const fixture = TestBed.createComponent(PricingComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.form.get('coeficienteA')!.value).toBe(''); // no numérico → ignorado
+      expect(cmp.form.get('coeficienteB')!.value).toBe(42);
+      expect(cmp.form.get('precioMinimo')!.value).toBe(5);
+      expect(cmp.form.get('precioMaximo')!.value).toBe(''); // Infinity → ignorado
+      expect(cmp.form.invalid).toBe(true); // faltan coeficienteA, coeficienteC, precioMaximo
+    });
+
+    it('claves desconocidas se ignoran sin efecto', () => {
+      history.replaceState({ inputs: { coeficienteA: 1, foo: 'bar', bar: 42 } }, '');
+      const fixture = TestBed.createComponent(PricingComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.form.get('coeficienteA')!.value).toBe(1);
+      expect(cmp.form.get('coeficienteB')!.value).toBe('');
+      expect(cmp.form.invalid).toBe(true);
+    });
+  });
 });

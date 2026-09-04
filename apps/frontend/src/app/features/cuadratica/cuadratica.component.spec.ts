@@ -129,4 +129,89 @@ describe('CuadraticaComponent', () => {
     );
     expect(el.querySelector('.results-section')).toBeNull();
   });
+
+  describe('Precarga desde history.state (re-ejecución de escenario)', () => {
+    afterEach(() => {
+      history.replaceState({}, '');
+    });
+
+    it('con history.state.inputs = { a: 2, b: 1, c: -6 } precarga a/b/c tras ngOnInit', () => {
+      history.replaceState({ inputs: { a: 2, b: 1, c: -6 } }, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(2);
+      expect(cmp.b()).toBe(1);
+      expect(cmp.c()).toBe(-6);
+    });
+
+    it('con history.state sin inputs mantiene valores por defecto (1, -4, 4)', () => {
+      history.replaceState({}, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(1);
+      expect(cmp.b()).toBe(-4);
+      expect(cmp.c()).toBe(4);
+    });
+
+    it('con history.state undefined mantiene valores por defecto', () => {
+      history.replaceState(null, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(1);
+      expect(cmp.b()).toBe(-4);
+      expect(cmp.c()).toBe(4);
+    });
+
+    it('defensivo: inputs.a no numérico no pisa el default de a', () => {
+      history.replaceState({ inputs: { a: 'x', b: 5, c: -3 } }, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(1);  // default, no pisado
+      expect(cmp.b()).toBe(5);
+      expect(cmp.c()).toBe(-3);
+    });
+
+    it('defensivo: inputs parciales (solo b) solo precarga b, a/c quedan en default', () => {
+      history.replaceState({ inputs: { b: 7 } }, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(1);
+      expect(cmp.b()).toBe(7);
+      expect(cmp.c()).toBe(4);
+    });
+
+    it('defensivo: inputs con Infinity no se precarga', () => {
+      history.replaceState({ inputs: { a: Infinity, b: -Infinity, c: 3 } }, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(1);  // default
+      expect(cmp.b()).toBe(-4); // default
+      expect(cmp.c()).toBe(3);  // válida
+      // El cómputo downstream queda con valores finitos (no se propaga Infinity).
+      expect(Number.isFinite(cmp.discriminant())).toBe(true);
+    });
+
+    it('claves desconocidas se ignoran sin efecto', () => {
+      history.replaceState({ inputs: { a: 3, d: 99, extra: 'foo' } }, '');
+      const fixture = TestBed.createComponent(CuadraticaComponent);
+      fixture.detectChanges();
+      const cmp = fixture.componentInstance;
+
+      expect(cmp.a()).toBe(3);
+      expect(cmp.b()).toBe(-4); // default
+      expect(cmp.c()).toBe(4);  // default
+    });
+  });
 });

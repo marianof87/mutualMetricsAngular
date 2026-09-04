@@ -1,4 +1,4 @@
-import { Component, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, signal, computed, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
@@ -11,10 +11,26 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
   templateUrl: './cuadratica.component.html',
   styleUrl: './cuadratica.component.css'
 })
-export class CuadraticaComponent {
+export class CuadraticaComponent implements OnInit {
   a = signal<number>(1);
   b = signal<number>(-4);
   c = signal<number>(4);
+
+  ngOnInit(): void {
+    const state = history.state as Record<string, unknown> | undefined;
+    const inputs = state?.['inputs'] as Record<string, unknown> | undefined;
+    if (inputs && typeof inputs === 'object') {
+      if (typeof inputs['a'] === 'number' && Number.isFinite(inputs['a'])) {
+        this.a.set(inputs['a']);
+      }
+      if (typeof inputs['b'] === 'number' && Number.isFinite(inputs['b'])) {
+        this.b.set(inputs['b']);
+      }
+      if (typeof inputs['c'] === 'number' && Number.isFinite(inputs['c'])) {
+        this.c.set(inputs['c']);
+      }
+    }
+  }
 
   discriminant = computed(() => Math.pow(this.b(), 2) - 4 * this.a() * this.c());
   
