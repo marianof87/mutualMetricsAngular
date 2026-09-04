@@ -13,9 +13,9 @@ import type {
   EscenarioCreateRequest,
   EscenarioResponse,
   Paginado,
-  ParametrosPaginacion,
+  ParametrosListadoEscenarios,
 } from '@mutual-metrics/shared';
-import { EscenarioCreateSchema, ParametrosPaginacionSchema } from '@mutual-metrics/shared';
+import { EscenarioCreateSchema, ParametrosListadoEscenariosSchema } from '@mutual-metrics/shared';
 import { ZodValidationPipe } from '../../comunes/pipes/zod.pipe';
 import { JwtAuthGuard, type UsuarioJwt } from '../auth/jwt-auth.guard';
 import { UsuarioActual } from '../auth/usuario-actual.decorador';
@@ -32,9 +32,9 @@ export class EscenariosController {
   @Get()
   listar(
     @UsuarioActual() usuario: UsuarioJwt,
-    @Query(new ZodValidationPipe(ParametrosPaginacionSchema)) params: ParametrosPaginacion,
+    @Query(new ZodValidationPipe(ParametrosListadoEscenariosSchema)) params: ParametrosListadoEscenarios,
   ): Promise<Paginado<EscenarioResponse>> {
-    return this.servicio.listar(usuario.sub, params.page, params.tamano);
+    return this.servicio.listar(usuario.sub, params.page, params.tamano, params.tipo);
   }
 
   @Post()

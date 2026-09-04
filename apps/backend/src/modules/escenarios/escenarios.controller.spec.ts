@@ -110,6 +110,30 @@ describe('Escenarios (integración)', () => {
     expect(res.body).toEqual(esperado);
   });
 
+  it('GET /escenarios?tipo=cuadratica con token responde 200 y el servicio recibió el filtro', async () => {
+    prisma.escenario.findMany.mockResolvedValue([fila]);
+    prisma.escenario.count.mockResolvedValue(1);
+    const res = await request(app.getHttpServer())
+      .get('/escenarios?tipo=cuadratica')
+      .set('Authorization', `Bearer ${tokenDe('usuario-1')}`)
+      .expect(200);
+    expect(res.body.datos).toHaveLength(1);
+    expect(prisma.escenario.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { usuarioId: 'usuario-1', tipo: 'cuadratica' } }),
+    );
+    expect(prisma.escenario.count).toHaveBeenCalledWith({
+      where: { usuarioId: 'usuario-1', tipo: 'cuadratica' },
+    });
+  });
+
+  it('GET /escenarios?tipo=invalido con token responde 400 con ENTRADA_INVALIDA', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/escenarios?tipo=invalido')
+      .set('Authorization', `Bearer ${tokenDe('usuario-1')}`)
+      .expect(400);
+    expect(res.body.error.code).toBe('ENTRADA_INVALIDA');
+  });
+
   it('GET /escenarios/:id propio responde 200', async () => {
     prisma.escenario.findFirst.mockResolvedValue(fila);
     const res = await request(app.getHttpServer())

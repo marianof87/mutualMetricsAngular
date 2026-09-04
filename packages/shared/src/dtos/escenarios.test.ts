@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   EscenarioCreateSchema,
   EscenarioSchema,
+  ParametrosListadoEscenariosSchema,
   TipoEscenarioSchema,
 } from './escenarios';
 
@@ -104,5 +105,39 @@ describe('EscenarioSchema', () => {
   it('rechaza creadoEn que no es fecha ISO válida', () => {
     const resultado = EscenarioSchema.safeParse({ ...escenarioValido, creadoEn: 'ayer' });
     expect(resultado.success).toBe(false);
+  });
+});
+
+describe('ParametrosListadoEscenariosSchema', () => {
+  it('acepta { page: 1, tamano: 20 } sin tipo (retrocompatibilidad)', () => {
+    const res = ParametrosListadoEscenariosSchema.safeParse({ page: 1, tamano: 20 });
+    expect(res.success).toBe(true);
+    if (res.success) expect(res.data.tipo).toBeUndefined();
+  });
+
+  it("acepta { page: 1, tamano: 20, tipo: 'cuadratica' }", () => {
+    const res = ParametrosListadoEscenariosSchema.safeParse({ page: 1, tamano: 20, tipo: 'cuadratica' });
+    expect(res.success).toBe(true);
+    if (res.success) expect(res.data.tipo).toBe('cuadratica');
+  });
+
+  it("acepta { tipo: 'pricing' } con defaults de page/tamano", () => {
+    const res = ParametrosListadoEscenariosSchema.safeParse({ tipo: 'pricing' });
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.tipo).toBe('pricing');
+      expect(res.data.page).toBe(1); // default ParametrosPaginacionSchema
+      expect(res.data.tamano).toBe(20);
+    }
+  });
+
+  it("rechaza { tipo: 'actuarial' }", () => {
+    const res = ParametrosListadoEscenariosSchema.safeParse({ tipo: 'actuarial' });
+    expect(res.success).toBe(false);
+  });
+
+  it("rechaza { tipo: '' }", () => {
+    const res = ParametrosListadoEscenariosSchema.safeParse({ tipo: '' });
+    expect(res.success).toBe(false);
   });
 });
