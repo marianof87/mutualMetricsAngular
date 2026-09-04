@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ParametrosPaginacionSchema } from './paginacion';
 
 // Tipos de cálculo que puede guardar un escenario (enum cerrado).
 // Se puede extender con una migración futura si aparecen nuevos tipos.
@@ -26,3 +27,12 @@ export const EscenarioSchema = EscenarioCreateSchema.extend({
 });
 
 export type EscenarioResponse = z.infer<typeof EscenarioSchema>;
+
+// Parámetros del listado de escenarios: paginación estándar + filtro opcional
+// por tipo de cálculo. Extiende la paginación global SIN contaminarla: el filtro
+// `tipo` es específico de escenarios y queda acotado a este listado.
+export const ParametrosListadoEscenariosSchema = ParametrosPaginacionSchema.extend({
+  tipo: TipoEscenarioSchema.optional(),
+});
+
+export type ParametrosListadoEscenarios = z.infer<typeof ParametrosListadoEscenariosSchema>;

@@ -93,6 +93,39 @@ describe('EscenariosService', () => {
         tamano: 20,
       });
     });
+
+    it("con tipo: 'cuadratica' → findMany y count con where { usuarioId, tipo: 'cuadratica' }", async () => {
+      await servicio.listar(usuarioId, 1, 20, 'cuadratica');
+      expect(prisma.escenario.findMany).toHaveBeenCalledWith({
+        where: { usuarioId, tipo: 'cuadratica' },
+        skip: 0,
+        take: 20,
+        orderBy: { creadoEn: 'desc' },
+      });
+      expect(prisma.escenario.count).toHaveBeenCalledWith({ where: { usuarioId, tipo: 'cuadratica' } });
+    });
+
+    it('con tipo: undefined → where solo { usuarioId } (comportamiento actual)', async () => {
+      await servicio.listar(usuarioId, 1, 20, undefined);
+      expect(prisma.escenario.findMany).toHaveBeenCalledWith({
+        where: { usuarioId },
+        skip: 0,
+        take: 20,
+        orderBy: { creadoEn: 'desc' },
+      });
+      expect(prisma.escenario.count).toHaveBeenCalledWith({ where: { usuarioId } });
+    });
+
+    it("el filtro se combina con paginación: listar(usuarioId, 3, 5, 'pricing') → skip 10 take 5 where tipo pricing", async () => {
+      await servicio.listar(usuarioId, 3, 5, 'pricing');
+      expect(prisma.escenario.findMany).toHaveBeenCalledWith({
+        where: { usuarioId, tipo: 'pricing' },
+        skip: 10, // (3-1)*5
+        take: 5,
+        orderBy: { creadoEn: 'desc' },
+      });
+      expect(prisma.escenario.count).toHaveBeenCalledWith({ where: { usuarioId, tipo: 'pricing' } });
+    });
   });
 
   describe('obtenerPorId', () => {

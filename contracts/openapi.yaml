@@ -214,6 +214,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Pagina"
         - $ref: "#/components/parameters/TamanoPagina"
+        - $ref: "#/components/parameters/TipoEscenario"
       responses:
         "200":
           description: OK
@@ -928,3 +929,11 @@ components:
       name: tamano
       in: query
       schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    TipoEscenario:
+      name: tipo
+      in: query
+      required: false
+      description: Filtra los escenarios por tipo de cálculo (opcional).
+      schema:
+        type: string
+        enum: [cuadratica, pricing]

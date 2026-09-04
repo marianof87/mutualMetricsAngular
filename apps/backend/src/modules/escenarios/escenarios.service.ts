@@ -34,9 +34,10 @@ export class EscenariosService {
   }
 
   // Lista paginada de escenarios, scoped al usuario autenticado.
-  async listar(usuarioId: string, page: number = 1, tamano: number = 20): Promise<Paginado<EscenarioResponse>> {
+  // El filtro `tipo` es opcional: si llega, acota la consulta a ese tipo de cálculo.
+  async listar(usuarioId: string, page: number = 1, tamano: number = 20, tipo?: EscenarioResponse['tipo']): Promise<Paginado<EscenarioResponse>> {
     const skip = (page - 1) * tamano;
-    const where = { usuarioId };
+    const where = tipo ? { usuarioId, tipo } : { usuarioId };
 
     const [datos, total] = await Promise.all([
       this.prisma.escenario.findMany({
