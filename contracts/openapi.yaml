@@ -567,9 +567,12 @@ components:
 
     CuadraticaResponse:
       type: object
-      required: [discriminante, vertice]
+      required: [discriminante, tipo, raices, vertice]
       properties:
         discriminante: { type: number }
+        tipo:
+          type: string
+          enum: [dosReales, unaRealDoble, sinRaicesReales]
         raices:
           oneOf:
             - type: 'null'

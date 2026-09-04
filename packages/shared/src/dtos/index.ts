@@ -7,3 +7,4 @@ export * from './finanzas';
 export * from './lead';
 export * from './actuarial';
 export * from './escenarios';
+export * from './cuadratica';
